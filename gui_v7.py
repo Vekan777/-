@@ -17,6 +17,7 @@ V7 = BASE / "rescue-engine" / "unified_v7.py"
 V19 = BASE / "anime-factory" / "v19" / "AI_Anime_Factory_V19.html"
 V20 = BASE / "anime-factory" / "v20" / "AI_Anime_Factory_V20_3_PRESERVATION.html"
 V20_STORY = BASE / "anime-factory" / "v20" / "AI_Anime_Factory_V20_STORY_COMBAT.html"
+V21_VISUAL = BASE / "anime-factory" / "v21" / "AI_Anime_Factory_V21_VISUAL_QUALITY.html"
 
 
 class Studio:
@@ -31,7 +32,7 @@ class Studio:
         header = ttk.Frame(win, padding=12)
         header.pack(fill="x")
         ttk.Label(header, text="AI RESCUE FACTORY V7", font=("Segoe UI", 20, "bold")).pack(anchor="w")
-        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19/V20.3",
+        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V21",
                   font=("Segoe UI", 10)).pack(anchor="w")
         controls = ttk.Frame(win, padding=(12, 4))
         controls.pack(fill="x")
@@ -56,6 +57,7 @@ class Studio:
             ("Восстановить очередь", lambda: self.command("recover")),
             ("Открыть Anime Factory V19", lambda: self.open_html(V19)),
             ("Открыть Anime Factory V20 Story & Combat", lambda: self.open_html(V20_STORY)),
+            ("Открыть Anime Factory V21 Visual Quality", lambda: self.open_html(V21_VISUAL)),
             ("Открыть Anime Factory V20.3", lambda: self.open_html(V20)),
             ("Открыть папку проекта", self.show_workspace)
         ]
