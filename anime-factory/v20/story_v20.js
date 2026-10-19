@@ -33,6 +33,7 @@ function migrate(raw){
   const old=migrateV19Original(raw),source=raw&&typeof raw==='object'?raw:{};
   v20CarryUnknown(old,source);
   if(source.storyV20&&typeof source.storyV20==='object')old.storyV20=v20SafeJsonClone(source.storyV20);
+  if(source.version===20 && source.format==='AIAnimeFactoryProject')old.legacyOriginal=source.legacyOriginal||null;
   old.version=20;
   return old;
 }
