@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V21 Visual Quality — проверенная новая версия
+
+- **[Скачать прямой V21 ZIP для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip)** — 178 872 байта.
+- [Скачать реальные PNG-кадры браузерной проверки V21](https://github.com/Vekan777/-/actions/runs/39295923427/artifacts/12209440271)
+- [Скачать объединённый комплект V7 + V21](https://github.com/Vekan777/-/actions/runs/39295923427/artifacts/12207008209)
+- [Читать русскую инструкцию V21](https://github.com/Vekan777/-/blob/main/anime-factory/v21/README_RU.md)
+- [Посмотреть успешный запуск проверок](https://github.com/Vekan777/-/actions/runs/39295923427)
+
+В V21 действительно изменён Canvas-рендер: освещение, погода, детализация окружения, контровый свет героев, искры попаданий. Проверены Chromium, Windows/Linux Python и JS синтаксис. В ZIP включён оригинал V19.
+
 ## AI Anime Factory V20 Story & Combat — новый редактор
 
 - [Скачать прямой ZIP V20 для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V20_STORY_COMBAT_WINDOWS.zip)
