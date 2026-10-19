@@ -476,6 +476,7 @@ def selftest():
                 raise AssertionError("Unsafe path accepted")
             except RescueError:
                 pass
+        e.connection.close()
     print("SELFTEST PASS: queue, idempotency, backup, SHA256, ZIP, restore, recovery")
 
 
