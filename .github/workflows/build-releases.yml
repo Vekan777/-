@@ -1,0 +1,58 @@
+name: AI Rescue Factory V1-V6 and Anime V19 - Build ZIPs
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "rescue-engine/**"
+      - "anime-factory/**"
+      - "tests/**"
+      - "scripts/**"
+      - ".github/workflows/build-releases.yml"
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Check syntax
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py tests/test_engine.py
+      - name: Engine selftest
+        run: python rescue-engine/engine.py selftest
+      - name: Integration tests
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+  zip-releases:
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build and verify all release ZIPs
+        run: python scripts/build_releases.py --out dist
+      - name: Upload downloadable release ZIPs
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI_RESCUE_FACTORY_V1_V6_AND_ANIME_V19_WINDOWS
+          path: |
+            dist/*.zip
+            dist/RELEASE_INDEX.json
+          if-no-files-found: error
+          retention-days: 30
