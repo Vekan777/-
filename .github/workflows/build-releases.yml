@@ -96,3 +96,35 @@ jobs:
             dist/RELEASE_INDEX.json
           if-no-files-found: error
           retention-days: 30
+
+  publish-v21-download:
+    needs: [tests, visual-smoke, zip-releases]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout latest repository branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build final V21 ZIP with SHA256 manifest
+        run: python scripts/build_anime_v21.py --out downloads/AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip
+      - name: Commit verified ZIP to stable direct downloads folder
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V21 ZIP already current"
+          else
+            git commit -m "Release verified V21 Visual Quality Windows ZIP"
+            git push origin HEAD:main
+          fi
