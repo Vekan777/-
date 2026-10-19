@@ -1,5 +1,15 @@
 # AI Rescue Factory — исходники и выпуски
 
+## AI Anime Factory V20 Story & Combat — новый выпуск
+
+- [Скачать V20 Windows ZIP напрямую](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V20_STORY_COMBAT_WINDOWS.zip)
+- [Исходный HTML V20](anime-factory/v20/AI_Anime_Factory_V20_STORY_COMBAT.html)
+- [Подробная инструкция и результаты тестов](anime-factory/v20/RELEASE_NOTES_STORY_COMBAT_RU.md)
+- [Все ZIP в одном списке](downloads/INDEX_RU.md)
+
+V20 развивает V19: отслеживание цены вызова душ, ранений, предательства, памяти и отношений; контактный лист 4 кадров, редактируемый канон, более читаемый темп ударов, экспорт Story ZIP.
+В GitHub Actions она прошла 19 тестов на Windows и Linux. Обновлённый выпуск V7 через CI включает эту V20, а ранее опубликованный прямой V7 ZIP остаётся прежним и не перезаписывается.
+
 ## V7 Unified — новая основная версия
 
 - [Скачать V7 ZIP напрямую](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_RESCUE_FACTORY_V7_UNIFIED_CANDIDATE_WINDOWS.zip)
