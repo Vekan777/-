@@ -1,5 +1,20 @@
 # Реальные ZIP в GitHub
 
+## V7 Unified — новый основной выпуск
+
+**Прямое скачивание (ZIP, проверено CRC32 и SHA256-манифест):**
+https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_RESCUE_FACTORY_V7_UNIFIED_CANDIDATE_WINDOWS.zip
+
+**GitHub Actions (успешный запуск CI на Windows и Linux, ZIP и все прежние версии):**
+https://github.com/Vekan777/-/actions/runs/39286748398/artifacts/12203850830
+
+В ZIP V7 есть Python-движок, GUI Tkinter, сохранённый исходник аниме V19,
+восстановленный кандидат V20.3, ZIP-пакеты версий V1–V6 и тесты.
+Прямая ZIP-упаковка и Actions-упаковка отличаются байтами, но оба варианта
+содержат объединённые модули проекта.
+Локальный браузерный/GUI тест на вашем ноутбуке пока не подтверждён.
+
+
 Все архивы ниже реально загружены и видны через GitHub Contents API.
 Они созданы экстренным резервным ZIP-сборщиком (STORE, CRC32).
 Полноценные Python/Windows-тесты ещё не пройдены: GitHub Actions остаётся в очереди.
