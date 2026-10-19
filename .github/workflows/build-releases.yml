@@ -28,11 +28,13 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py tests/test_engine.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py anime-factory/v20/patch_preserve.py tests/test_engine.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
         run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: V20.3 source preservation test
+        run: python anime-factory/v20/patch_preserve.py --selftest
 
   zip-releases:
     needs: tests
