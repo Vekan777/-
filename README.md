@@ -1,5 +1,15 @@
 # AI Rescue Factory — исходники и выпуски
 
+## V7 Unified — новая основная версия
+
+- [Скачать V7 ZIP напрямую](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_RESCUE_FACTORY_V7_UNIFIED_CANDIDATE_WINDOWS.zip)
+- [Сборка GitHub Actions V1–V7 и Anime V19/V20](https://github.com/Vekan777/-/actions/runs/39286748398/artifacts/12203850830) — проверка Windows/Linux: SUCCESS
+- [Подробный отчёт QA и инструкция на русском](docs/V7_UNIFIED_QA_REPORT_RU.md)
+
+Объединены ядро V1–V6, автономная работа ZIP/SHA256/SQLite, графическая оболочка Tkinter и сохранённый исходник AI Anime Factory V19. V20.3 — восстановленный кандидат.
+
+Важно: успешные CI-тесты не означают проверку графического интерфейса на конкретном Windows 10 ноутбуке; Python и GUI нужно проверить локально.
+
 ## Прямые проверенные ZIP (без ожидания GitHub Actions)
 
 Все девять архивов собраны резервным ZIP-движком и доступны в [downloads/INDEX_RU.md](downloads/INDEX_RU.md). Архивы загружены в GitHub и проверены по структуре и CRC32. Полноценные Windows/Python-тесты ещё не пройдены — GitHub Actions пока в очереди.
