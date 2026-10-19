@@ -1,4 +1,4 @@
-name: AI Rescue Factory V1-V6 and Anime V19 - Build ZIPs
+name: AI Rescue Factory V1-V7 Unified and Anime V19/V20 - Build ZIPs
 on:
   workflow_dispatch:
   push:
@@ -28,13 +28,15 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py anime-factory/v20/patch_preserve.py tests/test_engine.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
         run: python -m unittest discover -s tests -p "test_*.py" -v
       - name: V20.3 source preservation test
         run: python anime-factory/v20/patch_preserve.py --selftest
+      - name: V7 unified selftest
+        run: python rescue-engine/unified_v7.py selftest
 
   zip-releases:
     needs: tests
@@ -49,10 +51,14 @@ jobs:
           python-version: "3.13"
       - name: Build and verify all release ZIPs
         run: python scripts/build_releases.py --out dist
+      - name: Assemble unified V7 release ZIP
+        run: python scripts/build_v7.py --legacy dist --out dist
+      - name: Independently verify V7 release ZIP
+        run: python scripts/build_v7.py --verify dist/AI_RESCUE_FACTORY_V7_UNIFIED_CANDIDATE_WINDOWS.zip
       - name: Upload downloadable release ZIPs
         uses: actions/upload-artifact@v4
         with:
-          name: AI_RESCUE_FACTORY_V1_V6_AND_ANIME_V19_WINDOWS
+          name: AI_RESCUE_FACTORY_V1_V7_UNIFIED_AND_ANIME_V19_V20_WINDOWS
           path: |
             dist/*.zip
             dist/RELEASE_INDEX.json
