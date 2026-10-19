@@ -1,4 +1,4 @@
-name: AI Rescue Factory V1-V7 Unified and Anime V19/V20 - Build ZIPs
+name: AI Rescue Factory V1-V7 and Anime V19-V21 Visual Quality
 on:
   workflow_dispatch:
   push:
@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py anime-factory/v20/build_story_v20.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
@@ -38,8 +38,36 @@ jobs:
       - name: V7 unified selftest
         run: python rescue-engine/unified_v7.py selftest
 
-  zip-releases:
+  visual-smoke:
     needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install Playwright only for CI smoke tests
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install chromium
+      - name: Generate original V19 + V20 + V21 studio
+        run: python anime-factory/v21/build_visual_v21.py --output dist/AI_Anime_Factory_V21_VISUAL_QUALITY.html
+      - name: Render and verify actual V21 Canvas in Chromium
+        run: python tests/smoke_browser_v21.py --html dist/AI_Anime_Factory_V21_VISUAL_QUALITY.html --out dist/V21_VISUAL_SAMPLES
+      - name: Upload real screenshot QA samples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V21_VISUAL_BROWSER_SAMPLES
+          path: dist/V21_VISUAL_SAMPLES/
+          if-no-files-found: warn
+          retention-days: 30
+
+  zip-releases:
+    needs: [tests, visual-smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -53,6 +81,8 @@ jobs:
         run: python scripts/build_releases.py --out dist
       - name: Build standalone V20 Story and Combat ZIP
         run: python scripts/build_anime_v20.py --out dist/AI_ANIME_FACTORY_V20_STORY_COMBAT_WINDOWS.zip
+      - name: Build standalone V21 Visual Quality ZIP
+        run: python scripts/build_anime_v21.py --out dist/AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip
       - name: Assemble unified V7 release ZIP
         run: python scripts/build_v7.py --legacy dist --out dist
       - name: Independently verify V7 release ZIP
@@ -60,7 +90,7 @@ jobs:
       - name: Upload downloadable release ZIPs
         uses: actions/upload-artifact@v4
         with:
-          name: AI_RESCUE_FACTORY_V1_V7_UNIFIED_AND_ANIME_V19_V20_WINDOWS
+          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V21_WINDOWS
           path: |
             dist/*.zip
             dist/RELEASE_INDEX.json
