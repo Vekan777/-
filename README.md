@@ -1,5 +1,13 @@
 # AI Rescue Factory — исходники и выпуски
 
+## Новый AI Anime Factory V21 Visual Quality
+
+**[Скачать V21 ZIP напрямую (Windows)](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip)**
+
+V21 развивает V19 и V20: палитры, окружение, туман/снег/дождь/искры, контровое освещение персонажей, эффекты попаданий, отдельные параметры по сценам, экспорт кадров.
+[Настоящие кадры PNG после Chromium-теста](https://github.com/Vekan777/-/actions/runs/39295923427/artifacts/12209440271) · [успешная CI-проверка](https://github.com/Vekan777/-/actions/runs/39295923427) · [полная инструкция V21](anime-factory/v21/README_RU.md).
+
+ZIP подтверждён GitHub (178 872 байта). Все задания Windows/Linux/Chromium/ZIP/публикация завершены успешно. V21 остаётся 2D-аниматиком, а не профессиональным 3D-фильмом; художественное качество требует ручного контроля.
 ## AI Anime Factory V20 Story & Combat — новый выпуск
 
 - [Скачать V20 Windows ZIP напрямую](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V20_STORY_COMBAT_WINDOWS.zip)
