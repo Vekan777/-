@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py anime-factory/v20/build_story_v20.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
@@ -51,6 +51,8 @@ jobs:
           python-version: "3.13"
       - name: Build and verify all release ZIPs
         run: python scripts/build_releases.py --out dist
+      - name: Build standalone V20 Story and Combat ZIP
+        run: python scripts/build_anime_v20.py --out dist/AI_ANIME_FACTORY_V20_STORY_COMBAT_WINDOWS.zip
       - name: Assemble unified V7 release ZIP
         run: python scripts/build_v7.py --legacy dist --out dist
       - name: Independently verify V7 release ZIP
