@@ -132,6 +132,24 @@ def main():
             "Исходный ZIP V19 из Library не копируется побайтово.\n").encode("utf-8")
     }
     make_zip(output/"AI_ANIME_FACTORY_V19_REBUILT_WINDOWS.zip",v19)
+    import importlib.util
+    patch_file=ROOT/"anime-factory"/"v20"/"patch_preserve.py"
+    spec=importlib.util.spec_from_file_location("anime_v20_patch",patch_file)
+    patch_module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(patch_module)
+    patched=patch_module.patch(studio.read_text(encoding="utf-8"))
+    v20={
+        "AI_Anime_Factory_V20_3_PRESERVATION.html":patched.encode("utf-8"),
+        "backup/AI_Anime_Factory_V19_ORIGINAL.html":studio.read_bytes(),
+        "RUN_WINDOWS.bat":('@echo off\r\ncd /d "%~dp0"\r\n'
+                           'start "" "AI_Anime_Factory_V20_3_PRESERVATION.html"\r\n').encode("utf-8"),
+        "README_RU.txt":("V20.3 REBUILT CANDIDATE: patch over original V19.\n"
+                         "Nonstandard JSON fields are preserved; V19 2D renderer remains.\n"
+                         "Not yet verified in actual Windows browsers.\n").encode("utf-8")
+    }
+    make_zip(output/"AI_ANIME_FACTORY_V20_3_REBUILT_WINDOWS.zip",v20)
+    index.append(("AI_ANIME_FACTORY_V20_3_REBUILT_WINDOWS.zip",
+                  (output/"AI_ANIME_FACTORY_V20_3_REBUILT_WINDOWS.zip").stat().st_size))
     index.append(("AI_ANIME_FACTORY_V19_REBUILT_WINDOWS.zip",
                   (output/"AI_ANIME_FACTORY_V19_REBUILT_WINDOWS.zip").stat().st_size))
     all_source={
@@ -140,6 +158,7 @@ def main():
         "rescue-engine/ai_pipeline.py":ai,
         "anime-factory/v19/AI_Anime_Factory_V19.html":studio.read_bytes(),
         "tests/test_engine.py":(ROOT/"tests/test_engine.py").read_bytes(),
+        "anime-factory/v20/patch_preserve.py":patch_file.read_bytes(),
         "scripts/build_releases.py":Path(__file__).read_bytes()
     }
     make_zip(output/"AI_RESCUE_ALL_SOURCES_V1_V6_AND_ANIME_V19.zip",all_source)
