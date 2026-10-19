@@ -73,8 +73,9 @@ def main():
               return {version:p?.version, episodes:p?.episodes?.length,
                 visual:p?.episodes?.[0]?.scenes?.[0]?.visualV21};
             }""")
-            if stored["version"]!=21 or stored["episodes"]<1:
-                raise AssertionError("V21 project not persisted")
+            print("V21_STORAGE_DIAGNOSTIC", repr(stored), "local_keys", page.evaluate("""() => Object.keys(localStorage)"""))
+            if stored["version"]!=21 or not stored["episodes"] or stored["episodes"]<1:
+                raise AssertionError("V21 project not persisted: "+repr(stored))
             if stored["visual"]["weather"]!="rain" or stored["visual"]["look"]!="sunset":
                 raise AssertionError("V21 color and weather settings missing from JSON")
             report["storage"]=stored
