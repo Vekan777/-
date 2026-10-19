@@ -16,6 +16,7 @@ BASE = Path(__file__).resolve().parent
 V7 = BASE / "rescue-engine" / "unified_v7.py"
 V19 = BASE / "anime-factory" / "v19" / "AI_Anime_Factory_V19.html"
 V20 = BASE / "anime-factory" / "v20" / "AI_Anime_Factory_V20_3_PRESERVATION.html"
+V20_STORY = BASE / "anime-factory" / "v20" / "AI_Anime_Factory_V20_STORY_COMBAT.html"
 
 
 class Studio:
@@ -54,6 +55,7 @@ class Studio:
             ("Выполнить 1 задание", lambda: self.command("worker-once")),
             ("Восстановить очередь", lambda: self.command("recover")),
             ("Открыть Anime Factory V19", lambda: self.open_html(V19)),
+            ("Открыть Anime Factory V20 Story & Combat", lambda: self.open_html(V20_STORY)),
             ("Открыть Anime Factory V20.3", lambda: self.open_html(V20)),
             ("Открыть папку проекта", self.show_workspace)
         ]
