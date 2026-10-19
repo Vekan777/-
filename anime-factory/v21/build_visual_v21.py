@@ -89,6 +89,8 @@ def patch(v20,addon):
                         PANEL+'<section class="page" id="page-export" hidden>')
     result=replace_once(result,"const storageKey='AI_ANIME_FACTORY_V19';",
                         "const storageKey='AI_ANIME_FACTORY_V21';")
+    result=replace_once(result,"P={format:'AIAnimeFactoryProject',version:19,",
+                        "P={format:'AIAnimeFactoryProject',version:21,")
     result=replace_once(result,"try{const old=localStorage.getItem(storageKey);",
                         "try{const old=localStorage.getItem(storageKey)||localStorage.getItem('AI_ANIME_FACTORY_V19');")
     result=replace_once(result,"function migrate(raw){",
