@@ -19,6 +19,8 @@ class RescueTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.home = Path(self.tmp.name)
         self.engine = rescue.Engine(self.home, "test")
+        # SQLite must be closed before TemporaryDirectory cleanup on Windows.
+        self.addCleanup(self.engine.connection.close)
 
     def job(self, entries):
         file = self.home / "job.json"
@@ -92,10 +94,11 @@ class RescueTests(unittest.TestCase):
         good = self.engine.snapshot(label="checksum")
         corrupted = self.home / "broken.zip"
         raw = bytearray(good.read_bytes())
-        with zipfile.ZipFile(good) as f:
-            entry = f.getinfo("a.txt")
-            position = entry.header_offset + 30 + len(entry.filename.encode())
-            raw[position] ^= 1
+        # Flip central directory CRC32, not arbitrary compressed bytes.
+        # Corrupting a DEFLATE stream can alter unused bits without any effect.
+        directory = raw.find(b"PK\x01\x02")
+        self.assertGreaterEqual(directory, 0)
+        raw[directory + 16] ^= 1
         corrupted.write_bytes(raw)
         with self.assertRaises((zipfile.BadZipFile, rescue.RescueError, ValueError)):
             self.engine.verify(corrupted)
