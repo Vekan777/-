@@ -95,6 +95,8 @@ def patch(v20,addon):
                         "try{const old=localStorage.getItem(storageKey)||localStorage.getItem('AI_ANIME_FACTORY_V19');")
     result=replace_once(result,"function migrate(raw){",
                         "function migrateV20Original(raw){")
+    # V20's renderAll calls v20Ensure(); never downgrade a V21 project back to 20.
+    result=replace_once(result,"  P.version=20;","  if(Number(P.version)<20)P.version=20;")
     result=replace_once(result,"if(page==='story-v20')renderStoryV20();",
                         "if(page==='story-v20')renderStoryV20();if(page==='visual-v21')v21RenderPanel();")
     result=replace_once(result,"renderImpact19();renderQA();renderStoryV20();}",
