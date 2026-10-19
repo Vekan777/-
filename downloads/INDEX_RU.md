@@ -1,5 +1,16 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V20 Story & Combat — новый редактор
+
+- [Скачать прямой ZIP V20 для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V20_STORY_COMBAT_WINDOWS.zip)
+- [Открыть HTML V20 в GitHub](https://github.com/Vekan777/-/blob/main/anime-factory/v20/AI_Anime_Factory_V20_STORY_COMBAT.html)
+- [Отчёт и инструкция на русском](https://github.com/Vekan777/-/blob/main/anime-factory/v20/RELEASE_NOTES_STORY_COMBAT_RU.md)
+- [CI — успешные тесты Windows/Linux и полный комплект ZIP](https://github.com/Vekan777/-/actions/runs/39290483967/artifacts/12203984026)
+
+Прямая ZIP-сборка: 522 611 байт, CRC32 проверена, включён оригинал V19.
+CI-сборка V20: 163 824 байта, проверены тесты исходников и ZIP.
+
+
 ## V7 Unified — новый основной выпуск
 
 **Прямое скачивание (ZIP, проверено CRC32 и SHA256-манифест):**
