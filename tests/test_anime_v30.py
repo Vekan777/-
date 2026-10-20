@@ -39,7 +39,7 @@ class V30ReviewTests(unittest.TestCase):
   for m in ("function v30Stable(","function v30Hash(","function v30Snapshot(",
             "function v30Compare(","function v30Audit(","function v30Report(",
             "function v30Backup(","function v30Sheet(","delete extra.unifiedV30;",
-            "v20ContinuityQA()","v29QA()"):
+            "v20ContinuityQA()","[\'ритм V29\',v29QA]"):
    self.assertIn(m,js)
   self.assertNotIn("Math.random(",js)
   self.assertNotIn("fetch(",js)
