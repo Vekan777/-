@@ -47,7 +47,7 @@ class V32Tests(unittest.TestCase):
   self.assertIn("const storageKey='AI_ANIME_FACTORY_V32';",self.html)
   self.assertIn("P={format:'AIAnimeFactoryProject',version:32,",self.html)
   self.assertIn("if(Number(migrated.version)<32)migrated.version=32;",self.html)
-  for v in [19]+list(range(21,33)):
+  for v in [19]+list(range(21,32)):
    marker="localStorage.getItem('AI_ANIME_FACTORY_V"+str(v)+"')"
    self.assertTrue(marker in self.html,"Missing legacy fallback "+marker)
   for elem in ("v32-scene","v32-style","v32-enabled","v32-silhouette",
