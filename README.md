@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V26 Cinematic Combat — текущая проверенная версия
+## AI Anime Factory V27 World Quality — текущая проверенная версия
+
+- **[Скачать прямой ZIP V27 для Windows — 256 731 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V27_WORLD_QUALITY_WINDOWS.zip)**
+- [Русская инструкция V27](anime-factory/v27/README_RU.md)
+- [Windows, Linux, Chromium и ZIP: успешный GitHub Actions](https://github.com/Vekan777/-/actions/runs/39380603994)
+- [Проверочные PNG V26 против V27 и JSON отчёт](https://github.com/Vekan777/-/actions/runs/39380603994/artifacts/12245202641)
+- [Объединённый движок V7 и все версии Anime V19–V27](https://github.com/Vekan777/-/actions/runs/39380603994/artifacts/12245112939)
+
+Новый уровень 2D окружения: многослойные фоны города/леса/храма/поля боя, воздушная перспектива и атмосферный свет, привязанные к реальному положению бойцов контактные тени, ограниченные краевые детали переднего плана. Сохраняет прежний сюжет, персонажей, бои и камеру V19–V26. **2D Canvas, не настоящий 3D**, и не профессиональный нарисованный аниме-сериал. HTML запускается через RUN_WINDOWS.bat без установки Python.
+
+## AI Anime Factory V26 Cinematic Combat — сохранённая версия
 
 - **[Windows ZIP V26 — 244 272 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V26_CINEMATIC_COMBAT_WINDOWS.zip)** — прямое скачивание без ожидания GitHub Artifacts
 - [Русская инструкция V26](anime-factory/v26/README_RU.md)
