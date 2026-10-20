@@ -23,6 +23,7 @@ V23_CHARACTER = BASE / "anime-factory" / "v23" / "AI_Anime_Factory_V23_CHARACTER
 V24_ANIMATION = BASE / "anime-factory" / "v24" / "AI_Anime_Factory_V24_CHARACTER_ANIMATION.html"
 V25_COMBAT = BASE / "anime-factory" / "v25" / "AI_Anime_Factory_V25_COMBAT_CHOREOGRAPHY.html"
 V26_CINEMA = BASE / "anime-factory" / "v26" / "AI_Anime_Factory_V26_CINEMATIC_COMBAT.html"
+V27_WORLD = BASE / "anime-factory" / "v27" / "AI_Anime_Factory_V27_WORLD_QUALITY.html"
 
 
 class Studio:
@@ -37,7 +38,7 @@ class Studio:
         header = ttk.Frame(win, padding=12)
         header.pack(fill="x")
         ttk.Label(header, text="AI RESCUE FACTORY V7", font=("Segoe UI", 20, "bold")).pack(anchor="w")
-        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V26",
+        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V27",
                   font=("Segoe UI", 10)).pack(anchor="w")
         controls = ttk.Frame(win, padding=(12, 4))
         controls.pack(fill="x")
@@ -68,6 +69,7 @@ class Studio:
             ("Открыть Anime Factory V24 Character Animation", lambda: self.open_html(V24_ANIMATION)),
             ("Открыть Anime Factory V25 Combat Choreography", lambda: self.open_html(V25_COMBAT)),
             ("Открыть Anime Factory V26 Cinematic Combat", lambda: self.open_html(V26_CINEMA)),
+            ("Открыть Anime Factory V27 World Quality", lambda: self.open_html(V27_WORLD)),
             ("Открыть Anime Factory V20.3", lambda: self.open_html(V20)),
             ("Открыть папку проекта", self.show_workspace)
         ]
