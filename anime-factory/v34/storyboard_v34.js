@@ -171,11 +171,11 @@ async function v34Sheet(){
  const prev=a[index-1]?.e===a[index]?.e?a[index-1].s:null;
  const next=a[index+1]?.e===a[index]?.e?a[index+1].s:null;
  const frames=[
-  {s:prev||s,p:prev?.94:.12,title:prev?'Предыдущая / конец':'Текущая / начало'},
+  {s:prev||s,p:prev ? .94 : .12,title:prev?'Предыдущая / конец':'Текущая / начало'},
   {s,p:.12,title:'Текущая / общий'},
   {s,p:.50,title:'Текущая / средний'},
   {s,p:.88,title:'Текущая / крупный'},
-  {s:next||s,p:next?.06:.88,title:next?'Следующая / начало':'Текущая / конец'},
+  {s:next||s,p:next ? .06 : .88,title:next?'Следующая / начало':'Текущая / конец'},
   {s,p:.99,title:'Текущая / финал'}
  ];
  const frame=document.createElement('canvas'),board=document.createElement('canvas');
