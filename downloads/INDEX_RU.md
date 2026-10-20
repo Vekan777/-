@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V34 Storyboard & Shot Continuity — текущая версия
+
+- **[Скачать V34 Windows ZIP — 334 383 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V34_STORYBOARD_CONTINUITY_WINDOWS.zip)** — подтверждённый ZIP.
+- [Подробная инструкция Windows V34](https://github.com/Vekan777/-/blob/main/anime-factory/v34/README_RU.md)
+- [Все успешные тесты Windows, Linux, Chromium, ZIP и V7](https://github.com/Vekan777/-/actions/runs/39412333780)
+- [Контрольные PNG и отчёты монтажной оси](https://github.com/Vekan777/-/actions/runs/39412333780/artifacts/12259781945)
+- [Все предыдущие выпуски и V34 в объединённом V7](https://github.com/Vekan777/-/actions/runs/39412333780/artifacts/12259423706)
+
+В V34 реализованы три сменяемых плана на сцену (общий/средний/крупный), реальная корректировка камеры в Canvas и проверка соседних кадров по заданным метаданным оси. Шестикадровая PNG-раскадровка и план TXT показывают последовательность. Канон и данные V19–V33 сохранены. Это 2D-аниматик, а не готовая профессиональная 3D-анимация или полноценный кинематографический монтаж.
+
 ## AI Anime Factory V33 Character Acting & Expression — текущая версия
 
 - **[Скачать V33 Windows ZIP — 322 992 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V33_ACTING_EXPRESSION_WINDOWS.zip)** — подтверждённый файл GitHub.
