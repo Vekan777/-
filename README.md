@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V30 Unified Quality Review — текущая проверенная объединяющая версия
+## AI Anime Factory V31 Visual Production Review — текущая проверенная версия
+
+- **[Скачать V31 Windows ZIP — 301 367 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V31_VISUAL_PRODUCTION_REVIEW_WINDOWS.zip)**
+- [Русская инструкция V31](anime-factory/v31/README_RU.md)
+- [Успешные проверки Windows, Linux, Chromium, ZIP и V7](https://github.com/Vekan777/-/actions/runs/39404350168)
+- [Реальные PNG кадров и JSON-метрики яркости и контраста](https://github.com/Vekan777/-/actions/runs/39404350168/artifacts/12255679128)
+- [Объединённый V7 + исходники Anime V19–V31](https://github.com/Vekan777/-/actions/runs/39404350168/artifacts/12256493780)
+
+V31 добавляет измерение **реальных Canvas-пикселей** в четырёх кадрах каждой сцены: яркость, контраст, тени, пересвет, центр кадра и плотность видимых границ. Присутствует ограниченная цветокоррекция экспозиции/контраста/насыщенности/виньетки, встроенная в обычный экспорт кадров. По умолчанию сезонная проверка просматривает первые 24 сцены. Прежние сюжет, персонажи, бои и эталон V30 сохранены. Это **процедурный 2D-аниматик**, а не профессиональное 3D. Пиксельные эвристики не оценивают художественное качество лиц и эмоций. HTML запускается через RUN_WINDOWS.bat без Python.
+
+## AI Anime Factory V30 Unified Quality Review — сохранённая объединяющая версия
 
 - **[Прямой Windows ZIP V30 — 289 834 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V30_UNIFIED_QUALITY_REVIEW_WINDOWS.zip)**
 - [Полная русская инструкция V30](anime-factory/v30/README_RU.md)
