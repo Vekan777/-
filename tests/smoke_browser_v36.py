@@ -63,6 +63,11 @@ def main():
             page.reload(wait_until="load")
             page.wait_for_function("() => document.querySelector('#v36-episode')?.options.length>0",timeout=45000)
             page.locator('[data-page="audio-v36"]').click()
+            # Import normalizer can adjust ultra-short test scene times; capture its
+            # post-migration, actual authoritative values before the audio edit.
+            page.locator("#v36-save").click()
+            baseline=page.evaluate("""() => JSON.parse(
+              localStorage.getItem('AI_ANIME_FACTORY_V36'))""")
             page.locator("#v36-slot").select_option("voice")
             page.locator("#v36-audiofile").set_input_files(str(wav))
             page.wait_for_function("() => document.querySelector('#v36-asset').textContent.includes('аудио подключено')",timeout=20000)
@@ -87,8 +92,10 @@ def main():
                 raise AssertionError("Characters were rewritten")
             if after["episodes"][0]["scenes"][0]["assemblyV35"]!=before["episodes"][0]["scenes"][0].get("assemblyV35"):
                 raise AssertionError("V35 transitions changed")
-            if after["episodes"][0]["scenes"][0]["duration"]!=1.1:
-                raise AssertionError("Audio edits changed scene duration")
+            if after["episodes"][0]["scenes"][0]["duration"]!=baseline["episodes"][0]["scenes"][0]["duration"]:
+                raise AssertionError("Audio edits changed scene duration: "+
+                                     str(after["episodes"][0]["scenes"][0]["duration"])+" vs "+
+                                     str(baseline["episodes"][0]["scenes"][0]["duration"]))
             page.locator("#v36-play").click()
             page.wait_for_function("() => document.querySelector('#v36-play').textContent==='Остановить'",timeout=20000)
             page.wait_for_timeout(400)
