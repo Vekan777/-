@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V31 Visual Production Review — текущая версия
+
+- **[Скачать V31 Windows ZIP — 301 367 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V31_VISUAL_PRODUCTION_REVIEW_WINDOWS.zip)** — файл проверен через GitHub Contents.
+- [Полная инструкция V31 на русском](https://github.com/Vekan777/-/blob/main/anime-factory/v31/README_RU.md)
+- [Успешные Windows, Linux, Chromium и ZIP/V7 тесты](https://github.com/Vekan777/-/actions/runs/39404350168)
+- [Контрольные PNG и JSON-метрики реальных кадров](https://github.com/Vekan777/-/actions/runs/39404350168/artifacts/12255679128)
+- [Все версии в архиве V7 + Anime V19–V31](https://github.com/Vekan777/-/actions/runs/39404350168/artifacts/12256493780)
+
+В V31 представлены ограниченная цветокоррекция и численная оценка 4 реальных Canvas-кадров сцены: яркость, контраст, тени, пересвет и центр кадра. По умолчанию проверяются первые 24 сцены, другие — вручную. Не гарантируется художественное качество персонажей или профессиональное 3D-аниме. Исходный сценарий и все версии V19–V30 сохранены.
+
 ## AI Anime Factory V30 Unified Quality Review — текущая объединяющая версия
 
 - **[Скачать Windows V30 ZIP — 289 834 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V30_UNIFIED_QUALITY_REVIEW_WINDOWS.zip)** — файл подтверждён через GitHub Contents.
