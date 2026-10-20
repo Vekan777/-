@@ -1,0 +1,103 @@
+name: AI Anime Factory V36 Audio Episode Export
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v36/**"
+      - "tests/test_anime_v36.py"
+      - "tests/smoke_browser_v36.py"
+      - "scripts/build_anime_v36.py"
+      - ".github/workflows/anime-v36.yml"
+  push:
+    branches: [main]
+    paths:
+      - "anime-factory/v36/**"
+      - "tests/test_anime_v36.py"
+      - "tests/smoke_browser_v36.py"
+      - "scripts/build_anime_v36.py"
+      - ".github/workflows/anime-v36.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v36-structural:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile
+        run: python -m py_compile anime-factory/v36/build_audio_v36.py scripts/build_anime_v36.py tests/test_anime_v36.py tests/smoke_browser_v36.py
+      - name: V36 source preservation
+        run: python anime-factory/v36/build_audio_v36.py --selftest
+      - name: V36 Python and Node regressions
+        run: python -m unittest discover -s tests -p "test_anime_v36.py" -v
+      - name: ZIP build with SHA256, CRC32 and original V19 verification
+        run: python scripts/build_anime_v36.py --selftest
+
+  v36-chromium:
+    needs: v36-structural
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Chromium for integration smoke
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Build real V19–V36 HTML
+        run: python anime-factory/v36/build_audio_v36.py --output dist/AI_Anime_Factory_V36_AUDIO_EPISODE_EXPORT.html
+      - name: Browser real audio / MediaRecorder WebM / FFprobe
+        run: python tests/smoke_browser_v36.py --html dist/AI_Anime_Factory_V36_AUDIO_EPISODE_EXPORT.html --out dist/V36_AUDIO_SAMPLES
+      - name: Verified V36 Windows release ZIP
+        run: python scripts/build_anime_v36.py --out dist/AI_ANIME_FACTORY_V36_AUDIO_EPISODE_EXPORT_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI-Anime-Factory-V36-Windows-Verified
+          path: dist/AI_ANIME_FACTORY_V36_AUDIO_EPISODE_EXPORT_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V36-Audio-Chromium-Quality-Evidence
+          path: dist/V36_AUDIO_SAMPLES/
+          retention-days: 30
+          if-no-files-found: error
+
+  v36-github-release:
+    needs: v36-chromium
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build immutable versioned V36 ZIP
+        run: python scripts/build_anime_v36.py --out dist/AI_ANIME_FACTORY_V36_AUDIO_EPISODE_EXPORT_WINDOWS.zip
+      - name: Release permanent Windows ZIP link without rewriting earlier archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view anime-factory-v36 >/dev/null 2>&1; then
+            echo "V36 release already exists; no published asset is overwritten."
+          else
+            gh release create anime-factory-v36 dist/AI_ANIME_FACTORY_V36_AUDIO_EPISODE_EXPORT_WINDOWS.zip --title "AI Anime Factory V36 Audio Episode Export" --notes "V36: Web Audio scene stems, continuous V35 picture+audio, real WebM capture, FFmpeg converter BAT; complete V19–V36 sources and SHA256 manifest. This is a 2D animatic."
+          fi
