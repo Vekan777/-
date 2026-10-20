@@ -1,4 +1,4 @@
-name: AI Rescue Factory V1-V7 and Anime V19-V35 Scene Assembly Production
+name: AI Rescue Factory V1-V7 and Anime V19-V37 Delivery Production
 on:
   workflow_dispatch:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py scripts/build_anime_v24.py scripts/build_anime_v25.py scripts/build_anime_v26.py scripts/build_anime_v27.py scripts/build_anime_v28.py scripts/build_anime_v29.py scripts/build_anime_v30.py scripts/build_anime_v31.py scripts/build_anime_v32.py scripts/build_anime_v33.py scripts/build_anime_v34.py scripts/build_anime_v35.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v24/build_animation_v24.py anime-factory/v25/build_combat_v25.py anime-factory/v26/build_cinematic_v26.py anime-factory/v27/build_world_v27.py anime-factory/v28/build_interaction_v28.py anime-factory/v29/build_polish_v29.py anime-factory/v30/build_unified_v30.py anime-factory/v31/build_visual_v31.py anime-factory/v32/build_keyframes_v32.py anime-factory/v33/build_acting_v33.py anime-factory/v34/build_storyboard_v34.py anime-factory/v35/build_assembly_v35.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/test_anime_v24.py tests/test_anime_v25.py tests/test_anime_v26.py tests/test_anime_v27.py tests/test_anime_v28.py tests/test_anime_v29.py tests/test_anime_v30.py tests/test_anime_v31.py tests/test_anime_v32.py tests/test_anime_v33.py tests/test_anime_v34.py tests/test_anime_v35.py tests/smoke_browser_v23.py tests/smoke_browser_v24.py tests/smoke_browser_v25.py tests/smoke_browser_v26.py tests/smoke_browser_v27.py tests/smoke_browser_v28.py tests/smoke_browser_v29.py tests/smoke_browser_v30.py tests/smoke_browser_v31.py tests/smoke_browser_v32.py tests/smoke_browser_v33.py tests/smoke_browser_v34.py tests/smoke_browser_v35.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py scripts/build_anime_v24.py scripts/build_anime_v25.py scripts/build_anime_v26.py scripts/build_anime_v27.py scripts/build_anime_v28.py scripts/build_anime_v29.py scripts/build_anime_v30.py scripts/build_anime_v31.py scripts/build_anime_v32.py scripts/build_anime_v33.py scripts/build_anime_v34.py scripts/build_anime_v35.py scripts/build_anime_v36.py scripts/build_anime_v37.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v24/build_animation_v24.py anime-factory/v25/build_combat_v25.py anime-factory/v26/build_cinematic_v26.py anime-factory/v27/build_world_v27.py anime-factory/v28/build_interaction_v28.py anime-factory/v29/build_polish_v29.py anime-factory/v30/build_unified_v30.py anime-factory/v31/build_visual_v31.py anime-factory/v32/build_keyframes_v32.py anime-factory/v33/build_acting_v33.py anime-factory/v34/build_storyboard_v34.py anime-factory/v35/build_assembly_v35.py anime-factory/v36/build_audio_v36.py anime-factory/v37/build_subtitles_v37.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/test_anime_v24.py tests/test_anime_v25.py tests/test_anime_v26.py tests/test_anime_v27.py tests/test_anime_v28.py tests/test_anime_v29.py tests/test_anime_v30.py tests/test_anime_v31.py tests/test_anime_v32.py tests/test_anime_v33.py tests/test_anime_v34.py tests/test_anime_v35.py tests/test_anime_v36.py tests/test_anime_v37.py tests/smoke_browser_v23.py tests/smoke_browser_v24.py tests/smoke_browser_v25.py tests/smoke_browser_v26.py tests/smoke_browser_v27.py tests/smoke_browser_v28.py tests/smoke_browser_v29.py tests/smoke_browser_v30.py tests/smoke_browser_v31.py tests/smoke_browser_v32.py tests/smoke_browser_v33.py tests/smoke_browser_v34.py tests/smoke_browser_v35.py tests/smoke_browser_v36.py tests/smoke_browser_v37.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
@@ -281,6 +281,10 @@ jobs:
         run: python scripts/build_anime_v34.py --out dist/AI_ANIME_FACTORY_V34_STORYBOARD_CONTINUITY_WINDOWS.zip
       - name: Build standalone V35 Scene Assembly Windows ZIP
         run: python scripts/build_anime_v35.py --out dist/AI_ANIME_FACTORY_V35_SCENE_ASSEMBLY_WINDOWS.zip
+      - name: Build standalone V36 Audio Episode Windows ZIP
+        run: python scripts/build_anime_v36.py --out dist/AI_ANIME_FACTORY_V36_AUDIO_EPISODE_EXPORT_WINDOWS.zip
+      - name: Build standalone V37 Subtitles Delivery Windows ZIP
+        run: python scripts/build_anime_v37.py --out dist/AI_ANIME_FACTORY_V37_SUBTITLES_DELIVERY_WINDOWS.zip
       - name: Assemble unified V7 release ZIP
         run: python scripts/build_v7.py --legacy dist --out dist
       - name: Independently verify V7 release ZIP
@@ -288,7 +292,7 @@ jobs:
       - name: Upload downloadable release ZIPs
         uses: actions/upload-artifact@v4
         with:
-          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V35_WINDOWS
+          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V37_WINDOWS
           path: |
             dist/*.zip
             dist/RELEASE_INDEX.json
