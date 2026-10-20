@@ -1,4 +1,4 @@
-name: AI Rescue Factory V1-V7 and Anime V19-V27 World Quality
+name: AI Rescue Factory V1-V7 and Anime V19-V28 Character World Interaction
 on:
   workflow_dispatch:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py scripts/build_anime_v24.py scripts/build_anime_v25.py scripts/build_anime_v26.py scripts/build_anime_v27.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v24/build_animation_v24.py anime-factory/v25/build_combat_v25.py anime-factory/v26/build_cinematic_v26.py anime-factory/v27/build_world_v27.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/test_anime_v24.py tests/test_anime_v25.py tests/test_anime_v26.py tests/test_anime_v27.py tests/smoke_browser_v23.py tests/smoke_browser_v24.py tests/smoke_browser_v25.py tests/smoke_browser_v26.py tests/smoke_browser_v27.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py scripts/build_anime_v24.py scripts/build_anime_v25.py scripts/build_anime_v26.py scripts/build_anime_v27.py scripts/build_anime_v28.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v24/build_animation_v24.py anime-factory/v25/build_combat_v25.py anime-factory/v26/build_cinematic_v26.py anime-factory/v27/build_world_v27.py anime-factory/v28/build_interaction_v28.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/test_anime_v24.py tests/test_anime_v25.py tests/test_anime_v26.py tests/test_anime_v27.py tests/test_anime_v28.py tests/smoke_browser_v23.py tests/smoke_browser_v24.py tests/smoke_browser_v25.py tests/smoke_browser_v26.py tests/smoke_browser_v27.py tests/smoke_browser_v28.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
@@ -83,6 +83,18 @@ jobs:
         run: python anime-factory/v27/build_world_v27.py --output dist/AI_Anime_Factory_V27_WORLD_QUALITY.html
       - name: Render and verify real V27 world layers, settings and JSON in Chromium
         run: python tests/smoke_browser_v27.py --html dist/AI_Anime_Factory_V27_WORLD_QUALITY.html --out dist/V27_WORLD_SAMPLES
+      - name: Build V28 from original V19 through V27
+        run: python anime-factory/v28/build_interaction_v28.py --output dist/AI_Anime_Factory_V28_CHARACTER_WORLD_INTERACTION.html
+      - name: Chromium V28 actor/environment A-B, event gates, JSON reload and PNG
+        run: python tests/smoke_browser_v28.py --html dist/AI_Anime_Factory_V28_CHARACTER_WORLD_INTERACTION.html --out dist/V28_INTERACTION_SAMPLES
+      - name: Upload actual V28 environment interaction PNG comparisons
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V28_INTERACTION_BROWSER_SAMPLES
+          path: dist/V28_INTERACTION_SAMPLES/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Upload real V27 environment before and after browser frames
         if: always()
         uses: actions/upload-artifact@v4
@@ -169,6 +181,8 @@ jobs:
         run: python scripts/build_anime_v26.py --out dist/AI_ANIME_FACTORY_V26_CINEMATIC_COMBAT_WINDOWS.zip
       - name: Build V27 Environment World ZIP
         run: python scripts/build_anime_v27.py --out dist/AI_ANIME_FACTORY_V27_WORLD_QUALITY_WINDOWS.zip
+      - name: Assemble standalone V28 interaction Windows ZIP
+        run: python scripts/build_anime_v28.py --out dist/AI_ANIME_FACTORY_V28_CHARACTER_WORLD_INTERACTION_WINDOWS.zip
       - name: Assemble unified V7 release ZIP
         run: python scripts/build_v7.py --legacy dist --out dist
       - name: Independently verify V7 release ZIP
@@ -176,7 +190,7 @@ jobs:
       - name: Upload downloadable release ZIPs
         uses: actions/upload-artifact@v4
         with:
-          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V27_WINDOWS
+          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V28_WINDOWS
           path: |
             dist/*.zip
             dist/RELEASE_INDEX.json
@@ -410,5 +424,38 @@ jobs:
             echo "V27 ZIP already published"
           else
             git commit -m "Release verified V27 World Quality Windows ZIP"
+            git push origin HEAD:main
+          fi
+
+  publish-v28-download:
+    # Build after previous releases to serialize main branch updates.
+    needs: [tests, visual-smoke, zip-releases, publish-v27-download]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build and verify V28 Windows ZIP
+        run: python scripts/build_anime_v28.py --out downloads/AI_ANIME_FACTORY_V28_CHARACTER_WORLD_INTERACTION_WINDOWS.zip
+      - name: Publish additive V28 ZIP preserving all older versions
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V28_CHARACTER_WORLD_INTERACTION_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V28 ZIP already published"
+          else
+            git commit -m "Release verified V28 Character World Interaction Windows ZIP"
             git push origin HEAD:main
           fi
