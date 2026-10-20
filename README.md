@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V34 Storyboard & Shot Continuity — текущая проверенная версия
+## AI Anime Factory V35 Scene Assembly & Production — текущая проверенная версия
+
+- **[Скачать Windows ZIP V35 — 346 321 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V35_SCENE_ASSEMBLY_WINDOWS.zip)**
+- [Полная инструкция V35 на русском](anime-factory/v35/README_RU.md)
+- [Все успешные тесты Windows, Linux, Chromium и ZIP/V7](https://github.com/Vekan777/-/actions/runs/39415183926)
+- [Контрольные PNG последовательности эпизода и JSON проверки](https://github.com/Vekan777/-/actions/runs/39415183926/artifacts/12261551069)
+- [Объединённый V7 + все версии Anime V19–V35](https://github.com/Vekan777/-/actions/runs/39415183926/artifacts/12261686060)
+
+V35 впервые соединяет **визуальные кадры всей серии** в общую временную шкалу с полноценным воспроизведением/паузой, ручной перемоткой и плавными наложениями соседних сцен на Canvas. Результаты можно выгрузить в TXT-монтажный лист, JSON с точным началом/концом сцен и шесть настоящих PNG-кадров. Длительности, события, сюжет, персонажи, авторские PNG и все V19–V34 сохранены. **Это не автоматический экспорт единого MP4 со звуком**; он требует отдельного монтажа/FFmpeg. Сам автономный HTML запускается через RUN_WINDOWS.bat без Python.
+
+## AI Anime Factory V34 Storyboard & Shot Continuity — сохранённая версия
 
 - **[Скачать Windows ZIP V34 — 334 383 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V34_STORYBOARD_CONTINUITY_WINDOWS.zip)**
 - [Полная инструкция V34 на русском](anime-factory/v34/README_RU.md)
