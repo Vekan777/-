@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V27 World Quality — текущая проверенная версия
+## AI Anime Factory V28 Character–Environment Interaction — текущая проверенная версия
+
+- **[Скачать Windows V28 ZIP — 264 351 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V28_CHARACTER_WORLD_INTERACTION_WINDOWS.zip)**
+- [Инструкция по запуску V28 на русском](anime-factory/v28/README_RU.md)
+- [Успешные тесты Windows / Linux / Chromium / ZIP / V7](https://github.com/Vekan777/-/actions/runs/39382370633)
+- [Проверочные PNG взаимодействия V27 против V28](https://github.com/Vekan777/-/actions/runs/39382370633/artifacts/12246300788)
+- [Объединённый комплект V7 + Anime V19–V28](https://github.com/Vekan777/-/actions/runs/39382370633/artifacts/12246081501)
+
+V28 добавляет под ногами движущихся персонажей процедурные следы, пыль, отражённый свет и кратковременную реакцию земли на уже подтверждённые удары и блоки. Промах или уклонение не порождают ложного эффекта попадания. История V20, персонажи V23 и все предыдущие настройки V19–V27 сохранены. Это **2D Canvas-аниматик**, а не физическая 3D-система; пользовательские PNG не перерисовываются. Для запуска самостоятельного HTML ZIP Python не нужен.
+
+## AI Anime Factory V27 World Quality — сохранённая версия
 
 - **[Скачать прямой ZIP V27 для Windows — 256 731 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V27_WORLD_QUALITY_WINDOWS.zip)**
 - [Русская инструкция V27](anime-factory/v27/README_RU.md)
