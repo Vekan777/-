@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V25 Combat Choreography — проверенный выпуск
+
+- **[Скачать V25 ZIP Windows напрямую](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V25_COMBAT_CHOREOGRAPHY_WINDOWS.zip)** — 234 336 байт, файл проверен GitHub Contents API.
+- [Инструкция V25](https://github.com/Vekan777/-/blob/main/anime-factory/v25/README_RU.md)
+- [Успешный CI Windows, Linux, Chromium и ZIP](https://github.com/Vekan777/-/actions/runs/39375377086)
+- [Настоящие PNG-кадры V25 из Chromium](https://github.com/Vekan777/-/actions/runs/39375377086/artifacts/12243127495)
+- [Полный V7 + V19–V25](https://github.com/Vekan777/-/actions/runs/39375377086/artifacts/12242908171)
+
+V25 улучшает постановку боёв двух персонажей и сохраняет прежние серии и сюжет. Встроена резервная копия подлинного V19, проверки CRC32 и SHA-256. Работающий 2D-аниматик; импортированные PNG не дорисовываются, профессиональный 3D не заявлен.
+
 ## AI Anime Factory V24 Character Animation — проверенный выпуск
 
 - **[Скачать ZIP V24 для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V24_CHARACTER_ANIMATION_WINDOWS.zip)** — 218 579 байт, подтверждено GitHub Contents API.
