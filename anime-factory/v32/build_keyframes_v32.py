@@ -96,8 +96,8 @@ def patch(html,addon):
     "v24.lean+v25.lean+v29.lean;",
     "v24.lean+v25.lean+v29.lean+v32.lean;")
  html=once(html,
-    "const leftElbow=[-54-attack*12,-118-block*14],leftHand=[-72-attack*17+v25.guard*8,-97-block*46-v25.guard*33-v29.guardY];",
-    "const leftElbow=[-54-attack*12+v32.elbowLX,-118-block*14+v32.elbowLY],leftHand=[-72-attack*17+v25.guard*8+v32.handLX,-97-block*46-v25.guard*33-v29.guardY+v32.handLY];")
+    "const leftElbow=[-54-attack*12,-118-block*14-v25.guard*14],leftHand=[-72-attack*17+v25.guard*8,-97-block*46-v25.guard*33-v29.guardY];",
+    "const leftElbow=[-54-attack*12+v32.elbowLX,-118-block*14-v25.guard*14+v32.elbowLY],leftHand=[-72-attack*17+v25.guard*8+v32.handLX,-97-block*46-v25.guard*33-v29.guardY+v32.handLY];")
  html=once(html,
     "const rightElbow=[55+attack*17,-121-attack*42],rightHand=[76+attack*60-block*33+v24.handX+v25.attack*32+v29.handX,-104-attack*101-block*77-v24.handLift-v25.attack*25-v29.handY];",
     "const rightElbow=[55+attack*17+v32.elbowRX,-121-attack*42+v32.elbowRY],rightHand=[76+attack*60-block*33+v24.handX+v25.attack*32+v29.handX+v32.handRX,-104-attack*101-block*77-v24.handLift-v25.attack*25-v29.handY+v32.handRY];")
