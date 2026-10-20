@@ -83,13 +83,18 @@ def main():
      raise AssertionError("Legacy scene changed: "+key)
    # Same exact timestamp, with subtitle and after removing cue:
    # visual evidence is pixel-level change, not a fake placeholder.
-   page.locator("#v37-seek").fill("380")
+   cue=doc["episodes"][0]["cues"][0]
+   episode_seconds=doc["episodes"][0]["duration"]
+   if episode_seconds<=0:raise AssertionError("Invalid episode duration")
+   # Seek to an absolute timestamp WITHIN the cue, not a guessed percentage:
+   seek_pos=str(round(1000*((cue["start"]+cue["end"])/2)/episode_seconds))
+   page.locator("#v37-seek").fill(seek_pos)
    with_text=dest/"V37_REAL_CANVAS_WITH_SUBTITLE.png"
    page.locator("#v37-preview").screenshot(path=str(with_text))
    sha_text=png(with_text)
    page.locator("#v37-cue").select_option("0")
    page.locator("#v37-remove").click()
-   page.locator("#v37-seek").fill("380")
+   page.locator("#v37-seek").fill(seek_pos)
    without=dest/"V37_REAL_CANVAS_NO_SUBTITLE.png"
    page.locator("#v37-preview").screenshot(path=str(without))
    if sha_text==png(without):raise AssertionError("Caption did not alter real canvas pixels")
