@@ -67,11 +67,12 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V23):
+AI ANIME FACTORY (текущий редактор V24):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
    anime-factory\\v23\\AI_Anime_Factory_V23_CHARACTER_QUALITY.html
+   anime-factory\\v24\\AI_Anime_Factory_V24_CHARACTER_ANIMATION.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -137,6 +138,9 @@ def prepare(root, source_dist):
                  "anime-factory/v23/character_v23.js",
                  "anime-factory/v23/build_character_v23.py",
                  "anime-factory/v23/README_RU.md",
+                 "anime-factory/v24/animation_v24.js",
+                 "anime-factory/v24/build_animation_v24.py",
+                 "anime-factory/v24/README_RU.md",
                  "anime-factory/v21/README_RU.md",
                  "anime-factory/v20/build_story_v20.py",
                  "anime-factory/v20/README_RU.md",
@@ -185,6 +189,14 @@ def prepare(root, source_dist):
         character_builder.build().encode("utf-8")
     )
 
+    animation_path = root / "anime-factory" / "v24" / "build_animation_v24.py"
+    animation_spec = importlib.util.spec_from_file_location("anime_v24_animation", animation_path)
+    animation_builder = importlib.util.module_from_spec(animation_spec)
+    animation_spec.loader.exec_module(animation_builder)
+    data["anime-factory/v24/AI_Anime_Factory_V24_CHARACTER_ANIMATION.html"] = (
+        animation_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -194,6 +206,7 @@ def prepare(root, source_dist):
         "AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip",
         "AI_ANIME_FACTORY_V22_ACTING_COMBAT_WINDOWS.zip",
         "AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip",
+        "AI_ANIME_FACTORY_V24_CHARACTER_ANIMATION_WINDOWS.zip",
         "AI_RESCUE_ALL_SOURCES_V1_V6_AND_ANIME_V19.zip"
     ]
     for filename in names:
@@ -253,7 +266,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V23 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V24 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())
