@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V31 Visual Production Review — текущая проверенная версия
+## AI Anime Factory V32 Keyframe Readability — текущая проверенная версия
+
+- **[Прямой Windows ZIP V32 — 312 811 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V32_KEYFRAME_READABILITY_WINDOWS.zip)**
+- [Полная инструкция V32 на русском](anime-factory/v32/README_RU.md)
+- [Windows, Linux, реальный Chromium и проверенные ZIP/V7](https://github.com/Vekan777/-/actions/runs/39407541304)
+- [PNG сравнения V31/V32, 4 ключевые позы и отчёт](https://github.com/Vekan777/-/actions/runs/39407541304/artifacts/12257937428)
+- [Общий архив V7 + все версии Anime V19–V32](https://github.com/Vekan777/-/actions/runs/39407541304/artifacts/12257068862)
+
+V32 меняет реальные суставы процедурного 2D-рига: разводит локти и кисти для читаемого силуэта, уточняет стойку, согласованно наклоняет лицо и волосы, добавляет управляемую выразительность глаз и бровей. Четыре настраиваемые ключевые позы сцены плавно интерполируются; есть A/B рендер, PNG и TXT. Исходный V19, сериал, бой, V30 контрольная точка и все редакторы до V31 сохранены. **Это процедурный 2D-аниматик, не студийное аниме/3D.** Пользовательские PNG не перерисовываются. RUN_WINDOWS.bat запускает HTML без Python.
+
+## AI Anime Factory V31 Visual Production Review — сохранённая версия
 
 - **[Скачать V31 Windows ZIP — 301 367 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V31_VISUAL_PRODUCTION_REVIEW_WINDOWS.zip)**
 - [Русская инструкция V31](anime-factory/v31/README_RU.md)
