@@ -30,6 +30,7 @@ V30_REVIEW = BASE / "anime-factory" / "v30" / "AI_Anime_Factory_V30_UNIFIED_QUAL
 V31_VISUAL = BASE / "anime-factory" / "v31" / "AI_Anime_Factory_V31_VISUAL_PRODUCTION_REVIEW.html"
 V32_KEYFRAMES = BASE / "anime-factory" / "v32" / "AI_Anime_Factory_V32_KEYFRAME_READABILITY.html"
 V33_ACTING = BASE / "anime-factory" / "v33" / "AI_Anime_Factory_V33_ACTING_EXPRESSION.html"
+V34_STORYBOARD = BASE / "anime-factory" / "v34" / "AI_Anime_Factory_V34_STORYBOARD_CONTINUITY.html"
 
 
 class Studio:
@@ -44,7 +45,7 @@ class Studio:
         header = ttk.Frame(win, padding=12)
         header.pack(fill="x")
         ttk.Label(header, text="AI RESCUE FACTORY V7", font=("Segoe UI", 20, "bold")).pack(anchor="w")
-        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V33",
+        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V34",
                   font=("Segoe UI", 10)).pack(anchor="w")
         controls = ttk.Frame(win, padding=(12, 4))
         controls.pack(fill="x")
@@ -82,6 +83,7 @@ class Studio:
             ("Открыть Anime Factory V31 Visual Production Review", lambda: self.open_html(V31_VISUAL)),
             ("Открыть Anime Factory V32 Keyframe Readability", lambda: self.open_html(V32_KEYFRAMES)),
             ("Открыть Anime Factory V33 Acting Expression", lambda: self.open_html(V33_ACTING)),
+            ("Открыть Anime Factory V34 Storyboard Shot Continuity", lambda: self.open_html(V34_STORYBOARD)),
             ("Открыть Anime Factory V20.3", lambda: self.open_html(V20)),
             ("Открыть папку проекта", self.show_workspace)
         ]
