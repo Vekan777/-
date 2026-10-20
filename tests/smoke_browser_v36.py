@@ -43,14 +43,26 @@ def main():
             page.wait_for_function("() => document.querySelector('#v36-episode')?.options.length>0",timeout=45000)
             page.locator('[data-page="audio-v36"]').click()
             page.wait_for_function("() => !document.querySelector('#page-audio-v36').hidden")
-            before=page.evaluate("""() => ({
-               version:P.version,plot:P.episodes[0].storyV20,
-               hero:P.characters[0].qualityV23,
-               previous:P.episodes[0].scenes[0].assemblyV35,
-               oldDuration:P.episodes[0].scenes[0].duration
-            })""")
-            if before["version"]!=36 or not before["plot"] or not before["hero"]:
+            # Global P/v36 functions are safely enclosed in the editor IIFE.
+            # Check real persisted project rather than reaching private JS state.
+            page.locator("#v36-save").click()
+            before=page.evaluate("""() => JSON.parse(
+              localStorage.getItem('AI_ANIME_FACTORY_V36'))""")
+            if not before or before.get("version")!=36:
+                raise AssertionError("V36 project missing after save")
+            if not before["episodes"][0].get("storyV20") or not before["characters"][0].get("qualityV23"):
                 raise AssertionError("V36 lost canonical V20/V23 content")
+            # Make a SHORT episode in test-only localStorage, before binding audio.
+            page.evaluate("""() => {
+               const key='AI_ANIME_FACTORY_V36';
+               const value=JSON.parse(localStorage.getItem(key));
+               value.episodes[0].scenes=value.episodes[0].scenes.slice(0,2);
+               value.episodes[0].scenes.forEach(s=>{s.duration=1.1;});
+               localStorage.setItem(key,JSON.stringify(value));
+            }""")
+            page.reload(wait_until="load")
+            page.wait_for_function("() => document.querySelector('#v36-episode')?.options.length>0",timeout=45000)
+            page.locator('[data-page="audio-v36"]').click()
             page.locator("#v36-slot").select_option("voice")
             page.locator("#v36-audiofile").set_input_files(str(wav))
             page.wait_for_function("() => document.querySelector('#v36-asset').textContent.includes('аудио подключено')",timeout=20000)
@@ -67,30 +79,23 @@ def main():
                 raise AssertionError("Audio metadata/attachment missing")
             if abs(slot["gain"]-.75)>1e-5 or abs(slot["offsetSeconds"]-.25)>1e-5:
                 raise AssertionError("Volume or offset not saved")
-            after=page.evaluate("""() => ({
-                duration:P.episodes[0].scenes[0].duration,
-                plot:P.episodes[0].storyV20,
-                hero:P.characters[0].qualityV23,
-                previous:P.episodes[0].scenes[0].assemblyV35,
-                audio:P.episodes[0].scenes[0].audioV36
-            })""")
-            for k,past in (("duration","oldDuration"),("plot","plot"),
-                           ("hero","hero"),("previous","previous")):
-                if after[k]!=before[past]:
-                    raise AssertionError("Existing story or V35 timing rewritten: "+k)
-            # Reduce runtime ONLY in the browser test's in-memory copy; source files unaffected.
-            page.evaluate("""() => {
-              P.episodes[0].scenes=P.episodes[0].scenes.slice(0,2);
-              P.episodes[0].scenes.forEach(s=>{s.duration=1.1;});
-              v36Scenes();
-            }""")
+            after=page.evaluate("""() => JSON.parse(
+                localStorage.getItem('AI_ANIME_FACTORY_V36'))""")
+            if after["episodes"][0]["storyV20"]!=before["episodes"][0]["storyV20"]:
+                raise AssertionError("Canonical plot changed while adding audio")
+            if after["characters"][0]["qualityV23"]!=before["characters"][0]["qualityV23"]:
+                raise AssertionError("Characters were rewritten")
+            if after["episodes"][0]["scenes"][0]["assemblyV35"]!=before["episodes"][0]["scenes"][0].get("assemblyV35"):
+                raise AssertionError("V35 transitions changed")
+            if after["episodes"][0]["scenes"][0]["duration"]!=1.1:
+                raise AssertionError("Audio edits changed scene duration")
             page.locator("#v36-play").click()
-            page.wait_for_function("() => v36Active",timeout=20000)
+            page.wait_for_function("() => document.querySelector('#v36-play').textContent==='Остановить'",timeout=20000)
             page.wait_for_timeout(400)
-            clock=page.locator("#v36-clock").inner_text()
-            if "сцена" not in clock:raise AssertionError("No audio-visual clock")
+            if "сцена" not in page.locator("#v36-clock").inner_text():
+                raise AssertionError("No audio-visual clock")
             page.locator("#v36-play").click()
-            page.wait_for_function("() => !v36Active",timeout=15000)
+            page.wait_for_function("() => document.querySelector('#v36-play').textContent==='Слушать + смотреть'",timeout=15000)
             with page.expect_download(timeout=45000) as movie:
                 page.locator("#v36-export").click()
             video=folder/"V36_REAL_AUDIO_EPISODE.webm"
