@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V23 Character Quality — текущая проверенная версия
+## AI Anime Factory V24 Character Animation — текущая проверенная версия
+
+- **[Прямой ZIP V24 Windows — 218 579 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V24_CHARACTER_ANIMATION_WINDOWS.zip)**
+- [Инструкция и исходники V24](anime-factory/v24/README_RU.md)
+- [Успешные GitHub Actions: Windows, Linux, Chromium, ZIP](https://github.com/Vekan777/-/actions/runs/39374036679)
+- [Контрольные PNG движения, сравнение до/после](https://github.com/Vekan777/-/actions/runs/39374036679/artifacts/12241749039)
+- [Объединённый V7 + Anime V19–V24](https://github.com/Vekan777/-/actions/runs/39374036679/artifacts/12241624790)
+
+V24 добавляет процедурную походку, перенос веса, подготовку к удару, реакцию на попадание и инерцию. Все прежние V19–V23 исходники, сюжетные данные и рисунки сохраняются. Это автономный **2D-аниматик**, а не студийная 3D-анимация. ZIP V24 запускается через RUN_WINDOWS.bat без установки Python; V7 имеет отдельный Python/Tkinter интерфейс.
+
+## AI Anime Factory V23 Character Quality — сохранённая версия
 
 - **[Скачать V23 Character Quality — Windows ZIP, 203 922 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip)**
 - [Инструкция V23 на русском](anime-factory/v23/README_RU.md)
