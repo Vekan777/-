@@ -1,4 +1,4 @@
-name: AI Rescue Factory V1-V7 and Anime V19-V32 Keyframe Readability
+name: AI Rescue Factory V1-V7 and Anime V19-V33 Character Acting Expression
 on:
   workflow_dispatch:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py scripts/build_anime_v24.py scripts/build_anime_v25.py scripts/build_anime_v26.py scripts/build_anime_v27.py scripts/build_anime_v28.py scripts/build_anime_v29.py scripts/build_anime_v30.py scripts/build_anime_v31.py scripts/build_anime_v32.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v24/build_animation_v24.py anime-factory/v25/build_combat_v25.py anime-factory/v26/build_cinematic_v26.py anime-factory/v27/build_world_v27.py anime-factory/v28/build_interaction_v28.py anime-factory/v29/build_polish_v29.py anime-factory/v30/build_unified_v30.py anime-factory/v31/build_visual_v31.py anime-factory/v32/build_keyframes_v32.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/test_anime_v24.py tests/test_anime_v25.py tests/test_anime_v26.py tests/test_anime_v27.py tests/test_anime_v28.py tests/test_anime_v29.py tests/test_anime_v30.py tests/test_anime_v31.py tests/test_anime_v32.py tests/smoke_browser_v23.py tests/smoke_browser_v24.py tests/smoke_browser_v25.py tests/smoke_browser_v26.py tests/smoke_browser_v27.py tests/smoke_browser_v28.py tests/smoke_browser_v29.py tests/smoke_browser_v30.py tests/smoke_browser_v31.py tests/smoke_browser_v32.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py scripts/build_anime_v24.py scripts/build_anime_v25.py scripts/build_anime_v26.py scripts/build_anime_v27.py scripts/build_anime_v28.py scripts/build_anime_v29.py scripts/build_anime_v30.py scripts/build_anime_v31.py scripts/build_anime_v32.py scripts/build_anime_v33.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v24/build_animation_v24.py anime-factory/v25/build_combat_v25.py anime-factory/v26/build_cinematic_v26.py anime-factory/v27/build_world_v27.py anime-factory/v28/build_interaction_v28.py anime-factory/v29/build_polish_v29.py anime-factory/v30/build_unified_v30.py anime-factory/v31/build_visual_v31.py anime-factory/v32/build_keyframes_v32.py anime-factory/v33/build_acting_v33.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/test_anime_v24.py tests/test_anime_v25.py tests/test_anime_v26.py tests/test_anime_v27.py tests/test_anime_v28.py tests/test_anime_v29.py tests/test_anime_v30.py tests/test_anime_v31.py tests/test_anime_v32.py tests/test_anime_v33.py tests/smoke_browser_v23.py tests/smoke_browser_v24.py tests/smoke_browser_v25.py tests/smoke_browser_v26.py tests/smoke_browser_v27.py tests/smoke_browser_v28.py tests/smoke_browser_v29.py tests/smoke_browser_v30.py tests/smoke_browser_v31.py tests/smoke_browser_v32.py tests/smoke_browser_v33.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
@@ -103,6 +103,18 @@ jobs:
         run: python anime-factory/v32/build_keyframes_v32.py --output dist/AI_Anime_Factory_V32_KEYFRAME_READABILITY.html
       - name: Chromium V32 actual rig joints, keyframe controls and historic project data
         run: python tests/smoke_browser_v32.py --html dist/AI_Anime_Factory_V32_KEYFRAME_READABILITY.html --out dist/V32_KEYFRAME_SAMPLES
+      - name: Generate V33 real procedural acting from original V19 through V32
+        run: python anime-factory/v33/build_acting_v33.py --output dist/AI_Anime_Factory_V33_ACTING_EXPRESSION.html
+      - name: Chromium V33 compare acting facial poses, preserve canon and export PNGs
+        run: python tests/smoke_browser_v33.py --html dist/AI_Anime_Factory_V33_ACTING_EXPRESSION.html --out dist/V33_ACTING_SAMPLES
+      - name: Upload V33 real acting expression A/B PNG and JSON evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V33_ACTING_BROWSER_SAMPLES
+          path: dist/V33_ACTING_SAMPLES/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Upload V32 actual articulated pose comparisons and project report
         if: always()
         uses: actions/upload-artifact@v4
@@ -239,6 +251,8 @@ jobs:
         run: python scripts/build_anime_v31.py --out dist/AI_ANIME_FACTORY_V31_VISUAL_PRODUCTION_REVIEW_WINDOWS.zip
       - name: Build standalone V32 Keyframe Readability Windows ZIP
         run: python scripts/build_anime_v32.py --out dist/AI_ANIME_FACTORY_V32_KEYFRAME_READABILITY_WINDOWS.zip
+      - name: Build standalone V33 Acting Expression Windows ZIP
+        run: python scripts/build_anime_v33.py --out dist/AI_ANIME_FACTORY_V33_ACTING_EXPRESSION_WINDOWS.zip
       - name: Assemble unified V7 release ZIP
         run: python scripts/build_v7.py --legacy dist --out dist
       - name: Independently verify V7 release ZIP
@@ -246,7 +260,7 @@ jobs:
       - name: Upload downloadable release ZIPs
         uses: actions/upload-artifact@v4
         with:
-          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V32_WINDOWS
+          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V33_WINDOWS
           path: |
             dist/*.zip
             dist/RELEASE_INDEX.json
@@ -645,5 +659,38 @@ jobs:
             echo "V32 already published"
           else
             git commit -m "Release verified V32 Keyframe Readability Windows ZIP"
+            git push origin HEAD:main
+          fi
+
+  publish-v33-download:
+    # Publish after V32 to prevent branch races and retain legacy binary links.
+    needs: [tests, visual-smoke, zip-releases, publish-v32-download]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main after earlier downloads
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build and SHA256 verify V33 standalone Windows ZIP
+        run: python scripts/build_anime_v33.py --out downloads/AI_ANIME_FACTORY_V33_ACTING_EXPRESSION_WINDOWS.zip
+      - name: Publish V33 while preserving historical ZIPs
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V33_ACTING_EXPRESSION_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V33 already published"
+          else
+            git commit -m "Release verified V33 Character Acting Windows ZIP"
             git push origin HEAD:main
           fi
