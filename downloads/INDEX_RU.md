@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## V26 Cinematic Combat — текущий проверенный Windows ZIP
+
+- **[Скачать ZIP V26 для Windows, 244 272 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V26_CINEMATIC_COMBAT_WINDOWS.zip)**
+- [Инструкция V26 на русском и ограничения](https://github.com/Vekan777/-/blob/main/anime-factory/v26/README_RU.md)
+- [Успешная проверка Windows, Linux, реальный Chromium, ZIP и V7](https://github.com/Vekan777/-/actions/runs/39376507132)
+- [Реальные контрольные PNG кадров V26](https://github.com/Vekan777/-/actions/runs/39376507132/artifacts/12243870389)
+- [Объединённая V7 с Anime V19–V26](https://github.com/Vekan777/-/actions/runs/39376507132/artifacts/12243194695)
+
+В V26 добавлены операторские ракурсы, слежение камерой, выделение удара, кинополосы, плавные затемнения и русская раскадровка. Сохранены все прежние версии, сюжет и рисунки. 2D-процедурная анимация, не готовый профессиональный 3D-сериал.
+
 ## AI Anime Factory V25 Combat Choreography — проверенный выпуск
 
 - **[Скачать V25 ZIP Windows напрямую](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V25_COMBAT_CHOREOGRAPHY_WINDOWS.zip)** — 234 336 байт, файл проверен GitHub Contents API.
