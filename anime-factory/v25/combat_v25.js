@@ -206,7 +206,7 @@ async function v25Sheet(){
  download('V25_FIGHT_'+slug(s.title)+'.png',await blobPNG(out));
  notify('V25: 4 проверочных кадра боя сохранены.');
 }
-$('v25-scene').onchange=v25Show;
+$('v25-scene').onchange=e=>{const [i,j]=e.target.value.split(':').map(Number);selectScene(i,j);show('combat-v25');};
 $('v25-position').oninput=v25Preview;
 $('v25-style').onchange=()=>{$('v25-status').textContent='Нажмите «Сохранить» для применения профиля.';};
 $('v25-enabled').onchange=()=>{$('v25-status').textContent='Нажмите «Сохранить» для применения изменений.';};
