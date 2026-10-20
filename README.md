@@ -1,5 +1,15 @@
 # AI Rescue Factory — исходники и выпуски
 
+## AI Anime Factory V22 Acting & Combat — текущая версия
+
+- **[Скачать V22 ZIP для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V22_ACTING_COMBAT_WINDOWS.zip)**
+- [Русская инструкция и описание возможностей](anime-factory/v22/README_RU.md)
+- [Подтверждённые тесты Windows, Linux, Chromium](https://github.com/Vekan777/-/actions/runs/39367386461)
+- [Архив с PNG-контрольными кадрами V22](https://github.com/Vekan777/-/actions/runs/39367386461/artifacts/12239478898)
+- [Полный комплект V7 + V22](https://github.com/Vekan777/-/actions/runs/39367386461/artifacts/12239134874)
+
+V22 добавляет режиссуру мимики, ключи эмоций, дыхание, читаемые реакции в бою и PNG-контактный лист. Исходный V19 сохранён; объединённый V7 проверен и включает версию V22.
+
 ## Новый AI Anime Factory V21 Visual Quality
 
 **[Скачать V21 ZIP напрямую (Windows)](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip)**
