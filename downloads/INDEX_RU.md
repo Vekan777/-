@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V27 World Quality — проверенный Windows ZIP
+
+- **[Скачать Windows V27 ZIP — 256 731 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V27_WORLD_QUALITY_WINDOWS.zip)** — файл реально присутствует в GitHub Contents.
+- [Инструкция по запуску V27 на русском](https://github.com/Vekan777/-/blob/main/anime-factory/v27/README_RU.md)
+- [Успешные Windows/Linux/Chromium/ZIP/V7 проверки](https://github.com/Vekan777/-/actions/runs/39380603994)
+- [Реальные PNG окружения V27 и A/B сравнение](https://github.com/Vekan777/-/actions/runs/39380603994/artifacts/12245202641)
+- [Полный архив V7 + Anime V19–V27](https://github.com/Vekan777/-/actions/runs/39380603994/artifacts/12245112939)
+
+Режимы окружения: город, лес, храм, поле боя; процедурная воздушная перспектива, глубина, свет, контактная тень под персонажами и передний план. Предыдущие редакторы и сюжетные данные остаются в интегрированной сборке. Это улучшение 2D-аниматика; полноценного 3D-мира здесь нет.
+
 ## V26 Cinematic Combat — текущий проверенный Windows ZIP
 
 - **[Скачать ZIP V26 для Windows, 244 272 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V26_CINEMATIC_COMBAT_WINDOWS.zip)**
