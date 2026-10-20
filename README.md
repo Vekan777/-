@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V24 Character Animation — текущая проверенная версия
+## AI Anime Factory V25 Combat Choreography — текущая проверенная версия
+
+- **[Прямой Windows ZIP V25 — 234 336 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V25_COMBAT_CHOREOGRAPHY_WINDOWS.zip)**
+- [Полная русская инструкция](anime-factory/v25/README_RU.md)
+- [Windows / Linux / Chromium / ZIP / V7 — все проверки пройдены](https://github.com/Vekan777/-/actions/runs/39375377086)
+- [Контрольные PNG реального боя и сравнение V24–V25](https://github.com/Vekan777/-/actions/runs/39375377086/artifacts/12243127495)
+- [Объединённый комплект V7 + V19–V25 (GitHub Artifact)](https://github.com/Vekan777/-/actions/runs/39375377086/artifacts/12242908171)
+
+V25 координирует двух процедурных 2D-персонажей в бою: шаги, дистанция, атака, блок, отступление и реакция на попадание. Исходная разметка исходов V19/V17 остаётся единственным источником фактических «попаданий», а старые серии, история, персонажи и пользовательские изображения остаются в проекте. **V25 — 2D-аниматик, не профессиональный 3D или физический боевой движок.** Для отдельного HTML ZIP Python не нужен.
+
+## AI Anime Factory V24 Character Animation — сохранённая версия
 
 - **[Прямой ZIP V24 Windows — 218 579 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V24_CHARACTER_ANIMATION_WINDOWS.zip)**
 - [Инструкция и исходники V24](anime-factory/v24/README_RU.md)
