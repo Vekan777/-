@@ -1,6 +1,8 @@
-name: AI Rescue Factory V1-V7 and Anime V19-V22 Acting Combat
+name: AI Rescue Factory V1-V7 and Anime V19-V23 Character Quality
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -28,7 +30,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/smoke_browser_v23.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
@@ -61,6 +63,18 @@ jobs:
         run: python anime-factory/v22/build_acting_v22.py --output dist/AI_Anime_Factory_V22_ACTING_COMBAT.html
       - name: Render V22 actor expressions and verify JSON / PNG in Chromium
         run: python tests/smoke_browser_v22.py --html dist/AI_Anime_Factory_V22_ACTING_COMBAT.html --out dist/V22_ACTING_SAMPLES
+      - name: Generate preserved V19 through V23 character studio
+        run: python anime-factory/v23/build_character_v23.py --output dist/AI_Anime_Factory_V23_CHARACTER_QUALITY.html
+      - name: Render V23 character anatomy and verify V20–V23 reload in Chromium
+        run: python tests/smoke_browser_v23.py --html dist/AI_Anime_Factory_V23_CHARACTER_QUALITY.html --out dist/V23_CHARACTER_SAMPLES
+      - name: Upload real V23 character QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V23_CHARACTER_BROWSER_SAMPLES
+          path: dist/V23_CHARACTER_SAMPLES/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Upload real V22 actor screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -97,6 +111,8 @@ jobs:
         run: python scripts/build_anime_v21.py --out dist/AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip
       - name: Build standalone V22 Acting Combat ZIP
         run: python scripts/build_anime_v22.py --out dist/AI_ANIME_FACTORY_V22_ACTING_COMBAT_WINDOWS.zip
+      - name: Build standalone V23 Character Quality ZIP
+        run: python scripts/build_anime_v23.py --out dist/AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip
       - name: Assemble unified V7 release ZIP
         run: python scripts/build_v7.py --legacy dist --out dist
       - name: Independently verify V7 release ZIP
@@ -104,7 +120,7 @@ jobs:
       - name: Upload downloadable release ZIPs
         uses: actions/upload-artifact@v4
         with:
-          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V22_WINDOWS
+          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V23_WINDOWS
           path: |
             dist/*.zip
             dist/RELEASE_INDEX.json
@@ -173,5 +189,38 @@ jobs:
             echo "V22 ZIP up to date"
           else
             git commit -m "Release verified V22 Acting Combat Windows ZIP"
+            git push origin HEAD:main
+          fi
+
+  publish-v23-download:
+    # Wait for V21 and V22; all binary ZIP commits must be serialized.
+    needs: [tests, visual-smoke, zip-releases, publish-v22-download]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout latest repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build verified V23 ZIP
+        run: python scripts/build_anime_v23.py --out downloads/AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip
+      - name: Publish V23 ZIP
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V23 ZIP up to date"
+          else
+            git commit -m "Release verified V23 Character Quality Windows ZIP"
             git push origin HEAD:main
           fi
