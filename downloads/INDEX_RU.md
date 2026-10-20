@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V35 Scene Assembly & Production — текущая версия
+
+- **[Скачать Windows ZIP V35 — 346 321 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V35_SCENE_ASSEMBLY_WINDOWS.zip)** — подтверждён GitHub Contents.
+- [Инструкция V35 на русском](https://github.com/Vekan777/-/blob/main/anime-factory/v35/README_RU.md)
+- [Успешные Windows, Linux, Chromium и контроль CRC32/SHA256](https://github.com/Vekan777/-/actions/runs/39415183926)
+- [Реальные PNG кадров и JSON-проверки непрерывной серии](https://github.com/Vekan777/-/actions/runs/39415183926/artifacts/12261551069)
+- [Объединённый V7 + Anime V19–V35, исходники и предыдущие ZIP](https://github.com/Vekan777/-/actions/runs/39415183926/artifacts/12261686060)
+
+V35 собирает последовательность всей серии из настоящих кадров отдельных сцен, даёт плавные переходы по общей временной шкале, воспроизведение/паузу, 6 PNG, TXT/JSON с точной разметкой. Авторская длительность, сюжет и персонажи V19–V34 не меняются. Аудиомикширования и готового MP4 единого эпизода здесь пока нет; это процедурный 2D-аниматик.
+
 ## AI Anime Factory V34 Storyboard & Shot Continuity — текущая версия
 
 - **[Скачать V34 Windows ZIP — 334 383 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V34_STORYBOARD_CONTINUITY_WINDOWS.zip)** — подтверждённый ZIP.
