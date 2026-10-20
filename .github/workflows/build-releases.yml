@@ -1,4 +1,4 @@
-name: AI Rescue Factory V1-V7 and Anime V19-V24 Character Animation
+name: AI Rescue Factory V1-V7 and Anime V19-V25 Combat Choreography
 on:
   workflow_dispatch:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Check syntax
-        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py scripts/build_anime_v24.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v24/build_animation_v24.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/test_anime_v24.py tests/smoke_browser_v23.py tests/smoke_browser_v24.py
+        run: python -m py_compile rescue-engine/engine.py rescue-engine/launch.py rescue-engine/ai_pipeline.py scripts/build_releases.py scripts/build_v7.py scripts/build_anime_v20.py scripts/build_anime_v21.py scripts/build_anime_v22.py scripts/build_anime_v23.py scripts/build_anime_v24.py scripts/build_anime_v25.py anime-factory/v20/build_story_v20.py anime-factory/v21/build_visual_v21.py anime-factory/v22/build_acting_v22.py anime-factory/v23/build_character_v23.py anime-factory/v24/build_animation_v24.py anime-factory/v25/build_combat_v25.py anime-factory/v20/patch_preserve.py rescue-engine/unified_v7.py gui_v7.py tests/test_engine.py tests/test_unified_v7.py tests/test_anime_v20.py tests/test_anime_v21.py tests/test_anime_v22.py tests/test_anime_v23.py tests/test_anime_v24.py tests/test_anime_v25.py tests/smoke_browser_v23.py tests/smoke_browser_v24.py tests/smoke_browser_v25.py
       - name: Engine selftest
         run: python rescue-engine/engine.py selftest
       - name: Integration tests
@@ -71,6 +71,18 @@ jobs:
         run: python anime-factory/v24/build_animation_v24.py --output dist/AI_Anime_Factory_V24_CHARACTER_ANIMATION.html
       - name: Chromium A/B gait + pose preservation and export QA for V24
         run: python tests/smoke_browser_v24.py --html dist/AI_Anime_Factory_V24_CHARACTER_ANIMATION.html --out dist/V24_CHARACTER_ANIMATION_SAMPLES
+      - name: Generate original V19 through V25 combat choreography
+        run: python anime-factory/v25/build_combat_v25.py --output dist/AI_Anime_Factory_V25_COMBAT_CHOREOGRAPHY.html
+      - name: Chromium V25 A/B fighter coordination and JSON persistence
+        run: python tests/smoke_browser_v25.py --html dist/AI_Anime_Factory_V25_COMBAT_CHOREOGRAPHY.html --out dist/V25_COMBAT_SAMPLES
+      - name: Upload verified V25 real combat PNG samples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V25_COMBAT_BROWSER_SAMPLES
+          path: dist/V25_COMBAT_SAMPLES/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Upload real V24 animation frames and A/B comparisons
         if: always()
         uses: actions/upload-artifact@v4
@@ -127,6 +139,8 @@ jobs:
         run: python scripts/build_anime_v23.py --out dist/AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip
       - name: Build standalone V24 Character Animation ZIP
         run: python scripts/build_anime_v24.py --out dist/AI_ANIME_FACTORY_V24_CHARACTER_ANIMATION_WINDOWS.zip
+      - name: Build standalone V25 Combat Choreography Windows ZIP
+        run: python scripts/build_anime_v25.py --out dist/AI_ANIME_FACTORY_V25_COMBAT_CHOREOGRAPHY_WINDOWS.zip
       - name: Assemble unified V7 release ZIP
         run: python scripts/build_v7.py --legacy dist --out dist
       - name: Independently verify V7 release ZIP
@@ -134,7 +148,7 @@ jobs:
       - name: Upload downloadable release ZIPs
         uses: actions/upload-artifact@v4
         with:
-          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V24_WINDOWS
+          name: AI_RESCUE_FACTORY_V1_V7_AND_ANIME_V19_V25_WINDOWS
           path: |
             dist/*.zip
             dist/RELEASE_INDEX.json
@@ -269,5 +283,38 @@ jobs:
             echo "V24 ZIP already published"
           else
             git commit -m "Release verified V24 Character Animation Windows ZIP"
+            git push origin HEAD:main
+          fi
+
+  publish-v25-download:
+    # Serialize binary release publishes through V21–V24 to avoid branch races.
+    needs: [tests, visual-smoke, zip-releases, publish-v24-download]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build and verify V25 Windows archive
+        run: python scripts/build_anime_v25.py --out downloads/AI_ANIME_FACTORY_V25_COMBAT_CHOREOGRAPHY_WINDOWS.zip
+      - name: Publish verified V25 ZIP without replacing previous versions
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V25_COMBAT_CHOREOGRAPHY_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V25 already published"
+          else
+            git commit -m "Release verified V25 Combat Choreography Windows ZIP"
             git push origin HEAD:main
           fi
