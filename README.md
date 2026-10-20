@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V32 Keyframe Readability — текущая проверенная версия
+## AI Anime Factory V33 Acting & Expression — текущая проверенная версия
+
+- **[Скачать Windows ZIP V33 — 322 992 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V33_ACTING_EXPRESSION_WINDOWS.zip)**.
+- [Полная инструкция V33 на русском](anime-factory/v33/README_RU.md).
+- [Успешные тесты Windows, Linux, Chromium и архивов](https://github.com/Vekan777/-/actions/runs/39409825507).
+- [Реальные PNG лица и жестов V32/V33 + отчёт браузера](https://github.com/Vekan777/-/actions/runs/39409825507/artifacts/12259260581).
+- [Объединённый V7 + Anime V19–V33](https://github.com/Vekan777/-/actions/runs/39409825507/artifacts/12258682629).
+
+V33 встроила в **реальный процедурный 2D-риг** направленный взгляд, движения глаз и бровей, лёгкий наклон головы, дыхание и жесты кистей на основе ранее заданных эмоций V22 и поз V32. Есть сохранение настроек каждой сцены, сравнение одинаковых кадров, PNG/TXT и полный контроль старых сюжетных данных. Подлинный V19 и все предыдущие версии сохранены. Авторские PNG не перерисовываются; это не профессиональная студийная 3D-анимация. HTML-редактор запускается через RUN_WINDOWS.bat без Python.
+
+## AI Anime Factory V32 Keyframe Readability — сохранённая версия
 
 - **[Прямой Windows ZIP V32 — 312 811 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V32_KEYFRAME_READABILITY_WINDOWS.zip)**
 - [Полная инструкция V32 на русском](anime-factory/v32/README_RU.md)
