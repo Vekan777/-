@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V33 Acting & Expression — текущая проверенная версия
+## AI Anime Factory V34 Storyboard & Shot Continuity — текущая проверенная версия
+
+- **[Скачать Windows ZIP V34 — 334 383 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V34_STORYBOARD_CONTINUITY_WINDOWS.zip)**
+- [Полная инструкция V34 на русском](anime-factory/v34/README_RU.md)
+- [Успешные Windows, Linux, Chromium и проверка архивов](https://github.com/Vekan777/-/actions/runs/39412333780)
+- [Контрольные PNG и отчёт проверки стыков соседних планов](https://github.com/Vekan777/-/actions/runs/39412333780/artifacts/12259781945)
+- [Объединённый архив V7 + все версии Anime V19–V34](https://github.com/Vekan777/-/actions/runs/39412333780/artifacts/12259423706)
+
+V34 добавляет три авторских плана для любой сцены, управляемую крупность, выбор объекта внимания, мягкие переходы и технические предупреждения о нарушении монтажной оси между соседними сценами. Шесть настоящих кадров в PNG-раскадровке показывают предыдущую/текущую/следующую сцену; план монтажа доступен в TXT. Подлинный V19, сюжет, персонажи, бои и все V20–V33 сохранены. HTML запускается без Python через RUN_WINDOWS.bat. Проект остаётся **процедурным 2D-аниматиком**, не профессиональной системой 3D-видеомонтажа.
+
+## AI Anime Factory V33 Acting & Expression — сохранённая версия
 
 - **[Скачать Windows ZIP V33 — 322 992 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V33_ACTING_EXPRESSION_WINDOWS.zip)**.
 - [Полная инструкция V33 на русском](anime-factory/v33/README_RU.md).
