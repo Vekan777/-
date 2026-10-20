@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V25 Combat Choreography — текущая проверенная версия
+## AI Anime Factory V26 Cinematic Combat — текущая проверенная версия
+
+- **[Windows ZIP V26 — 244 272 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V26_CINEMATIC_COMBAT_WINDOWS.zip)** — прямое скачивание без ожидания GitHub Artifacts
+- [Русская инструкция V26](anime-factory/v26/README_RU.md)
+- [Пройденные Windows/Linux/Chromium/ZIP проверки](https://github.com/Vekan777/-/actions/runs/39376507132)
+- [Проверенные PNG со сравнением камеры V25/V26](https://github.com/Vekan777/-/actions/runs/39376507132/artifacts/12243870389)
+- [Объединённый V7 + Anime V19–V26](https://github.com/Vekan777/-/actions/runs/39376507132/artifacts/12243194695)
+
+V26 добавляет операторскую постановку боевых сцен: масштаб и движение камеры, смену крупности плана, реакцию на ранее размеченные события боя, кинополосы, монтажные акценты, A/B проверку одного кадра и экспорт списка планов. Исходники V19–V25 и пользовательские изображения сохранены. **Текущий результат — 2D Canvas-аниматик, не профессиональное 3D и не полноценный нарисованный сериал.** Windows HTML-редактор открывается через RUN_WINDOWS.bat без Python.
+
+## AI Anime Factory V25 Combat Choreography — сохранённая версия
 
 - **[Прямой Windows ZIP V25 — 234 336 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V25_COMBAT_CHOREOGRAPHY_WINDOWS.zip)**
 - [Полная русская инструкция](anime-factory/v25/README_RU.md)
