@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V34):
+AI ANIME FACTORY (текущий редактор V35):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -83,6 +83,7 @@ AI ANIME FACTORY (текущий редактор V34):
    anime-factory\\v32\\AI_Anime_Factory_V32_KEYFRAME_READABILITY.html
    anime-factory\\v33\\AI_Anime_Factory_V33_ACTING_EXPRESSION.html
    anime-factory\\v34\\AI_Anime_Factory_V34_STORYBOARD_CONTINUITY.html
+   anime-factory\\v35\\AI_Anime_Factory_V35_SCENE_ASSEMBLY.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -181,6 +182,9 @@ def prepare(root, source_dist):
                  "anime-factory/v34/storyboard_v34.js",
                  "anime-factory/v34/build_storyboard_v34.py",
                  "anime-factory/v34/README_RU.md",
+                 "anime-factory/v35/assembly_v35.js",
+                 "anime-factory/v35/build_assembly_v35.py",
+                 "anime-factory/v35/README_RU.md",
                  "anime-factory/v21/README_RU.md",
                  "anime-factory/v20/build_story_v20.py",
                  "anime-factory/v20/README_RU.md",
@@ -317,6 +321,14 @@ def prepare(root, source_dist):
         story34_builder.build().encode("utf-8")
     )
 
+    episode35_path = root / "anime-factory" / "v35" / "build_assembly_v35.py"
+    episode35_spec = importlib.util.spec_from_file_location("anime_v35_assembly", episode35_path)
+    episode35_builder = importlib.util.module_from_spec(episode35_spec)
+    episode35_spec.loader.exec_module(episode35_builder)
+    data["anime-factory/v35/AI_Anime_Factory_V35_SCENE_ASSEMBLY.html"] = (
+        episode35_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -337,6 +349,7 @@ def prepare(root, source_dist):
         "AI_ANIME_FACTORY_V32_KEYFRAME_READABILITY_WINDOWS.zip",
         "AI_ANIME_FACTORY_V33_ACTING_EXPRESSION_WINDOWS.zip",
         "AI_ANIME_FACTORY_V34_STORYBOARD_CONTINUITY_WINDOWS.zip",
+        "AI_ANIME_FACTORY_V35_SCENE_ASSEMBLY_WINDOWS.zip",
         "AI_RESCUE_ALL_SOURCES_V1_V6_AND_ANIME_V19.zip"
     ]
     for filename in names:
@@ -396,7 +409,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V34 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V35 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())
