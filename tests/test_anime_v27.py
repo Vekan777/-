@@ -32,9 +32,9 @@ class AnimeV27Tests(unittest.TestCase):
 
  def test_environment_passes_in_live_canvas(self):
   for key in ('function v27Back(','function v27Feet(','function v27Front(',
-              'v27Back(g,w,h,s,sec);cin14Layers(',
+              'v21AtmosphereBack(g,w,h,s,sec);v27Back(g,w,h,s,sec);cin14Layers(',
               'v27Feet(g,w,h,s,sec,poses);for(const p',
-              "cin14Layers(g,w,h,s,sec,'near');v27Front(g,w,h,s,sec);"):
+              "cin14Layers(g,w,h,s,sec,'near');v21AtmosphereFront(g,w,h,s,sec);v27Front(g,w,h,s,sec);"):
    self.assertIn(key,self.html)
 
  def test_no_imported_art_is_overwritten(self):
