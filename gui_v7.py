@@ -28,6 +28,7 @@ V28_INTERACTION = BASE / "anime-factory" / "v28" / "AI_Anime_Factory_V28_CHARACT
 V29_POLISH = BASE / "anime-factory" / "v29" / "AI_Anime_Factory_V29_ANIMATION_COMBAT_POLISH.html"
 V30_REVIEW = BASE / "anime-factory" / "v30" / "AI_Anime_Factory_V30_UNIFIED_QUALITY_REVIEW.html"
 V31_VISUAL = BASE / "anime-factory" / "v31" / "AI_Anime_Factory_V31_VISUAL_PRODUCTION_REVIEW.html"
+V32_KEYFRAMES = BASE / "anime-factory" / "v32" / "AI_Anime_Factory_V32_KEYFRAME_READABILITY.html"
 
 
 class Studio:
@@ -42,7 +43,7 @@ class Studio:
         header = ttk.Frame(win, padding=12)
         header.pack(fill="x")
         ttk.Label(header, text="AI RESCUE FACTORY V7", font=("Segoe UI", 20, "bold")).pack(anchor="w")
-        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V31",
+        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V32",
                   font=("Segoe UI", 10)).pack(anchor="w")
         controls = ttk.Frame(win, padding=(12, 4))
         controls.pack(fill="x")
@@ -78,6 +79,7 @@ class Studio:
             ("Открыть Anime Factory V29 Animation Combat Polish", lambda: self.open_html(V29_POLISH)),
             ("Открыть Anime Factory V30 Unified Quality Review", lambda: self.open_html(V30_REVIEW)),
             ("Открыть Anime Factory V31 Visual Production Review", lambda: self.open_html(V31_VISUAL)),
+            ("Открыть Anime Factory V32 Keyframe Readability", lambda: self.open_html(V32_KEYFRAMES)),
             ("Открыть Anime Factory V20.3", lambda: self.open_html(V20)),
             ("Открыть папку проекта", self.show_workspace)
         ]
