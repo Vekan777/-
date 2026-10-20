@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V32 Keyframe Readability — текущая версия
+
+- **[Скачать V32 Windows ZIP — 312 811 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V32_KEYFRAME_READABILITY_WINDOWS.zip)** — файл подтверждён в GitHub Contents.
+- [Подробная инструкция V32 на русском](https://github.com/Vekan777/-/blob/main/anime-factory/v32/README_RU.md)
+- [Успешные Windows, Linux, Chromium, CRC32/SHA256 проверки](https://github.com/Vekan777/-/actions/runs/39407541304)
+- [Реальные PNG новых поз V31 против V32](https://github.com/Vekan777/-/actions/runs/39407541304/artifacts/12257937428)
+- [Объединённая V7 с Anime V19–V32](https://github.com/Vekan777/-/actions/runs/39407541304/artifacts/12257068862)
+
+В V32 улучшены именно суставы, силуэты и выражение лица процедурных персонажей: четыре интерполируемых ключевых положения сцены с отдельной настраиваемой силой, сравнение V31/V32 и экспорт PNG/TXT. Сюжет V20, персонажи V23 и все настройки до V31 сохраняются; исходный V19 в резерве. Импортированный пользовательский PNG не деформируется. Программа остаётся 2D-аниматиком, а не профессиональным 3D-производством.
+
 ## AI Anime Factory V31 Visual Production Review — текущая версия
 
 - **[Скачать V31 Windows ZIP — 301 367 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V31_VISUAL_PRODUCTION_REVIEW_WINDOWS.zip)** — файл проверен через GitHub Contents.
