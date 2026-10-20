@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V29 Animation & Combat Polish — текущая проверенная версия
+
+- **[Скачать ZIP V29 Windows — 276 484 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V29_ANIMATION_COMBAT_POLISH_WINDOWS.zip)** — файл подтверждён GitHub Contents API.
+- [Подробная инструкция V29 на русском](https://github.com/Vekan777/-/blob/main/anime-factory/v29/README_RU.md)
+- [Windows/Linux/Chromium и проверка CRC/SHA архивов](https://github.com/Vekan777/-/actions/runs/39383963913)
+- [Реальные браузерные контрольные PNG V28 против V29](https://github.com/Vekan777/-/actions/runs/39383963913/artifacts/12247275182)
+- [Полная объединённая V7 + Anime V19–V29](https://github.com/Vekan777/-/actions/runs/39383963913/artifacts/12246069462)
+
+Новая версия синхронизирует движения корпуса, ног, рук и пыль по фазам одного боевого события. Промах остаётся промахом; исходные V19–V28, история и авторские PNG не теряются. Формат 2D-аниматика, не полноценный 3D.
+
 ## AI Anime Factory V28 Character–Environment Interaction — текущая проверенная версия
 
 - **[Скачать Windows V28 ZIP — 264 351 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V28_CHARACTER_WORLD_INTERACTION_WINDOWS.zip)** — файл проверен через GitHub Contents.
