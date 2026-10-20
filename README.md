@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V29 Animation & Combat Polish — текущая проверенная версия
+## AI Anime Factory V30 Unified Quality Review — текущая проверенная объединяющая версия
+
+- **[Прямой Windows ZIP V30 — 289 834 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V30_UNIFIED_QUALITY_REVIEW_WINDOWS.zip)**
+- [Полная русская инструкция V30](anime-factory/v30/README_RU.md)
+- [Успешные Windows, Linux, Chromium, ZIP и объединённая V7](https://github.com/Vekan777/-/actions/runs/39402039383)
+- [Реальные PNG/JSON доказательства проверки сохранности](https://github.com/Vekan777/-/actions/runs/39402039383/artifacts/12256620057)
+- [Все версии AI Rescue V1–V7 + Anime V19–V30](https://github.com/Vekan777/-/actions/runs/39402039383/artifacts/12255510516)
+
+V30 **не удаляет и не переписывает** прошлое содержание: выполняет объединённый аудит V20–V29, позволяет сохранить контрольную точку сюжета, персонажей, серий и сцен, обнаружить их изменения, скачать полный резерв JSON и отчёты TXT/JSON. Контрольные PNG берутся из рабочего 2D Canvas. Автоматический анализ эвристический, он **не гарантирует** художественную согласованность и не заменяет работу сценариста. Исходники V19–V29 сохранены. Самостоятельный HTML запускается через RUN_WINDOWS.bat без Python.
+
+## AI Anime Factory V29 Animation & Combat Polish — сохранённая версия
 
 - **[Прямой Windows ZIP V29 — 276 484 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V29_ANIMATION_COMBAT_POLISH_WINDOWS.zip)**
 - [Русская инструкция и исходники V29](anime-factory/v29/README_RU.md)
