@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Build checksum-verified V25 Windows ZIP from preserved V19–V23 code."""
+"""Build checksum-verified V25 Windows ZIP from preserved V19–V24 code."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -72,8 +72,8 @@ def assemble(dest):
         ("source","anime-factory/v22/build_acting_v22.py"),
         ("source","anime-factory/v23/character_v23.js"),
         ("source","anime-factory/v23/build_character_v23.py"),
-        ("source","anime-factory/v25/combat_v25.js"),
-        ("source","anime-factory/v25/build_combat_v25.py"),
+        ("source","anime-factory/v24/animation_v24.js"),
+        ("source","anime-factory/v24/build_animation_v24.py"),
         ("source","tests/test_anime_v23.py"),
         ("source","tests/smoke_browser_v23.py"),
         ("source","tests/test_anime_v24.py"),
@@ -86,8 +86,8 @@ def assemble(dest):
         entries[folder+"/"+Path(path).name]=(ROOT/path).read_bytes()
     manifest={
         "schema":"AnimeFactoryV25Release/1",
-        "version":24,
-        "source":"genuine V19 + additive V20/V21/V22/V23/V25 features",
+        "version":25,
+        "source":"genuine V19 + additive V20/V21/V22/V23/V24/V25 features",
         "files":[{"path":n,"bytes":len(d),"sha256":sha(d)}
                  for n,d in sorted(entries.items())]
     }
