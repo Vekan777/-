@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V23 Character Quality — проверенный выпуск
+
+- **[Скачать V23 ZIP прямо из GitHub](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip)** — 203 922 байта, подтверждено GitHub Contents API.
+- [Подробная инструкция V23](https://github.com/Vekan777/-/blob/main/anime-factory/v23/README_RU.md)
+- [Успешная проверка Windows / Linux / Chromium / ZIP](https://github.com/Vekan777/-/actions/runs/39372681791)
+- [Реальные PNG-кадры V23](https://github.com/Vekan777/-/actions/runs/39372681791/artifacts/12241732461)
+- [Объединённый V7 + Anime V19–V23 (GitHub Artifact)](https://github.com/Vekan777/-/actions/runs/39372681791/artifacts/12242222411)
+
+Новый редактор анатомии, волос, одежды, вторичного движения с сохранением V19–V22. Отдельное хранилище V23 с миграцией V22 и проверкой сохранения через перезагрузку. Процедурная 2D-анимация, не нейронный видеорендер.
+
 ## AI Anime Factory V22 Acting & Combat — новый выпуск
 
 - **[Прямой ZIP V22 для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V22_ACTING_COMBAT_WINDOWS.zip)** — 183 336 байт
