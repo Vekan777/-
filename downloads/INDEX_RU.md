@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V30 Unified Quality Review — текущая объединяющая версия
+
+- **[Скачать Windows V30 ZIP — 289 834 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V30_UNIFIED_QUALITY_REVIEW_WINDOWS.zip)** — файл подтверждён через GitHub Contents.
+- [Инструкция V30 на русском](https://github.com/Vekan777/-/blob/main/anime-factory/v30/README_RU.md)
+- [Все успешные проверки Windows, Linux, Chromium и архива](https://github.com/Vekan777/-/actions/runs/39402039383)
+- [Контрольные PNG, отчёты качества и резерв проекта из Chromium](https://github.com/Vekan777/-/actions/runs/39402039383/artifacts/12256620057)
+- [Объединённая V7 со всеми предыдущими версиями до Anime V30](https://github.com/Vekan777/-/actions/runs/39402039383/artifacts/12255510516)
+
+V30 проводит техническую проверку истории, персонажей, боевых событий и визуальных настроек V19–V29. Контрольная точка и отчёты помогают обнаружить изменение или потерю материалов, но не перезаписывают сюжет. Скачивайте полный резерв JSON до сохранения эталона. Продукт по-прежнему является 2D-аниматиком, а не готовым профессиональным аниме или геометрическим 3D.
+
 ## AI Anime Factory V29 Animation & Combat Polish — текущая проверенная версия
 
 - **[Скачать ZIP V29 Windows — 276 484 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V29_ANIMATION_COMBAT_POLISH_WINDOWS.zip)** — файл подтверждён GitHub Contents API.
