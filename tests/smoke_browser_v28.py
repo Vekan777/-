@@ -63,21 +63,23 @@ def main():
    for key in ("visualV21","actingV22","motionV24","choreographyV25",
                "cinemaV26","worldV27"):
     if key not in scene:raise AssertionError("Prior scene field lost: "+key)
-   # Validate physics terminology: a miss or dodge cannot cause V28 impact
-   # damage. We stub only the existing contact-provider for this isolated test.
+   # Evaluate the exact V28 source function in an isolated browser scope.
+   # The real editor keeps its IIFE functions private, so we do not poke
+   # private state or mutate the project's authoritative combat timeline.
    gates=page.evaluate("""() => {
-      const s=scene(),fn=v25Contact;
-      try{
-       v25Contact=()=>({active:true,outcome:'miss',actor:'hero',contact:1});
-       const miss=v28ImpactAt({...s,kind:'fight'},s.duration*.4);
-       v25Contact=()=>({active:true,outcome:'dodge',actor:'hero',contact:1});
-       const dodge=v28ImpactAt({...s,kind:'fight'},s.duration*.4);
-       v25Contact=()=>({active:true,outcome:'hit',actor:'hero',contact:1});
-       const hit=v28ImpactAt({...s,kind:'fight'},s.duration*.4);
-       return {miss:miss===null,dodge:dodge===null,hit:hit?.kind};
-      }finally{v25Contact=fn;}
+      const source=[...document.querySelectorAll('script')].map(s=>s.textContent).join('\\n');
+      const matched=source.match(/function v28ImpactAt\\(s,t\\)\\{[\\s\\S]*?\\n\\}(?=\\nfunction v28CombatGround)/);
+      if(!matched)throw new Error('V28 impact-gating function not found in generated JS');
+      const limit=(v,a,b)=>Math.max(a,Math.min(b,v));
+      function check(outcome){
+       const runner=new Function('v25Contact','clamp',
+           matched[0]+";return v28ImpactAt({kind:'fight'},2);");
+       return runner(()=>({active:true,outcome,actor:'hero',contact:1}),limit);
+      }
+      return {miss:check('miss')===null,dodge:check('dodge')===null,
+              hit:check('hit')?.kind,block:check('block')?.kind};
    }""")
-   if gates!={"miss":True,"dodge":True,"hit":"hit"}:
+   if gates!={"miss":True,"dodge":True,"hit":"hit","block":"block"}:
     raise AssertionError("V28 combat-gating failed: "+str(gates))
    page.reload(wait_until="load")
    page.wait_for_function("() => document.querySelector('#v28-scene')?.options.length>0")
