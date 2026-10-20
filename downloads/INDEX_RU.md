@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V24 Character Animation — проверенный выпуск
+
+- **[Скачать ZIP V24 для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V24_CHARACTER_ANIMATION_WINDOWS.zip)** — 218 579 байт, подтверждено GitHub Contents API.
+- [Инструкция V24, исходники и ограничения](https://github.com/Vekan777/-/blob/main/anime-factory/v24/README_RU.md)
+- [Windows / Linux / Chromium / ZIP: успешный CI](https://github.com/Vekan777/-/actions/runs/39374036679)
+- [Сравнение движений на реальных PNG](https://github.com/Vekan777/-/actions/runs/39374036679/artifacts/12241749039)
+- [Полный комплект V7 + V19–V24](https://github.com/Vekan777/-/actions/runs/39374036679/artifacts/12241624790)
+
+Анимация шагов, перенос веса, фазы подготовки и отдачи в боях и контроль движения по сценам. Все прежние сюжетные и визуальные данные сохраняются. Формат — 2D-аниматик, а не готовый кинематографичный 3D фильм.
+
 ## AI Anime Factory V23 Character Quality — проверенный выпуск
 
 - **[Скачать V23 ZIP прямо из GitHub](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip)** — 203 922 байта, подтверждено GitHub Contents API.
