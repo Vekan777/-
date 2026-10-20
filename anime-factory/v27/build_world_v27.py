@@ -98,16 +98,16 @@ def patch(html,addon):
         "concat(v21VisualQA(),v22ActingQA(),v23CharacterQA(),v24MotionQA(),v25QA(),v26QA(),v27QA());")
     # The new depth pass is behind authored character drawings.
     html=once(html,
-        "drawBG(g,w,h,s.background,sec,q.lighting,q.effects);cin14Layers(g,w,h,s,sec,'far');",
-        "drawBG(g,w,h,s.background,sec,q.lighting,q.effects);v27Back(g,w,h,s,sec);cin14Layers(g,w,h,s,sec,'far');")
+        "drawBG(g,w,h,s.background,sec,q.lighting,q.effects);v21AtmosphereBack(g,w,h,s,sec);cin14Layers(g,w,h,s,sec,'far');",
+        "drawBG(g,w,h,s.background,sec,q.lighting,q.effects);v21AtmosphereBack(g,w,h,s,sec);v27Back(g,w,h,s,sec);cin14Layers(g,w,h,s,sec,'far');")
     # Contact shadows follow the already calculated character poses.
     html=once(html,
         "for(const p of [poses.hero,poses.partner]){g.fillStyle='rgba(3,9,17,.55)';",
         "v27Feet(g,w,h,s,sec,poses);for(const p of [poses.hero,poses.partner]){g.fillStyle='rgba(3,9,17,.55)';")
     # Foreground is screen-space and under later vignette/caption passes.
     html=once(html,
-        "g.restore();cin14Layers(g,w,h,s,sec,'near');",
-        "g.restore();cin14Layers(g,w,h,s,sec,'near');v27Front(g,w,h,s,sec);")
+        "g.restore();cin14Layers(g,w,h,s,sec,'near');v21AtmosphereFront(g,w,h,s,sec);",
+        "g.restore();cin14Layers(g,w,h,s,sec,'near');v21AtmosphereFront(g,w,h,s,sec);v27Front(g,w,h,s,sec);")
     html=once(html,"'AI ANIME FACTORY V26  •  CINEMATIC COMBAT'",
         "'AI ANIME FACTORY V27  •  WORLD QUALITY'")
     html=once(html,
