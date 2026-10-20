@@ -144,7 +144,8 @@ jobs:
           fi
 
   publish-v22-download:
-    needs: [tests, visual-smoke, zip-releases]
+    # Publish V21 first, then V22: binary updates must not race on main.
+    needs: [tests, visual-smoke, zip-releases, publish-v21-download]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 12
