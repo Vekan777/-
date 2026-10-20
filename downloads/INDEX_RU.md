@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V33 Character Acting & Expression — текущая версия
+
+- **[Скачать V33 Windows ZIP — 322 992 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V33_ACTING_EXPRESSION_WINDOWS.zip)** — подтверждённый файл GitHub.
+- [Подробная инструкция запуска Windows V33](https://github.com/Vekan777/-/blob/main/anime-factory/v33/README_RU.md).
+- [Все успешные тесты Windows, Linux, Chromium и SHA256/CRC32](https://github.com/Vekan777/-/actions/runs/39409825507).
+- [Настоящие PNG мимики и движений рук V32 против V33](https://github.com/Vekan777/-/actions/runs/39409825507/artifacts/12259260581).
+- [Объединённый V7 с историей до Anime V33](https://github.com/Vekan777/-/actions/runs/39409825507/artifacts/12258682629).
+
+Обновление улучшает процедурную актёрскую анимацию глаз, бровей, кистей, головы и дыхания по существующим настроениям сцен V22, сохраняет историю V19–V32 и проект JSON. Пользовательские PNG не деформируются. Это работающий **процедурный 2D-аниматик**, не полноценный профессиональный аниме-сериал/3D.
+
 ## AI Anime Factory V32 Keyframe Readability — текущая версия
 
 - **[Скачать V32 Windows ZIP — 312 811 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V32_KEYFRAME_READABILITY_WINDOWS.zip)** — файл подтверждён в GitHub Contents.
