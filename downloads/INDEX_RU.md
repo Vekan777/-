@@ -1,5 +1,15 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V28 Character–Environment Interaction — текущая проверенная версия
+
+- **[Скачать Windows V28 ZIP — 264 351 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V28_CHARACTER_WORLD_INTERACTION_WINDOWS.zip)** — файл проверен через GitHub Contents.
+- [Русская инструкция V28](https://github.com/Vekan777/-/blob/main/anime-factory/v28/README_RU.md)
+- [Успешные тесты Windows, Linux, Chromium и архивов](https://github.com/Vekan777/-/actions/runs/39382370633)
+- [Реальные PNG кадры, сравнение V27/V28, браузерный отчёт](https://github.com/Vekan777/-/actions/runs/39382370633/artifacts/12246300788)
+- [Полная объединённая V7 с Anime V19–V28](https://github.com/Vekan777/-/actions/runs/39382370633/artifacts/12246081501)
+
+Положение персонажа управляет 2D контактными следами, пылью и отражённым светом. Последствия удара появляются только при подтверждённых V19/V25 событиях. Данные сцен, канон и герои V19–V27 сохранены. Новые эффекты не являются физической 3D-симуляцией.
+
 ## AI Anime Factory V27 World Quality — проверенный Windows ZIP
 
 - **[Скачать Windows V27 ZIP — 256 731 байт](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V27_WORLD_QUALITY_WINDOWS.zip)** — файл реально присутствует в GitHub Contents.
