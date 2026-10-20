@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V36):
+AI ANIME FACTORY (текущий редактор V37):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -85,6 +85,7 @@ AI ANIME FACTORY (текущий редактор V36):
    anime-factory\\v34\\AI_Anime_Factory_V34_STORYBOARD_CONTINUITY.html
    anime-factory\\v35\\AI_Anime_Factory_V35_SCENE_ASSEMBLY.html
    anime-factory\\v36\\AI_Anime_Factory_V36_AUDIO_EPISODE_EXPORT.html
+   anime-factory\\v37\\AI_Anime_Factory_V37_SUBTITLES_DELIVERY.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -189,6 +190,12 @@ def prepare(root, source_dist):
                  "anime-factory/v36/audio_v36.js",
                  "anime-factory/v36/build_audio_v36.py",
                  "anime-factory/v36/README_RU.md",
+                 "anime-factory/v37/subtitles_v37.js",
+                 "anime-factory/v37/build_subtitles_v37.py",
+                 "anime-factory/v37/README_RU.md",
+                 "scripts/build_anime_v37.py",
+                 "tests/test_anime_v37.py",
+                 "tests/smoke_browser_v37.py",
                  "scripts/build_anime_v36.py",
                  "tests/test_anime_v36.py",
                  "tests/smoke_browser_v36.py",
@@ -344,6 +351,14 @@ def prepare(root, source_dist):
         audio36_builder.build().encode("utf-8")
     )
 
+    subs37_path = root / "anime-factory" / "v37" / "build_subtitles_v37.py"
+    subs37_spec = importlib.util.spec_from_file_location("anime_v37_subtitles",subs37_path)
+    subs37_builder=importlib.util.module_from_spec(subs37_spec)
+    subs37_spec.loader.exec_module(subs37_builder)
+    data["anime-factory/v37/AI_Anime_Factory_V37_SUBTITLES_DELIVERY.html"]=(
+        subs37_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -381,6 +396,11 @@ def prepare(root, source_dist):
             if z.testzip():
                 raise ValueError("V36 archive failed CRC check")
         data["legacy/" + optional_v36.name] = optional_v36.read_bytes()
+    optional_v37 = source_dist / "AI_ANIME_FACTORY_V37_SUBTITLES_DELIVERY_WINDOWS.zip"
+    if optional_v37.is_file():
+        with zipfile.ZipFile(optional_v37) as z:
+            if z.testzip():raise ValueError("V37 release CRC invalid")
+        data["legacy/" + optional_v37.name] = optional_v37.read_bytes()
 
     data["README_RU.txt"] = README_RU.encode("utf-8")
     data["RUN_V7_WINDOWS.bat"] = BAT_GUI.encode("utf-8")
@@ -430,7 +450,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V36 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V37 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())

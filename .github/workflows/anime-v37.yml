@@ -1,0 +1,131 @@
+name: AI Anime Factory V37 Subtitle Delivery Production
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v37/**"
+      - "scripts/build_anime_v37.py"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v37.py"
+      - "tests/smoke_browser_v37.py"
+      - ".github/workflows/anime-v37.yml"
+  push:
+    branches: [main]
+    paths:
+      - "anime-factory/v37/**"
+      - "scripts/build_anime_v37.py"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v37.py"
+      - "tests/smoke_browser_v37.py"
+      - ".github/workflows/anime-v37.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v37-structural:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check syntax including original V36 and V37 builders
+        run: python -m py_compile anime-factory/v36/build_audio_v36.py anime-factory/v37/build_subtitles_v37.py scripts/build_anime_v36.py scripts/build_anime_v37.py scripts/build_v7.py gui_v7.py tests/test_anime_v37.py tests/smoke_browser_v37.py
+      - name: Build V37 from source V19-V36
+        run: python anime-factory/v37/build_subtitles_v37.py --selftest
+      - name: Unit and Node checks V37
+        run: python -m unittest discover -s tests -p "test_anime_v37.py" -v
+      - name: ZIP CRC32 and SHA256 plus full archived V36
+        run: python scripts/build_anime_v37.py --selftest
+
+  v37-chromium:
+    needs: v37-structural
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install fixed Playwright and genuine Chromium
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Generate whole V19-V37 HTML
+        run: python anime-factory/v37/build_subtitles_v37.py --output dist/AI_Anime_Factory_V37_SUBTITLES_DELIVERY.html
+      - name: Check actual subtitled frames, global timestamps and real audio/video
+        run: python tests/smoke_browser_v37.py --html dist/AI_Anime_Factory_V37_SUBTITLES_DELIVERY.html --out dist/V37_SUBTITLE_SAMPLES
+      - name: Build and checksum-verify V37 Windows ZIP
+        run: python scripts/build_anime_v37.py --out dist/AI_ANIME_FACTORY_V37_SUBTITLES_DELIVERY_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V37_WINDOWS_VERIFIED
+          path: dist/AI_ANIME_FACTORY_V37_SUBTITLES_DELIVERY_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V37_REAL_SUBTITLE_BROWSER_SAMPLES
+          path: dist/V37_SUBTITLE_SAMPLES/
+          retention-days: 30
+          if-no-files-found: error
+
+  publish-v37-download:
+    needs: v37-chromium
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build tested standalone ZIP to stable raw GitHub path
+        run: python scripts/build_anime_v37.py --out downloads/AI_ANIME_FACTORY_V37_SUBTITLES_DELIVERY_WINDOWS.zip
+      - name: Publish without deleting prior releases
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V37_SUBTITLES_DELIVERY_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V37 ZIP already available"
+          else
+            git commit -m "Publish verified V37 Subtitles Delivery Windows ZIP"
+            for try in 1 2 3 4 5 6 7 8; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then exit 0; fi
+              sleep 3
+            done
+            echo "Unable to publish stable V37 raw link after retries" >&2
+            exit 1
+          fi
+      - name: Publish immutable GitHub release link
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view anime-factory-v37 >/dev/null 2>&1; then
+            echo "V37 tag exists, will not overwrite a release"
+          else
+            gh release create anime-factory-v37 downloads/AI_ANIME_FACTORY_V37_SUBTITLES_DELIVERY_WINDOWS.zip --title "AI Anime Factory V37 Subtitles & Episode Delivery" --notes "V37: truthful subtitle editor, SRT/VTT, timed Canvas burn-in for recorded WebM, complete V19–V37 chain including parent V36 ZIP, Russian launch instructions and SHA256/CRC32 checks. 2D animatic; MP4 via FFmpeg."
+          fi
