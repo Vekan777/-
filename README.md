@@ -1,6 +1,16 @@
 # AI Rescue Factory — исходники и выпуски
 
-## AI Anime Factory V22 Acting & Combat — текущая версия
+## AI Anime Factory V23 Character Quality — текущая проверенная версия
+
+- **[Скачать V23 Character Quality — Windows ZIP, 203 922 байта](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V23_CHARACTER_QUALITY_WINDOWS.zip)**
+- [Инструкция V23 на русском](anime-factory/v23/README_RU.md)
+- [Проверки Windows, Linux, Chromium, ZIP и V7 (успешно)](https://github.com/Vekan777/-/actions/runs/39372681791)
+- [Настоящие контрольные PNG V23](https://github.com/Vekan777/-/actions/runs/39372681791/artifacts/12241732461)
+- [Объединённый V7 + Anime V19–V23 в GitHub Artifacts](https://github.com/Vekan777/-/actions/runs/39372681791/artifacts/12242222411)
+
+V23 улучшает процедурные векторные модели персонажей: пропорции тела и головы, пряди волос, костюмы, руки и ноги, плавные движения. Сохраняет историю и функции V20, визуальные настройки V21, ключи мимики V22, исходный HTML V19 и пользовательские рисунки. Это **2D-аниматик**, а не готовый профессиональный 3D-фильм. Прямой V7 ZIP из предыдущего выпуска **не перезаписывался**; свежий объединённый V7 + V23 доступен отдельным GitHub Artifact.
+
+## AI Anime Factory V22 Acting & Combat — сохранённая версия
 
 - **[Скачать V22 ZIP для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V22_ACTING_COMBAT_WINDOWS.zip)**
 - [Русская инструкция и описание возможностей](anime-factory/v22/README_RU.md)
