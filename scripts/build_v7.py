@@ -131,6 +131,8 @@ def prepare(root, source_dist):
                  "anime-factory/v20/story_v20.js",
                  "anime-factory/v21/visual_v21.js",
                  "anime-factory/v21/build_visual_v21.py",
+                 "anime-factory/v22/acting_v22.js",
+                 "anime-factory/v22/build_acting_v22.py",
                  "anime-factory/v21/README_RU.md",
                  "anime-factory/v20/build_story_v20.py",
                  "anime-factory/v20/README_RU.md",
@@ -163,6 +165,13 @@ def prepare(root, source_dist):
     data["anime-factory/v21/AI_Anime_Factory_V21_VISUAL_QUALITY.html"] = (
         visual_builder.build().encode("utf-8")
     )
+    acting_path = root / "anime-factory" / "v22" / "build_acting_v22.py"
+    acting_spec = importlib.util.spec_from_file_location("anime_v22_acting", acting_path)
+    acting_builder = importlib.util.module_from_spec(acting_spec)
+    acting_spec.loader.exec_module(acting_builder)
+    data["anime-factory/v22/AI_Anime_Factory_V22_ACTING_COMBAT.html"] = (
+        acting_builder.build().encode("utf-8")
+    )
 
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
@@ -171,6 +180,7 @@ def prepare(root, source_dist):
         "AI_ANIME_FACTORY_V20_3_REBUILT_WINDOWS.zip",
         "AI_ANIME_FACTORY_V20_STORY_COMBAT_WINDOWS.zip",
         "AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip",
+        "AI_ANIME_FACTORY_V22_ACTING_COMBAT_WINDOWS.zip",
         "AI_RESCUE_ALL_SOURCES_V1_V6_AND_ANIME_V19.zip"
     ]
     for filename in names:
