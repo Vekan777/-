@@ -1,5 +1,14 @@
 # Реальные ZIP в GitHub
 
+## AI Anime Factory V22 Acting & Combat — новый выпуск
+
+- **[Прямой ZIP V22 для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V22_ACTING_COMBAT_WINDOWS.zip)** — 183 336 байт
+- [Русская инструкция V22](https://github.com/Vekan777/-/blob/main/anime-factory/v22/README_RU.md)
+- [Проверки GitHub Actions](https://github.com/Vekan777/-/actions/workflows/build-releases.yml)
+
+V22 включает мимику и актёрские ключи, реакцию персонажей на события, дыхание, акценты ударов и четыре контрольных PNG кадра. Исходник V19 сохранён в резервной копии. Это 2D-аниматик.
+
+
 ## AI Anime Factory V21 Visual Quality — проверенная новая версия
 
 - **[Скачать прямой V21 ZIP для Windows](https://raw.githubusercontent.com/Vekan777/-/main/downloads/AI_ANIME_FACTORY_V21_VISUAL_QUALITY_WINDOWS.zip)** — 178 872 байта.
