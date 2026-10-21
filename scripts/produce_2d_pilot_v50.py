@@ -109,7 +109,7 @@ def check_pack(pack):
         if [s["kind"] for s in ep["scenes"]]!=kinds:
             raise ValueError("Canon scene sequence changed")
         for s in ep["scenes"]:
-            if not (8<=s["duration"]<=30) or len(s["dialogue"])!=2:
+            if not (8<=s["duration"]<=12) or len(s["dialogue"])!=2:
                 raise ValueError("Unusable scene length or dialogue")
             for role,line in s["dialogue"]:
                 if role not in VOICE or not (10<=len(line)<=230):
@@ -159,6 +159,8 @@ def build(project,pack,with_tts=False):
                     voice=make_tts(shot["dialogue"],Path(tmp))
             duration=max(float(shot["duration"]),
                          round(voice["total"]+1.4,2) if voice else 0)
+            if duration>12:
+                raise ValueError("V50 migration clamps scenes over 12 seconds; split long dialogue first")
             scene["title"]=shot["title"]
             scene["duration"]=duration
             scene["narration"]=shot["acting"]
