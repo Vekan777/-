@@ -1,0 +1,61 @@
+name: Solo VPN V8 — Android WireGuard build
+
+on:
+  push:
+    branches: [solo-vpn-v8-build]
+    paths:
+      - 'solo-vpn/**'
+      - '.github/workflows/build-solo-vpn-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-real-client:
+    name: Compile Solo VPN (debug, not production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout repository branch
+        uses: actions/checkout@v4
+
+      - name: Configure Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configure Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Configure Gradle 8.11.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Install Android API 35 and Build Tools
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.1'
+
+      - name: Restore V8 Android project and verify checksum
+        run: |
+          mkdir -p solo-vpn/build
+          base64 --decode solo-vpn/android-project.tgz.b64 > /tmp/solo-vpn-source.tgz
+          echo '67a896d3b1c6d852bd2a40ca95e4199989fb72d17707c7c957e4eaa72c2dd272  /tmp/solo-vpn-source.tgz' | sha256sum -c -
+          tar -xzf /tmp/solo-vpn-source.tgz -C solo-vpn/build
+
+      - name: Build original WireGuard Android client
+        working-directory: solo-vpn/build/android
+        run: gradle --no-daemon --stacktrace :app:assembleDebug '-PsoloApiUrl=https://www.YOUR_DOMAIN.example' -PsoloChannel=direct
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: SoloVPN-V8-REAL-WIREGUARD-DEBUG-NO-LIVE-SERVER
+          path: solo-vpn/build/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Print build status
+        if: always()
+        run: echo 'Debug build only. No production VPN servers or payment provider configured.'
