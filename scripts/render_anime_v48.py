@@ -50,7 +50,7 @@ def load_checkpoint(path,project_hash,html_hash,fps):
  if not isinstance(d.get("episodes"),dict):d["episodes"]={}
  return d
 def choose_episodes(page,arg):
- count=page.evaluate("() => P.episodes.length")
+ count=page.evaluate("() => window.v48BatchBridge.count()")
  if count<1:raise RuntimeError("No episodes in project")
  if arg:
   parts=[int(x) for x in arg.split(",") if x.strip()]
@@ -111,16 +111,7 @@ def main():
    page.wait_for_function("() => document.querySelector('#v48-episode')?.options.length>0",
     timeout=45000)
    if args.qa_short:
-    page.evaluate("""() => {
-      P.episodes=P.episodes.slice(0,2);
-      for(const ep of P.episodes){
-       ep.scenes=ep.scenes.slice(0,1);
-       ep.scenes[0].duration=2.7;
-       if(ep.scenes[0].audioV36?.voice?.embeddedV47)
-        ep.scenes[0].audioV36.voice.offset=0;
-      }
-      P.version=48;save();
-    }""")
+    page.evaluate("() => window.v48BatchBridge.testShorten()")
     page.reload(wait_until="load")
     page.wait_for_function("() => document.querySelector('#v48-episode')?.options.length===2",
      timeout=45000)
@@ -128,18 +119,13 @@ def main():
    report={"schema":"V48/RenderOutput/1","episodes":[],"projectSha256":digest,
     "renderHtmlSha256":sha(path.read_bytes()),"fps":args.fps,"generatedAt":time.time()}
    for i in indices:
-    meta=page.evaluate("""(idx) => {
-      const ep=P.episodes[idx],p=v35Plan(ep);
-      return {title:ep.title,number:ep.number,duration:p.duration,scenes:p.rows.length,
-       subtitles:v37Timeline(ep).cues.length};
-    }""",i)
+    meta=page.evaluate("(idx) => window.v48BatchBridge.episode(idx)",i)
     base=f"episode_{i+1:02d}"
     webm=out/(base+".webm")
     mp4=out/(base+".mp4")
     subtitles={}
     for ext in ("srt","vtt"):
-     contents=page.evaluate("""([idx,format]) => v37SubtitleFile(P.episodes[idx],format)""",
-      [i,ext])
+     contents=page.evaluate("([idx,fmt]) => window.v48BatchBridge.subtitles(idx,fmt)",[i,ext])
      target=out/(base+"."+ext);target.write_text(contents,encoding="utf-8")
      subtitles[ext]={"file":target.name,"sha256":sha(target.read_bytes())}
     if not resume_done(i,base):
