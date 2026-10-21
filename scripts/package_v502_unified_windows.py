@@ -55,7 +55,10 @@ def main():
     media=[]
     if x.video_dir:
         d=Path(x.video_dir).resolve()
-        for n in (1,2):
+        # Old V50.2 packages two pilot videos, scripted Season V50.2
+        # must include ALL six previews to avoid dropping former episodes.
+        numbers=range(1,7) if data.get("seasonScriptV502") else (1,2)
+        for n in numbers:
             movie=d/f"episode_{n:02d}.mp4"
             if not movie.is_file() or movie.stat().st_size<100000:
                 raise RuntimeError("Missing verified MP4 "+str(movie))
