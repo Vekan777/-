@@ -277,7 +277,7 @@ v501Actor=function(g,id,x,y,scale,dir,pose,sec,local){
  return actor(g,id,x,y,scale,dir,pose,sec,local,index<0?0:index);
 };
 v502Scene=function(g,ei,scene,sec){
- if(!P?.v502MotionRig?.enabled || ei>1 || !scene?.pilotV50)
+ if(!P?.v502MotionRig?.enabled || (ei>1&&!P?.seasonScriptV502) || !scene?.pilotV50)
    return oldScene(g,ei,scene,sec);
  return v502MotionScene(g,ei,scene,sec);
 };
