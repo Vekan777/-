@@ -1,0 +1,151 @@
+name: AI Anime Factory V50.2 cinematic Russian studio pilot
+on:
+  pull_request:
+    branches: [main, anime-v50-production-pilot-2d]
+    paths:
+      - "anime-factory/v50_2/**"
+      - "scripts/postprocess_v502.py"
+      - "scripts/build_anime_v502.py"
+      - "tests/smoke_director_v502.py"
+      - "tests/test_actor_recordings_v502.py"
+      - ".github/workflows/anime-v502-director.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  make-real-two-episodes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check syntax, original canon, V50, V50.1 and V50.2 overlays
+        run: |
+          node --check anime-factory/v50_1/cinematic_pilot_v501.js
+          node --check anime-factory/v50_2/director_v502.js
+          python -m py_compile anime-factory/v50_2/build_director_v502.py scripts/postprocess_v502.py scripts/build_anime_v502.py tests/smoke_director_v502.py tests/test_actor_recordings_v502.py
+          python scripts/produce_2d_pilot_v501.py --validate-only
+          python anime-factory/v50_2/build_director_v502.py --selftest
+          node tests/test_deep_qa_v50.js
+      - name: Install Chromium, local Russian speech, FFmpeg and images
+        run: |
+          python -m pip install playwright==1.56.0 pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+          espeak-ng --voices=ru
+      - name: Build FULL V50.2 offline studio over original V19–V50.1
+        run: |
+          python anime-factory/v50_2/build_director_v502.py \
+            --output dist/AI_Anime_Factory_V50_2_DIRECTOR_2D.html
+      - name: Generate Russian 24-dialogue pilot from original season
+        run: |
+          python scripts/produce_2d_pilot_v501.py \
+            --html dist/AI_Anime_Factory_V50_2_DIRECTOR_2D.html \
+            --out dist/V502 --tts
+          cp dist/V502/PROJECT_PILOT_V50.json dist/V502/PROJECT_PILOT_V501.json
+      - name: Apply cinematography and ORIGINAL procedurally generated foley and music
+        run: |
+          python scripts/postprocess_v502.py \
+            --project dist/V502/PROJECT_PILOT_V501.json \
+            --output dist/V502/PROJECT_V502.json
+          python tests/test_actor_recordings_v502.py \
+            --project dist/V502/PROJECT_PILOT_V501.json
+      - name: Chromium inspect 48 ACTUAL directed frames + V50 deep QA
+        run: |
+          python tests/smoke_director_v502.py \
+            --html dist/AI_Anime_Factory_V50_2_DIRECTOR_2D.html \
+            --project dist/V502/PROJECT_V502.json \
+            --out dist/V502/DIRECTOR_FRAMES
+      - name: Create reviewable contact sheets for portrait, combat and drama
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image,ImageDraw
+          root=Path('dist/V502/DIRECTOR_FRAMES')
+          for name,paths in [
+            ('EPISODE_1',sorted(root.glob('e1_s*_cut*.png'))),
+            ('EPISODE_2',sorted(root.glob('e2_s*_cut*.png'))),
+            ('FIGHT_1',sorted(root.glob('e1_s3_cut*.png'))),
+            ('BETRAYAL_1',sorted(root.glob('e1_s5_cut*.png')))]:
+            assert len(paths)>=4,name
+            cols=4
+            w,h=420,270
+            canvas=Image.new('RGB',(cols*w,((len(paths)+cols-1)//cols)*h),'#101623')
+            drawer=ImageDraw.Draw(canvas)
+            for i,p in enumerate(paths):
+              im=Image.open(p).convert('RGB')
+              im.thumbnail((w-8,h-31))
+              x=(i%cols)*w+4;y=(i//cols)*h+2
+              canvas.paste(im,(x,y))
+              drawer.text((x,y+h-29),p.stem,fill='white')
+            canvas.save(root/f'V502_{name}_CONTACT.jpg',quality=86)
+          PY
+      - name: Record TWO ACTUAL non-shortened Russian WebM + H264/AAC episodes
+        run: |
+          python scripts/render_anime_v48.py \
+            --html dist/AI_Anime_Factory_V50_2_DIRECTOR_2D.html \
+            --project dist/V502/PROJECT_V502.json \
+            --out dist/V502/VIDEO --episodes 1,2 --fps 6 --mp4
+      - name: Verify codec, real duration, audible and mix-level audio
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,subprocess,re
+          out=Path("dist/V502/VIDEO")
+          for n in (1,2):
+            movie=out/f"episode_{n:02d}.mp4"
+            assert movie.stat().st_size>30000,movie
+            r=subprocess.run(["ffprobe","-v","error","-show_entries",
+              "stream=codec_name,codec_type:format=duration","-of","json",
+              str(movie)],capture_output=True,text=True,check=True)
+            j=json.loads(r.stdout)
+            assert {"h264","aac"}.issubset({s["codec_name"] for s in j["streams"]})
+            assert float(j["format"]["duration"])>55,j
+            a=subprocess.run(["ffmpeg","-hide_banner","-nostats","-i",str(movie),
+              "-vn","-af","volumedetect","-f","null","-"],
+              capture_output=True,text=True,check=True)
+            volume=re.search(r"max_volume:\s*(-?[\d.]+) dB",a.stderr)
+            assert volume and float(volume.group(1))>-43
+            srt=(out/f"episode_{n:02d}.srt").read_text(encoding="utf-8")
+            assert "Акира" in srt and "-->" in srt
+            print("V50.2 VERIFIED Russian MP4",n,"sec",j["format"]["duration"],volume.group(1),"dB")
+          PY
+      - name: Build one Windows V50.2 archive with source and detailed Russian instructions
+        run: |
+          python scripts/build_anime_v502.py \
+            --html dist/AI_Anime_Factory_V50_2_DIRECTOR_2D.html \
+            --project dist/V502/PROJECT_V502.json \
+            --out dist/AI_ANIME_FACTORY_V50_2_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: AI_ANIME_FACTORY_V502_CINEMATIC_SHOTS_RUSSIAN_PROJECT
+          path: |
+            dist/V502/DIRECTOR_FRAMES/
+            dist/V502/PROJECT_V502.json
+            dist/V502/PROJECT_PILOT_V501.json
+            dist/V502/PILOT_PRODUCTION_QA.json
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V502_TWO_REAL_RUSSIAN_EPISODES
+          path: dist/V502/VIDEO/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V502_WINDOWS_STUDIO
+          path: dist/AI_ANIME_FACTORY_V50_2_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
