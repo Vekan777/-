@@ -76,6 +76,46 @@ jobs:
             json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
           print('REAL TWO PIPER RUSSIAN VOICES PASSED',rows)
           PY
+      - name: Build original six-episode scripted Russian project from source
+        run: |
+          python -m pip install numpy playwright==1.56.0
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+          python anime-factory/v50_2/build_complete_v502.py --out dist/v503/base.html
+          python scripts/produce_2d_pilot_v501.py \
+            --html dist/v503/base.html --out dist/v503/base_pilot --tts
+          python scripts/postprocess_v502.py \
+            --project dist/v503/base_pilot/PROJECT_PILOT_V50.json \
+            --output dist/v503/PROJECT_V502_2EP.json
+          python scripts/expand_season_v502.py \
+            --project dist/v503/PROJECT_V502_2EP.json \
+            --out dist/v503/PROJECT_ORIGINAL_SIX.json --tts --sound
+      - name: Revoice ACTUAL two scenes by real Piper, recalculate subtitles and protect canon
+        run: |
+          export LD_LIBRARY_PATH=/tmp/v503/piper:${LD_LIBRARY_PATH:-}
+          python scripts/voice_v503_dual.py \
+            --project dist/v503/PROJECT_ORIGINAL_SIX.json \
+            --out dist/v503/PROJECT_V503_TWO_SCENES_REAL_NEURAL.json \
+            --piper-bin /tmp/v503/piper/piper \
+            --voices-dir /tmp/v503/voices \
+            --episodes 1 --only-scenes 1,2
+          python - <<'PY'
+          import json,hashlib,pathlib
+          a=json.loads(pathlib.Path('dist/v503/PROJECT_ORIGINAL_SIX.json').read_text(encoding='utf-8'))
+          b=json.loads(pathlib.Path('dist/v503/PROJECT_V503_TWO_SCENES_REAL_NEURAL.json').read_text(encoding='utf-8'))
+          assert a['pilotProductionV50']['originalV50ProjectSha256']==b['pilotProductionV50']['originalV50ProjectSha256']
+          assert a['seasonScriptV502']['originalFirstTwoEpisodesSha256']==b['seasonScriptV502']['originalFirstTwoEpisodesSha256']
+          assert b['v503NeuralDub']['maleNeuralLines']>=3
+          assert b['v503NeuralDub']['femaleActorsStillEspeak']
+          assert len(b['episodes'])==6
+          for s in b['episodes'][0]['scenes'][:2]:
+            line=s['lines']; cue=s['subtitlesV37']['cues']
+            assert len(cue)==len(line)==2
+            assert all(abs(c['start']-l['start'])<.004 for c,l in zip(cue,line))
+            assert all(c['end']<=s['duration']+.001 for c in cue)
+          print('V50.3 REAL PROJECT VOICE + CANON + TIMING QA PASS')
+          PY
       - uses: actions/upload-artifact@v4
         if: success()
         with:
