@@ -16,6 +16,8 @@ jobs:
         run: |
           mkdir -p dist/V504_MODELS
           curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 -o dist/V504_MODELS/v5_5_ru.pt https://models.silero.ai/models/tts/ru/v5_5_ru.pt
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 -o dist/V504_MODELS/Rhubarb-Lip-Sync-1.14.0-Linux.zip https://github.com/DanielSWolf/rhubarb-lip-sync/releases/download/v1.14.0/Rhubarb-Lip-Sync-1.14.0-Linux.zip
+          test $(stat -c%s dist/V504_MODELS/Rhubarb-Lip-Sync-1.14.0-Linux.zip) -gt 40000000
           file dist/V504_MODELS/v5_5_ru.pt
           test $(stat -c%s dist/V504_MODELS/v5_5_ru.pt) -gt 30000000
           sha256sum dist/V504_MODELS/v5_5_ru.pt > dist/V504_MODELS/V504_SHA256.txt
