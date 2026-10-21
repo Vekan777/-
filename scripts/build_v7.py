@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V38):
+AI ANIME FACTORY (текущий редактор V39):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -87,6 +87,7 @@ AI ANIME FACTORY (текущий редактор V38):
    anime-factory\\v36\\AI_Anime_Factory_V36_AUDIO_EPISODE_EXPORT.html
    anime-factory\\v37\\AI_Anime_Factory_V37_SUBTITLES_DELIVERY.html
    anime-factory\\v38\\AI_Anime_Factory_V38_CINEMATIC_FINISHING.html
+   anime-factory\\v39\\AI_Anime_Factory_V39_CHARACTER_ACTION.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -197,6 +198,12 @@ def prepare(root, source_dist):
                  "anime-factory/v38/cinematic_v38.js",
                  "anime-factory/v38/build_cinematic_v38.py",
                  "anime-factory/v38/README_RU.md",
+                 "anime-factory/v39/performance_v39.js",
+                 "anime-factory/v39/build_performance_v39.py",
+                 "anime-factory/v39/README_RU.md",
+                 "scripts/build_anime_v39.py",
+                 "tests/test_anime_v39.py",
+                 "tests/smoke_browser_v39.py",
                  "scripts/build_anime_v38.py",
                  "tests/test_anime_v38.py",
                  "tests/smoke_browser_v38.py",
@@ -374,6 +381,14 @@ def prepare(root, source_dist):
         cinema38_builder.build().encode("utf-8")
     )
 
+    perf39_path=root/"anime-factory"/"v39"/"build_performance_v39.py"
+    perf39_spec=importlib.util.spec_from_file_location("anime_v39_character",perf39_path)
+    perf39_builder=importlib.util.module_from_spec(perf39_spec)
+    perf39_spec.loader.exec_module(perf39_builder)
+    data["anime-factory/v39/AI_Anime_Factory_V39_CHARACTER_ACTION.html"]=(
+        perf39_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -421,6 +436,11 @@ def prepare(root, source_dist):
         with zipfile.ZipFile(optional_v38) as archive:
             if archive.testzip():raise ValueError("V38 CRC32 failure")
         data["legacy/"+optional_v38.name]=optional_v38.read_bytes()
+    optional_v39=source_dist/"AI_ANIME_FACTORY_V39_CHARACTER_ACTION_WINDOWS.zip"
+    if optional_v39.is_file():
+        with zipfile.ZipFile(optional_v39) as z:
+            if z.testzip():raise ValueError("V39 CRC32 failure")
+        data["legacy/"+optional_v39.name]=optional_v39.read_bytes()
 
     data["README_RU.txt"] = README_RU.encode("utf-8")
     data["RUN_V7_WINDOWS.bat"] = BAT_GUI.encode("utf-8")
@@ -470,7 +490,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V38 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V39 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())
