@@ -52,6 +52,11 @@ def main():
    page.wait_for_function("() => document.querySelector('#v39-episode')?.options.length>0",timeout=45000)
    page.locator('[data-page="performance-v39"]').click()
    page.locator("#v39-scene").select_option("0")
+   # Establish normalized legacy fields before touching only V39 controls.
+   canonical=page.evaluate("""() => {
+     const value=JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V39'));
+     return JSON.parse(JSON.stringify(value.episodes[0].scenes[0]));
+   }""")
    page.locator("#v39-enabled").uncheck()
    page.locator("#v39-save").click()
    with page.expect_download(timeout=20000) as dl:
@@ -93,11 +98,10 @@ def main():
     raise AssertionError("Canonical episode story was rewritten")
    if current["characters"][0]["qualityV23"]!=base["characters"][0]["qualityV23"]:
     raise AssertionError("Canonical character model was rewritten")
-   for key in ("storyboardV34","assemblyV35","audioV36","subtitlesV37","cameraV38"):
-    if current["episodes"][0]["scenes"][0].get(key)!=manifest["episodes"][0]["scenes"][0].get(key):
-     # V39 JSON does not include older scene properties; verify instead that
-     # performance editor never wrote to any *existing* non-V39 keys.
-     break
+   for key in ("storyboardV34","assemblyV35","audioV36","subtitlesV37",
+               "cameraV38","choreographyV25","motionV24","duration","kind"):
+    if current["episodes"][0]["scenes"][0].get(key)!=canonical.get(key):
+     raise AssertionError("V39 rewrote a previous scene field: "+key)
    if current["episodes"][0]["scenes"][0]["performanceV39"]["enabled"] is not True:
     raise AssertionError("V39 motion not saved")
    # V37 subtitles and V38 camera remain active in existing studio.
