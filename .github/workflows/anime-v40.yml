@@ -1,0 +1,129 @@
+name: AI Anime Factory V40 Character Art Production
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v40/**"
+      - "scripts/build_anime_v40.py"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v40.py"
+      - "tests/smoke_browser_v40.py"
+      - ".github/workflows/anime-v40.yml"
+  push:
+    branches: [main]
+    paths:
+      - "anime-factory/v40/**"
+      - "scripts/build_anime_v40.py"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v40.py"
+      - "tests/smoke_browser_v40.py"
+      - ".github/workflows/anime-v40.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v40-structural:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile all new V40 scripts and V7
+        run: python -m py_compile anime-factory/v39/build_performance_v39.py anime-factory/v40/build_art_v40.py scripts/build_anime_v39.py scripts/build_anime_v40.py scripts/build_v7.py gui_v7.py tests/test_anime_v40.py tests/smoke_browser_v40.py
+      - name: Non-destructive project source check
+        run: python anime-factory/v40/build_art_v40.py --selftest
+      - name: Real V40 JavaScript Node parsing and Python regressions
+        run: python -m unittest discover -s tests -p "test_anime_v40.py" -v
+      - name: Deep V19 original, V38 parent, ZIP CRC32/SHA256
+        run: python scripts/build_anime_v40.py --selftest
+
+  v40-chromium:
+    needs: v40-structural
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install real Playwright Chromium
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Create real complete V19–V40 HTML
+        run: python anime-factory/v40/build_art_v40.py --output dist/AI_Anime_Factory_V40_CHARACTER_ART.html
+      - name: Chromium actual character art, screenshots, story and real WebM with sound
+        run: python tests/smoke_browser_v40.py --html dist/AI_Anime_Factory_V40_CHARACTER_ART.html --out dist/V40_REAL_ART_SAMPLES
+      - name: Build verified standalone Windows ZIP
+        run: python scripts/build_anime_v40.py --out dist/AI_ANIME_FACTORY_V40_CHARACTER_ART_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V40_WINDOWS_VERIFIED
+          path: dist/AI_ANIME_FACTORY_V40_CHARACTER_ART_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V40_REAL_ART_BROWSER_SAMPLES
+          path: dist/V40_REAL_ART_SAMPLES/
+          retention-days: 30
+          if-no-files-found: error
+
+  publish-v40-download:
+    needs: v40-chromium
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build permanent standalone V40 ZIP
+        run: python scripts/build_anime_v40.py --out downloads/AI_ANIME_FACTORY_V40_CHARACTER_ART_WINDOWS.zip
+      - name: Publish GitHub raw stable ZIP link like V35 without touching older archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V40_CHARACTER_ART_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V40 already released"
+          else
+            git commit -m "Release verified V40 Character Art Windows ZIP"
+            for attempt in 1 2 3 4 5 6 7 8; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then exit 0; fi
+              sleep 3
+            done
+            echo "Unable to publish V40 to downloads/" >&2
+            exit 1
+          fi
+      - name: Publish immutable GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view anime-factory-v40 >/dev/null 2>&1; then
+            echo "V40 tag already exists; not overwriting"
+          else
+            gh release create anime-factory-v40 downloads/AI_ANIME_FACTORY_V40_CHARACTER_ART_WINDOWS.zip --title "AI Anime Factory V40 Character Art & Performance" --notes "V40: actual 2D rig animation, facial performance, canon-faithful hit/block/dodge effects, V38 color/V37 subtitle/V36 sound preserved, original V19 and complete V38 backup, ZIP SHA256/CRC32. Not 3D or generative AI character drawing."
+          fi
