@@ -168,6 +168,8 @@ def build(project,pack,with_tts=False):
             raise ValueError("V19 canon ordering changed: manual script merge required")
         if not episode.get("storyV20"):raise ValueError("V20 episode canon lost")
         episode.setdefault("pilotV50",{})
+        episode["pilotV50"]["originalStoryV20"] = json.loads(json.dumps(episode["storyV20"],ensure_ascii=False))
+        episode["pilotV50"]["originalMemoryLost"] = episode.get("memoryLost")
         episode["pilotV50"].update({
             "status":"DRAFT_REQUIRES_HUMAN_ART_REVIEW","logline":ep_plan["logline"],
             "arc":ep_plan["arc"],"license_status":"UNVERIFIED",
@@ -188,11 +190,14 @@ def build(project,pack,with_tts=False):
                          round(voice["total"]+1.4,2) if voice else 0)
             if duration>12:
                 raise ValueError("V50 migration clamps scenes over 12 seconds; split long dialogue first")
+            previousText={key:json.loads(json.dumps(scene.get(key),ensure_ascii=False))
+              for key in ("title","duration","narration","camera","dialogue","lines")}
             scene["title"]=shot["title"]
             scene["duration"]=duration
-            scene["narration"]=shot["acting"]
-            scene["camera"]=shot["shot"]
+            # Retain the original V19 story narration and camera text: pilot staging
+            # is additional metadata, not destructive replacement of plot canon.
             scene["pilotV50"]={"acting":shot["acting"],"camera":shot["shot"],
+                "sourceSceneTextV19":previousText,
                 "speech_source":"eSpeak NG temporary preview" if voice else "not_recorded",
                 "speech_rights":"CHECK ESPEAK-NG VOICE LICENSE BEFORE COMMERCIAL RELEASE"}
             lines=[]
