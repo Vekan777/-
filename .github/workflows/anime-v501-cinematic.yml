@@ -1,0 +1,131 @@
+name: AI Anime Factory V50.1 Russian Cinematic 2D Acceptance
+on:
+  pull_request:
+    branches: [main, anime-v50-production-pilot-2d]
+    paths:
+      - "anime-factory/v50_1/**"
+      - "scripts/produce_2d_pilot_v50.py"
+      - "scripts/produce_2d_pilot_v501.py"
+      - "scripts/build_anime_v501.py"
+      - "tests/smoke_cinematic_v501.py"
+      - ".github/workflows/anime-v501-cinematic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v501-art-and-real-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 42
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile and validate all new art and production source
+        run: |
+          node --check anime-factory/v50_1/cinematic_pilot_v501.js
+          python -m py_compile anime-factory/v50_1/build_cinematic_v501.py scripts/produce_2d_pilot_v50.py scripts/produce_2d_pilot_v501.py scripts/build_anime_v501.py tests/smoke_cinematic_v501.py
+          python scripts/produce_2d_pilot_v501.py --validate-only
+          python anime-factory/v50_1/build_cinematic_v501.py --selftest
+          node tests/test_deep_qa_v50.js
+      - name: Install browser, FFmpeg, Russian speech and Pillow
+        run: |
+          python -m pip install playwright==1.56.0 pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+          espeak-ng --voices=ru
+      - name: Build unchanged V19-V50 parent and V50.1 cinematic overlay
+        run: |
+          python anime-factory/v50_1/build_cinematic_v501.py --output dist/AI_Anime_Factory_V50_1_CINEMATIC_2D.html
+      - name: Produce 2 actual scenes with Russian two-speaker dialogue and new art
+        run: |
+          python scripts/produce_2d_pilot_v501.py --html dist/AI_Anime_Factory_V50_1_CINEMATIC_2D.html --out dist/V501_PILOT --tts
+          cp dist/V501_PILOT/PROJECT_PILOT_V50.json dist/V501_PILOT/PROJECT_PILOT_V501.json
+      - name: Actual Chromium test of six characters, 12 illustrated scenes and nine combat states
+        run: |
+          python tests/smoke_cinematic_v501.py --html dist/AI_Anime_Factory_V50_1_CINEMATIC_2D.html --project dist/V501_PILOT/PROJECT_PILOT_V501.json --out dist/V501_PILOT/FRAME_QA
+      - name: Build independent 12-scene + 9-combat contact sheet
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image,ImageOps,ImageDraw
+          root=Path('dist/V501_PILOT/FRAME_QA')
+          for title,paths,cols in [
+             ('SCENES',sorted(root.glob('episode_*_scene_*.png')),3),
+             ('COMBAT',sorted(root.glob('battle_beat_*.png')),3)]:
+            assert len(paths)==(12 if title=='SCENES' else 9),len(paths)
+            w,h=480,290
+            sheet=Image.new('RGB',(cols*w,((len(paths)+cols-1)//cols)*h),(13,19,29))
+            draw=ImageDraw.Draw(sheet)
+            for i,p in enumerate(paths):
+              im=Image.open(p).convert('RGB')
+              im.thumbnail((w-12,h-36))
+              x=(i%cols)*w+6;y=(i//cols)*h+8
+              sheet.paste(im,(x,y));draw.text((x,y+h-27),p.stem,fill='white')
+            sheet.save(root/f'V501_{title}_CONTACT.jpg',quality=88)
+          PY
+      - name: Real 2-episode WebM voice and H264/AAC MP4 (NO shortened scenes)
+        run: |
+          python scripts/render_anime_v48.py --html dist/AI_Anime_Factory_V50_1_CINEMATIC_2D.html --project dist/V501_PILOT/PROJECT_PILOT_V501.json --out dist/V501_PILOT/VIDEO --episodes 1,2 --fps 6 --mp4
+          python scripts/render_anime_v48.py --html dist/AI_Anime_Factory_V50_1_CINEMATIC_2D.html --project dist/V501_PILOT/PROJECT_PILOT_V501.json --out dist/V501_PILOT/VIDEO --episodes 1,2 --fps 6 --mp4 > dist/V501_PILOT/RESUME_LOG.txt
+          test "$(grep -c 'V48 VERIFIED RESUME / SKIPPED' dist/V501_PILOT/RESUME_LOG.txt)" -eq 2
+      - name: Independent media checks, H264/AAC, Russian transcript and audible audio
+        run: |
+          python - <<'PY'
+          import json,subprocess,re
+          from pathlib import Path
+          from PIL import Image
+          out=Path('dist/V501_PILOT/VIDEO')
+          project=json.loads(Path('dist/V501_PILOT/PROJECT_PILOT_V501.json').read_text(encoding='utf-8'))
+          assert project['v501Visual']['enabled'] and project['v501Visual']['language']=='ru-RU'
+          for i in (1,2):
+            mp4=out/f'episode_{i:02d}.mp4'
+            assert mp4.stat().st_size>30000
+            media=json.loads(subprocess.run(['ffprobe','-v','error','-show_entries',
+              'stream=codec_name,codec_type:format=duration',
+              '-of','json',str(mp4)],capture_output=True,text=True,check=True).stdout)
+            assert {'h264','aac'}.issubset({t.get('codec_name') for t in media['streams']})
+            assert float(media['format']['duration'])>55
+            check=subprocess.run(['ffmpeg','-hide_banner','-nostats','-i',str(mp4),
+              '-vn','-af','volumedetect','-f','null','-'],
+              capture_output=True,text=True)
+            vol=re.search(r'max_volume:\s*(-?[\d.]+) dB',check.stderr)
+            assert check.returncode==0 and vol and float(vol.group(1))>-42
+            srt=(out/f'episode_{i:02d}.srt').read_text(encoding='utf-8')
+            assert 'Акира' in srt and '-->' in srt
+            print('V50.1 episode',i,'real Russian subtitles, audio + H264/AAC',float(media['format']['duration']))
+          PY
+      - name: Build one complete Windows user ZIP after successful QA
+        run: |
+          python scripts/build_anime_v501.py --html dist/AI_Anime_Factory_V50_1_CINEMATIC_2D.html --project dist/V501_PILOT/PROJECT_PILOT_V501.json --out dist/AI_ANIME_FACTORY_V50_1_CINEMATIC_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: AI_ANIME_FACTORY_V501_REAL_FRAMES_RUSSIAN_PROJECT
+          path: |
+            dist/V501_PILOT/PROJECT_PILOT_V501.json
+            dist/V501_PILOT/PILOT_PRODUCTION_QA.json
+            dist/V501_PILOT/FRAME_QA/
+            dist/V501_PILOT/RESUME_LOG.txt
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V501_TWO_REAL_RUSSIAN_MP4
+          path: dist/V501_PILOT/VIDEO/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V501_WINDOWS_VERIFIED
+          path: dist/AI_ANIME_FACTORY_V50_1_CINEMATIC_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
