@@ -62,13 +62,17 @@ def browser_frames(html,project,out):
         page.on('pageerror',lambda e:errors.append(str(e)))
         try:
             page.goto(html.resolve().as_uri(),wait_until='load',timeout=60000)
-            page.evaluate("p=>localStorage.setItem('AI_ANIME_FACTORY_V50',JSON.stringify(p))",project)
-            page.reload(wait_until='load')
-            page.wait_for_function('() => window.v502Motion && window.v50FinalQA',timeout=30000)
+            # The six-episode project contains 36 embedded sound scenes and
+            # exceeds Chrome's ~5MB localStorage quota. It must be pre-embedded
+            # into the fully offline HTML by build_season_v502.py.
+            page.wait_for_function('() => window.v502Motion && window.v50FinalQA && window.v502SeasonStageQA',timeout=30000)
             page.wait_for_function('() => window.v502CleanCutsQA.loaded()===13',timeout=30000)
             state=page.evaluate("""() =>({episodeCount:window.v50FinalQA.currentProject().episodes.length,
+                     stage:window.v502SeasonStageQA.active(),
+                     sourceSHA:window.v50FinalQA.currentProject().seasonScriptV502?.originalFirstTwoEpisodesSha256,
                      errors:window.v50FinalQA.audit().errors})""")
-            assert state['episodeCount']==6 and not state['errors'],state
+            assert state['episodeCount']==6 and state['stage'] and not state['errors'],state
+            assert state['sourceSHA']==project['seasonScriptV502']['originalFirstTwoEpisodesSha256'],state
             for ei in range(2,6):
                 ep=project['episodes'][ei]
                 for si,scene in enumerate(ep['scenes']):
