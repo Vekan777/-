@@ -99,11 +99,6 @@ def main():
    "--disable-dev-shm-usage","--disable-gpu",
    "--autoplay-policy=no-user-gesture-required"])
   context=browser.new_context(accept_downloads=True)
-  if source:
-   encoded=json.dumps(data,ensure_ascii=False)
-   context.add_init_script("try{if(!localStorage.getItem('AI_ANIME_FACTORY_V48'))"+
-    "localStorage.setItem('AI_ANIME_FACTORY_V48',"+
-    encoded+");}catch(error){console.error('V48 JSON restore:',error.message);}")
   page=context.new_page()
   errors=[]
   page.on("pageerror",lambda e:errors.append(str(e)))
@@ -111,6 +106,25 @@ def main():
    page.goto(path.as_uri(),wait_until="load",timeout=60000)
    page.wait_for_function("() => document.querySelector('#v48-episode')?.options.length>0",
     timeout=45000)
+   if source:
+    # Import only after an ordinary page boot. Passing file JSON as a
+    # Playwright argument avoids script-injection escaping/origin problems.
+    page.evaluate("""raw => {
+      localStorage.setItem('AI_ANIME_FACTORY_V48',raw);
+      if(localStorage.getItem('AI_ANIME_FACTORY_V48')!==raw)
+       throw Error('Imported project localStorage readback failed');
+    }""",data)
+    page.reload(wait_until="load")
+    try:
+     page.wait_for_function("() => document.querySelector('#v48-episode')?.options.length>0",
+      timeout=25000)
+    except Exception as ex:
+     stored=page.evaluate("""() => ({
+       bytes:localStorage.getItem('AI_ANIME_FACTORY_V48')?.length||0,
+       options:document.querySelector('#v48-episode')?.options.length||0
+     })""")
+     raise RuntimeError("Imported V48 project failed to initialize: "+str(stored)+
+      "; browser errors: "+"; ".join(errors[:6])) from ex
    if args.qa_short:
     page.evaluate("() => window.v48BatchBridge.testShorten()")
     page.reload(wait_until="load")
