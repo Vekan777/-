@@ -1,0 +1,548 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI Anime Factory C5 — Hybrid 3D Motion + Russian Sound</title><style>
+:root{color-scheme:dark;font:15px/1.45 Segoe UI,system-ui,sans-serif;--bg:#070b14;--panel:#121c31;--edge:#283855;--ink:#eaf1ff;--dim:#99a9c5;--cyan:#42d6ff}*{box-sizing:border-box}body{margin:0;color:var(--ink);background:radial-gradient(ellipse at 45% -60px,#192c4f,var(--bg) 76%)}header{padding:17px clamp(14px,3vw,40px);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--edge)}h1{font-size:21px;margin:0;font-weight:800;letter-spacing:.035em}h2{font-size:16px;margin:0 0 10px}.muted{color:var(--dim)}.tag{font:11px monospace;background:#194a60;color:#b7efff;padding:3px 8px;border-radius:20px}main{max-width:1530px;display:grid;grid-template-columns:minmax(520px,1.85fr) minmax(320px,1fr);gap:18px;padding:22px;margin:auto}.card{border:1px solid var(--edge);border-radius:12px;background:#111b2e;padding:15px;margin-bottom:14px;box-shadow:0 9px 30px #0003}.preview{border:1px solid #375579;border-radius:12px;overflow:hidden;position:relative;background:#050a18}canvas{width:100%;display:block;aspect-ratio:16/9;background:#070b1a}.watermark{position:absolute;top:12px;left:12px;font:11px monospace;background:#071525c9;padding:5px 9px;border-radius:5px;color:#cbeeff;pointer-events:none}.subtitles{position:absolute;bottom:17px;left:5%;width:90%;text-align:center;font-weight:700;letter-spacing:.01em;font-size:19px;color:white;text-shadow:0 2px 3px black,0 0 5px #000,0 0 16px #000;pointer-events:none}.toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap}button,input,select,textarea{font:inherit;color:var(--ink);background:#1b2945;border:1px solid #415879;border-radius:7px;padding:7px 10px}button{cursor:pointer}button:hover{background:#2b4268}button.primary{background:#13577a;color:#eaffff;border-color:#308bad}button:disabled{opacity:.48;cursor:wait}select,option{color:#eaf1ff}input[type=range]{accent-color:var(--cyan);width:100%;border:0;padding:0}input[type=number]{width:80px}input[type=text]{width:100%}input[type=file]{width:100%;font-size:11px}.field{margin:9px 0}.field label{display:block;color:#bdcce4;font-size:12px;margin-bottom:5px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.shot-row{display:flex;justify-content:space-between;gap:7px;border-bottom:1px solid #273855;padding:7px 0}.shot-row span{font-size:12px}.shot-row select{padding:3px 4px;font-size:12px}.tiny{font-size:12px}.timeline{position:relative;background:#071323;border-radius:6px;height:35px;overflow:hidden;border:1px solid #293f5a;display:flex}.cut{height:100%;border-right:2px solid #6392a9;background:#254160;display:flex;justify-content:center;align-items:center;overflow:hidden;white-space:nowrap;font:10px system-ui}.head{position:absolute;top:0;bottom:0;width:2px;background:#caffdb;pointer-events:none}.status{padding:9px;background:#203048;border-radius:6px;min-height:34px;font:12px/1.5 monospace;white-space:pre-wrap}.issues{font:12px/1.5 monospace;color:#ebbd7d;white-space:pre-wrap}.warning{color:#ffd7a1;font-size:12px}.success{color:#b5f7d1}.note{font-size:12px;color:var(--dim);line-height:1.55}.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.stat{padding:7px 9px;background:#0b1527;border-radius:5px;font:12px monospace}.download{display:inline-block;color:#b2eafa;margin-top:5px}textarea{width:100%;min-height:80px;resize:vertical}@media(max-width:950px){main{display:block;padding:14px}canvas{min-height:200px}}
+</style></head><body>
+<header><div><h1>AI ANIME FACTORY <span class="tag">C6 / EPISODE PRODUCTION + 3D</span></h1><div class="muted tiny">Объёмные 3D-риги, обратная кинематика, ключи движения • русские субтитры • звук в WebM</div></div><div class="toolbar"><button id="new-project">Новый проект</button><button id="save-json">Сохранить всё JSON</button><button id="load-json">Импорт C1–C5</button><input id="file-json" type="file" hidden accept=".json,application/json"></div></header>
+<main><div>
+<section class="card"><div class="row"><h2>Трёхмерная сцена</h2><span class="tag" id="render-status">WebGL запускается…</span></div>
+<div class="preview"><canvas id="stage" width="640" height="360" aria-label="Трёхмерная сцена боя"></canvas><div class="watermark">Процедурная 3D-превизуализация · не студийный аниме-кадр</div><div class="subtitles" id="subtitle"></div></div>
+<div class="toolbar" style="margin-top:11px"><button id="play" class="primary">▶ Воспроизвести</button><button id="restart">⟲ С начала</button><label class="tiny">Время: <span id="timecode">00:00.00</span> / 16.00</label><label class="tiny">Качество: <select id="quality"><option value="eco">Эконом 640×360</option><option value="hd">HD 1280×720</option></select></label></div>
+<div class="field"><input type="range" min="0" max="16" step="0.01" id="scrub" value="0" aria-label="Временная шкала"/></div><div id="timeline" class="timeline"></div>
+<div class="toolbar" style="margin-top:9px"><label class="tiny">Вращение камеры: <input id="yaw" type="range" min="-2" max="2" value="0" step="0.03" style="width:108px;vertical-align:middle"/></label><label class="tiny">Масштаб: <input id="distance" type="range" min=".65" max="1.65" value="1" step=".03" style="width:100px;vertical-align:middle"/></label><button id="export-frame">Сохранить PNG</button></div>
+<div class="status" id="stats">Ожидание запуска графического движка...</div></section>
+<section class="card" id="c6-episode-panel"><h2>C6 · Студия целых серий</h2>
+<p class="note">Несколько разных фрагментов настоящей 3D-сцены C5 собираются в единый монтаж. Создавайте серии и сцены, меняйте их порядок, параметры камеры/анимации, импортируйте старый C5 и экспортируйте полный проект. Профессиональная рисовка и skinning импортированных OBJ пока не реализованы.</p>
+<div class="field"><label>Название сезона</label><input type="text" maxlength="150" id="c6-season-title"></div>
+<div class="grid2"><div class="field"><label>Серия</label><select id="c6-ep"></select></div><div class="field"><label>Сцена</label><select id="c6-scene"></select></div></div>
+<div class="toolbar"><button id="c6-add-ep">+ Серия</button><button id="c6-add-scene">+ Сцена</button><button id="c6-delete-scene">Удалить сцену</button><button id="c6-up">↑ Выше</button><button id="c6-down">↓ Ниже</button></div>
+<div class="grid2"><div class="field"><label>Название сцены</label><input id="c6-scene-title" maxlength="120"></div><div class="field"><label>Название серии</label><input id="c6-ep-title" maxlength="130"></div></div>
+<div class="grid2"><div class="field"><label>Начало фрагмента C5, сек</label><input type="number" step="0.1" min="0" id="c6-in"></div><div class="field"><label>Конец фрагмента C5, сек</label><input type="number" step="0.1" min="0" id="c6-out"></div></div>
+<div class="toolbar"><button id="c6-save-cut">Сохранить границы и названия</button><button id="c6-commit">Сохранить правки камеры/рига в выбранную сцену</button></div>
+<div class="field"><label>Таймлайн серии: <b id="c6-time-label">0.00 / 0.00 с</b></label><input type="range" id="c6-timeline" min="0" max="16" value="0" step="0.02"></div>
+<div class="toolbar"><button id="c6-play">▶ Смотреть целую серию</button><button id="c6-export-srt">Субтитры всей серии SRT</button></div>
+<div class="toolbar"><button class="primary" id="c6-export-json">Сохранить ВЕСЬ сезон C6 JSON</button><button id="c6-import-json">Восстановить C6 или добавить C5</button><input id="c6-file" type="file" accept=".json,application/json" hidden></div>
+<p id="c6-status" class="status">Подготовка C6…</p><p id="c6-qa" class="issues"></p>
+<p class="note">Для MP4 целого сезона запустите прилагаемый RUN_BATCH_WINDOWS.bat с сохранённым JSON и FFmpeg + Python/Playwright. Экспорт в браузере C5 по-прежнему записывает только текущую 3D-сцену.</p></section>
+<section class="card" id="c5-motion-panel"><h2>3D-суставы C5 / таймлайн анимации</h2>
+<p class="note">Встроенные 3D-герои двигают локтями, коленями, кистями, шеей и оружием через двухзвенную IK. Полностью нарисованная аниме-анимация требует оригинальных текстур и арт-прохода.</p>
+<div class="grid2"><div class="field"><label>Персонаж</label><select id="c5-actor"><option value="hero">Аран · герой</option><option value="enemy">Страж · противник</option></select></div><div class="field"><label>Ключ движения</label><select id="c5-key"></select></div></div>
+<div class="grid2"><div class="field"><label>Амплитуда движения: <b id="c5-power-value">1.00</b></label><input id="c5-power" type="range" min="0.1" max="2" value="1" step="0.05"></div><div class="field"><label>Пластика корпуса: <b id="c5-acting-value">1.00</b></label><input id="c5-acting" type="range" min="0.1" max="2" value="1" step="0.05"></div></div>
+<div id="c5-pose-fields" class="grid2"></div><div class="toolbar"><button id="c5-add-key">+ Ключ в текущем кадре</button><button id="c5-delete-key">Удалить ключ</button><button id="c5-pose-export">Экспортировать движения JSON</button></div><p class="status" id="c5-pose-status">Подготовка ключей…</p>
+</section>
+<section class="card"><h2>Импорт собственных 3D-моделей OBJ</h2><p class="note">Можно заменить встроенный объёмный манекен собственной моделью Wavefront OBJ (до 2 МБ). Импортируются вершины и треугольники, применяется движение всего объекта; скелет и материалы MTL/текстуры пока не импортируются; импортированные OBJ двигаются как целые объекты.</p><div class="grid2"><div class="field"><label>3D-модель героя (.obj)</label><input id="hero-obj" type="file" accept=".obj"></div><div class="field"><label>3D-модель противника (.obj)</label><input id="enemy-obj" type="file" accept=".obj"></div></div><button id="clear-models">Вернуть встроенные 3D-модели</button><p class="note">Встроенные герои анимируются суставами, но <b>импортированные OBJ пока не скиннятся</b>. Для собственного рига GLB/FBX, текстур, mocap и конечного аниме-рендера необходим дальнейший импорт моделей и арт-пайплайн.</p></section>
+<section class="card"><h2>Русские реплики, Foley и видео</h2><div class="field"><label>Импорт WAV/MP3/OGG (лицензированная речь/музыка/эффекты)</label><input id="audio-file" type="file" accept="audio/*,.wav,.mp3,.ogg"></div><div class="toolbar"><button id="record" class="primary">● Записать WebM со звуком</button><button id="export-srt">Экспорт RU SRT</button></div><p class="note">Во время записи воспроизводится полный 16-секундный план. Автономные звуки боя C5 пишутся в WebM. Импортированный русский голос также записывается. Кнопка «Прослушать русскую реплику» использует только браузерное TTS — этот TTS в экспорт не встраивается.</p><div id="record-state" class="status">Нет записи.</div></section>
+</div><div>
+<section class="card" id="c5-sound-panel"><h2>C5 / Русские реплики и оригинальные звуки боя</h2>
+<div class="grid2"><div class="field"><label>Реплика</label><select id="c5-line"></select></div><div class="field"><label>Говорящий</label><input id="c5-speaker" type="text" maxlength="80"></div></div>
+<div class="field"><label>Русский текст</label><textarea id="c5-text" maxlength="500"></textarea></div>
+<div class="toolbar"><button id="c5-line-save">Сохранить реплику</button><button id="c5-speak">Прослушать TTS (только браузер)</button></div>
+<div class="field"><label><input type="checkbox" id="c5-foley" checked> Встроенные звуки меча/блоков/ударов в экспортируемом видео</label></div>
+<div class="field"><label>Громкость Foley: <b id="c5-gain-value">0.65</b></label><input type="range" id="c5-gain" min="0" max="1" step="0.05" value="0.65"></div>
+<div class="toolbar"><button id="c5-wav">Экспортировать отдельную дорожку боя WAV</button><button id="c5-preview">Прослушать Foley</button></div>
+<p class="note">Собственный русский WAV/MP3/OGG загрузите в форме выше. Это полноценная актёрская дорожка для WebM. Автоматической нейросетевой озвучки в этой версии нет.</p><p id="c5-audio-status" class="status">Звуковой модуль готов.</p></section>
+<section class="card"><h2>Режиссёрская шкала кадров</h2><div class="field"><label>Название проекта</label><input id="project-title" type="text" maxlength="140"></div><div id="shot-list"></div><p class="note">Планы переключают положение реальной перспективной 3D-камеры. Изменения записываются в проект JSON.</p></section>
+<section class="card"><h2>Боевая хореография 3D</h2><div id="event-details" class="status">Загрузка сцены...</div><div class="grid2" style="margin-top:8px"><div class="stat">Контроль дистанции<br><strong id="distance-check">—</strong></div><div class="stat">Контроль попадания<br><strong id="impact-check">—</strong></div></div><p class="note">3D-суставы и двухзвенная IK для рук и ног управляются ключами C5. Hitbox оружия, физический движок и настоящий mocap ещё не подключены.</p></section>
+<section class="card"><h2>Контроль совместимости и качества</h2><div class="toolbar"><button id="check">Повторить QA</button><button id="export-report">Скачать отчёт</button></div><div id="issues" class="issues"></div><p class="warning">Критерий качества: проверять каждый финальный кадр глазами. Успешная проверка WebGL и архива не доказывает студийное качество изображения или движения.</p></section>
+<section class="card"><h2>План завершения</h2><p class="note"><b>C4:</b> 3D основа — сохранена.<br><b>C5:</b> скелетная анимация + покадровый Foley + русский ADR импорт — текущая.<br><b>C6:</b> сцены и серии.<br><b>C7:</b> единая сборка и перенос предыдущих версий без потерь.<br><b>C8:</b> углублённое исправление ошибок и художественная приёмка.</p><div class="note">C1–C4 не перезаписываются, оригинальный импорт C4 встроен в legacyC4. Художественная приёмка и киношная графика пока не достигнуты.</div></section>
+</div></main><script>
+/* AI ANIME FACTORY C4 HYBRID 3D / Original open source WebGL prototype. No third-party runtime. */
+(function(root){'use strict';
+const PI=Math.PI, TAU=2*PI;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),mix=(a,b,t)=>a+(b-a)*t,smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
+const length=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+const identity=()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+function mul(a,b){const c=Array(16).fill(0);for(let j=0;j<4;j++)for(let i=0;i<4;i++)for(let k=0;k<4;k++)c[i+j*4]+=a[i+k*4]*b[k+j*4];return c;}
+function translate(x=0,y=0,z=0){let a=identity();a[12]=x;a[13]=y;a[14]=z;return a;}
+function scale(x=1,y=1,z=1){let a=identity();a[0]=x;a[5]=y;a[10]=z;return a;}
+function rotX(v){let a=identity(),c=Math.cos(v),s=Math.sin(v);a[5]=c;a[9]=-s;a[6]=s;a[10]=c;return a;}
+function rotY(v){let a=identity(),c=Math.cos(v),s=Math.sin(v);a[0]=c;a[8]=s;a[2]=-s;a[10]=c;return a;}
+function rotZ(v){let a=identity(),c=Math.cos(v),s=Math.sin(v);a[0]=c;a[4]=-s;a[1]=s;a[5]=c;return a;}
+function poseM(pos=[0,0,0],angles=[0,0,0],size=[1,1,1]){return mul(mul(mul(mul(translate(...pos),rotY(angles[1])),rotZ(angles[2])),rotX(angles[0])),scale(...size));}
+function tr(m,p){let x=p[0],y=p[1],z=p[2];return[m[0]*x+m[4]*y+m[8]*z+m[12],m[1]*x+m[5]*y+m[9]*z+m[13],m[2]*x+m[6]*y+m[10]*z+m[14]];}
+function normal(m,p){let n=[m[0]*p[0]+m[4]*p[1]+m[8]*p[2],m[1]*p[0]+m[5]*p[1]+m[9]*p[2],m[2]*p[0]+m[6]*p[1]+m[10]*p[2]],l=Math.hypot(...n)||1;return n.map(x=>x/l);}
+function lookAt(e,c,up=[0,1,0]){let z=unit(sub(e,c)),x=unit(cross(up,z)),y=cross(z,x);return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,e),-dot(y,e),-dot(z,e),1];}
+function perspective(fovy,aspect,near,far){let f=1/Math.tan(fovy/2),nf=1/(near-far);return[f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,2*far*near*nf,0];}
+const sub=(a,b)=>a.map((v,i)=>v-b[i]),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0),unit=a=>{let l=Math.hypot(...a)||1;return a.map(v=>v/l)};
+class MeshBuilder{
+ constructor(){this.data=[];this.matrix=identity();this.stack=[];this.triangles=0;}
+ push(m){this.stack.push(this.matrix);this.matrix=mul(this.matrix,m);}
+ pop(){this.matrix=this.stack.pop();}
+ group(m,fn){this.push(m);try{fn()}finally{this.pop()}}
+ tri(a,b,c,col){const n=unit(cross(sub(b,a),sub(c,a)));for(const p of[a,b,c])this.vertex(p,n,col);this.triangles++}
+ vertex(p,n,c){let pos=tr(this.matrix,p),nn=normal(this.matrix,n);this.data.push(...pos,...nn,...c)}
+ face(a,b,c,d,col){this.tri(a,b,c,col);this.tri(a,c,d,col)}
+ box(x,y,z,col){let a=x/2,b=y/2,c=z/2;const p=[[-a,-b,-c],[a,-b,-c],[a,b,-c],[-a,b,-c],[-a,-b,c],[a,-b,c],[a,b,c],[-a,b,c]],f=[[0,3,2,1],[4,5,6,7],[0,4,7,3],[1,2,6,5],[3,7,6,2],[0,1,5,4]];for(let q of f)this.face(...q.map(i=>p[i]),col)}
+ cylinder(r0,r1,h,col,steps=10){for(let i=0;i<steps;i++){let a=i*TAU/steps,b=(i+1)*TAU/steps;let p0=[r0*Math.cos(a),0,r0*Math.sin(a)],p1=[r0*Math.cos(b),0,r0*Math.sin(b)],q0=[r1*Math.cos(a),h,r1*Math.sin(a)],q1=[r1*Math.cos(b),h,r1*Math.sin(b)];this.face(p0,p1,q1,q0,col);if(r0>0)this.tri([0,0,0],p1,p0,col);if(r1>0)this.tri([0,h,0],q0,q1,col)}}
+ sphere(rx,ry,rz,col,steps=9,rings=6){for(let j=0;j<rings;j++){let v=j*PI/rings,w=(j+1)*PI/rings;for(let i=0;i<steps;i++){let a=i*TAU/steps,b=(i+1)*TAU/steps;function xyz(k,t){return[rx*Math.sin(t)*Math.cos(k),ry*Math.cos(t),rz*Math.sin(t)*Math.sin(k)]}let A=xyz(a,v),B=xyz(b,v),C=xyz(b,w),D=xyz(a,w);this.face(A,B,C,D,col)}}}
+ tetra(h,r,col){let a=[0,h,0],b=[-r,0,r],c=[r,0,r],d=[0,0,-r];this.tri(a,b,c,col);this.tri(a,c,d,col);this.tri(a,d,b,col);this.tri(b,d,c,col)}
+ ribbon(points,width,color){for(let i=1;i<points.length;i++){let p=points[i-1],q=points[i],w=width*(1-i/(points.length*1.2));this.face([p[0],p[1]-w,p[2]],[q[0],q[1]-w,p[2]],[q[0],q[1]+w,q[2]],[p[0],p[1]+w,p[2]],color)}}
+ fromOBJ(vertices,faces,color){for(let f of faces){for(let i=1;i<f.length-1;i++){const a=vertices[f[0]],b=vertices[f[i]],c=vertices[f[i+1]];this.tri(a,b,c,color)}}}
+ arr(){return new Float32Array(this.data)}
+}
+const C={floor:[.12,.18,.24],tile:[.16,.24,.31],tileAlt:[.10,.15,.21],dark:[.09,.11,.2],stone:[.31,.35,.44],mortar:[.09,.11,.19],silver:[.62,.74,.82],steel:[.22,.30,.44],black:[.065,.085,.17],cloth:[.09,.14,.33],hair:[.025,.05,.105],skin:[.91,.66,.55],eye:[.16,.76,.98],white:[.92,.89,.8],gold:[.83,.6,.3],scarlet:[.8,.11,.2],redMetal:[.43,.09,.19],ember:[1,.37,.1],cyan:[.15,.78,1],purple:[.43,.25,.87],torch:[.92,.47,.18]};
+function battleAt(t){t=clamp(t,0,16);let phases=[['Вступление',0,2],['Рывок',2,4],['Первый удар',4,5.4],['Блок и искры',5.4,7],['Уклонение',7,9],['Ответный выпад',9,11],['Комбинация',11,13.2],['Финальный удар',13.2,16]];let index=phases.findIndex(p=>t>=p[1]&&t<p[2]);if(index<0)index=7;const [name,start,end]=phases[index],p=smooth((t-start)/(end-start));let ax=-1.55,bx=1.55,az=0,bz=0;const anim={hero:{x:ax,z:az,bend:0,stride:0,attack:0,block:0,hurt:0,turn:-1.1,jump:0},enemy:{x:bx,z:bz,bend:0,stride:0,attack:0,block:0,hurt:0,turn:1.45,jump:0},name,index,t,phase:p,impact:false};
+ if(index===1){anim.hero.x=mix(-1.55,-.6,p);anim.hero.stride=Math.sin(t*13)*.6;anim.hero.bend=.25;anim.enemy.x=mix(1.55,1.0,p)}
+ if(index===2){anim.hero.x=-.6;anim.enemy.x=1;anim.hero.attack=Math.sin(p*PI);anim.hero.bend=.3;anim.enemy.block=smooth(p*1.5);anim.impact=p>.6&&p<.9}
+ if(index===3){anim.hero.x=-.45;anim.enemy.x=.95;anim.enemy.block=1;anim.hero.attack=.6;anim.impact=p<.23}
+ if(index===4){anim.hero.x=mix(-.6,-.9,p);anim.hero.z=-.9*Math.sin(p*PI);anim.enemy.x=.95;anim.enemy.attack=.95;anim.enemy.bend=.22;anim.hero.turn=-1.1+.3*Math.sin(PI*p);anim.hero.stride=.4}
+ if(index===5){anim.hero.x=-.8;anim.hero.z=-.2;anim.enemy.x=mix(.95,.3,p);anim.enemy.attack=Math.sin(PI*p);anim.hero.block=p<.7?1:.2;anim.hero.hurt=p>.45?.22:0;anim.impact=p>.4&&p<.7}
+ if(index===6){anim.hero.x=mix(-.75,.25,p);anim.enemy.x=mix(.8,1.05,p);anim.hero.attack=Math.abs(Math.sin(p*PI*2.5));anim.enemy.block=.5*Math.sin(p*PI);anim.enemy.hurt=p>.5?.35:0;anim.impact=Math.sin(p*PI*5)>.7}
+ if(index===7){anim.hero.x=.2;anim.enemy.x=mix(1.05,2.3,p);anim.hero.attack=mix(1,0,p);anim.enemy.hurt=Math.sin(p*PI)*.9;anim.enemy.bend=mix(0,-.8,p);anim.impact=p>.12&&p<.34}
+ return anim}
+function createEnvironment(m,t){m.group(poseM([0,-.22,0]),()=>{m.box(27,.36,27,C.floor)});
+ for(let x=-13;x<14;x++)for(let z=-13;z<14;z++){let c=(x+z)%2?C.tile:C.tileAlt;m.group(poseM([x+.5,-.033,z+.5]),()=>m.box(.98,.018,.98,c));}
+ for(let side of[-1,1])for(let i=0;i<6;i++){let x=side*7.4,z=-8+i*3.2;m.group(poseM([x,0,z]),()=>{m.cylinder(.68,.58,.42,C.stone,12);m.group(poseM([0,.43,0]),()=>m.cylinder(.35,.35,4.2,C.stone,10));m.group(poseM([0,4.6,0]),()=>m.box(1.08,.36,1.1,C.silver));m.group(poseM([0,4.85,0]),()=>m.tetra(.6,.65,C.dark));});}
+ for(let z of[-10,10]){m.group(poseM([0,4.6,z]),()=>m.box(16,.55,.5,C.stone));m.group(poseM([0,.7,z]),()=>m.box(16,1.35,.5,C.steel))}
+ // Torches and 3D flame clusters in courtyard
+ for(let x of[-4.8,4.8])for(let z of[-5,4.4])m.group(poseM([x,0,z]),()=>{m.cylinder(.12,.12,1.3,C.steel,7);m.group(poseM([0,1.2,0]),()=>m.tetra(.4,.3,C.ember));m.group(poseM([0,1.5+Math.sin(t*9+x)*.06,0]),()=>m.tetra(.35,.21,C.torch))});
+ // Stairs to throne
+ for(let k=0;k<5;k++)m.group(poseM([0,k*.22,-11+k*.9]),()=>m.box(6,k*.4+.24,1.0,C.stone));
+}
+function actor(m,kind,s,t){const hero=kind==='hero',colors=hero?{armor:C.cloth,trim:C.cyan,pants:C.black,skin:C.skin,head:C.hair,metal:C.silver,cloak:C.dark}:{armor:C.redMetal,trim:C.gold,pants:C.steel,skin:C.steel,head:C.scarlet,metal:C.silver,cloak:C.black};const sway=Math.sin(t*3.8+ (hero?0:1.6))*.028,legSwing=s.stride||0,atk=s.attack||0,blk=s.block||0,hurt=s.hurt||0;
+ m.group(poseM([s.x,s.jump+sway,s.z],[0,s.turn+(hero?-.25:0)+(s.hurt||0)*.15,0]),()=>{
+ // rotating chest and full 3d geometry
+ m.group(poseM([0,.98,0],[s.bend||0,0,hero?-.08-hurt*.22:hurt*.34]),()=>{
+ // shoulder and chest armor are actual volumes
+ m.group(poseM([0,.32,0]),()=>m.cylinder(.26,.42,.65,colors.armor,11));
+ m.group(poseM([0,.62,-.01]),()=>m.box(.82,.46,.37,colors.armor));
+ for(let side of[-1,1])m.group(poseM([side*.31,.53,-.07],[0,0,side*.08]),()=>m.box(.22,.56,.48,colors.trim));
+ m.group(poseM([0,.22,-.24]),()=>m.box(.52,.11,.06,colors.trim));
+ m.group(poseM([0,.77,0]),()=>m.cylinder(.15,.14,.14,colors.skin,8));
+ // anime-style head with nose and shining eyes on local front (-Z)
+ m.group(poseM([0,.98,0]),()=>{m.sphere(.235,.285,.205,colors.skin,12,8);m.group(poseM([0,-.05,-.199]),()=>m.tetra(.065,.045,colors.skin));if(hero){
+ m.group(poseM([0,.21,.03]),()=>m.sphere(.25,.15,.24,colors.head,13,6));for(let i=-2;i<=2;i++)m.group(poseM([i*.103,.19,-.16],[Math.sin(i)*.4,0,0]),()=>m.tetra(.24,.087,colors.head));
+ }else{m.group(poseM([0,.08,0]),()=>m.cylinder(.27,.19,.32,colors.head,8));for(let a of[-1,1])m.group(poseM([a*.2,.22,0],[0,0,-a*.5]),()=>m.tetra(.48,.09,colors.trim));}
+ for(let side of[-1,1]){m.group(poseM([side*.087,.04,-.199]),()=>m.sphere(.061,.034,.026,hero?C.white:C.ember,8,5));m.group(poseM([side*.087,.042,-.219]),()=>m.sphere(.02,.038,.009,hero?C.eye:C.white,7,5));m.group(poseM([side*.085,.092,-.213],[0,0,side*.17]),()=>m.box(.12,.024,.025,colors.head));}m.group(poseM([0,-.16,-.203]),()=>m.box(.085,.011,.014,C.dark));});
+ // Cape panels animated naturally but remain rigid polygons (not cloth simulation)
+ if(hero)for(let i=-2;i<=2;i++)m.group(poseM([i*.16,.57,.26],[.15+Math.sin(t*4+i*.9)*.15,0,Math.sin(t*2+i)*.07]),()=>{m.box(.16,.87,.07,C.dark);m.group(poseM([0,-.42,0]),()=>m.box(.16,.09,.08,C.purple))});
+ else for(let side of[-1,1])m.group(poseM([side*.42,.47,0],[0,0,side*.1]),()=>m.box(.25,.18,.55,colors.trim));
+ // arms articulated at shoulders, sword in right hand
+ for(let side of[-1,1]){const weapon=side===1;let rz=side*(.21+(weapon?atk*.65:blk*.6));let rx=(weapon?-.25+atk*1.3:-.14-blk*1.0);m.group(poseM([side*.52,.61,0],[rx,0,rz]),()=>{
+ m.group(poseM([0,-.22,0]),()=>m.cylinder(.115,.15,.38,colors.armor,8));m.group(poseM([0,-.48,-.015],[weapon?-.36+atk*.65:blk*.7,0,0]),()=>{
+ m.cylinder(.11,.12,.31,C.steel,8);m.group(poseM([0,-.28,-.015]),()=>m.sphere(.125,.11,.13,colors.skin,8,5));
+ if(weapon){m.group(poseM([0,-.35,-.08],[PI/2-.1-atk*.9,0,0]),()=>{
+ m.cylinder(.04,.05,.26,C.black,7);m.group(poseM([0,.22,0]),()=>m.box(.34,.045,.14,colors.trim));m.group(poseM([0,.34,0]),()=>m.box(.095,.46,.085,colors.metal));m.group(poseM([0,.6,0]),()=>m.tetra(.24,.055,C.white));});}
+ });});}
+ });
+ // pelvis legs connected 3D segments
+ m.group(poseM([0,1.05,0]),()=>m.box(.58,.29,.39,colors.pants));
+ for(let side of[-1,1]){const legrot=(side===1?1:-1)*legSwing*.7;
+ m.group(poseM([side*.24,1,0],[legrot,0,side*.05]),()=>{
+ m.group(poseM([0,-.25,0]),()=>m.cylinder(.16,.21,.48,colors.pants,9));m.group(poseM([0,-.54,0],[-legrot*.6,0,0]),()=>{
+ m.cylinder(.12,.15,.42,C.steel,9);m.group(poseM([0,-.37,-.08]),()=>m.box(.27,.18,.49,colors.armor));});});}
+ });
+}
+function effects(m,anim){let t=anim.t,p=anim.phase;if(anim.impact){m.group(poseM([.22,1.7,0]),()=>{for(let i=0;i<11;i++){let a=i*TAU/11+t,mr=mix(.22,.88,p);m.group(poseM([Math.cos(a)*mr,Math.sin(a)*mr,Math.sin(a*2)*.22],[a,a*.5,a]),()=>m.tetra(.2,.026,i%2?C.ember:C.cyan))}})}
+ if([2,3,5,6,7].includes(anim.index)){let a=anim.hero;const pts=[];for(let i=0;i<18;i++){let rad=(i/17)*PI*1.25+t*2.3;pts.push([a.x+.43+Math.cos(rad)*.75,1.7+Math.sin(rad)*.8,a.z-.4+Math.sin(rad)*.2])}m.ribbon(pts,.11,anim.index===6?C.purple:C.cyan)}
+ // visible anticipation / dash trails
+ if(anim.index===1||anim.index===6)for(let i=0;i<5;i++){let s=anim.hero;m.group(poseM([s.x-.3-i*.3,.5+i*.07,s.z+.3]),()=>m.box(.2,.04,.02,C.cyan))}
+}
+function validateProject(p){let issues=[];if(!p||typeof p!=='object'||p.schema!=='anime-c4-hybrid-3d-v1')issues.push('Неизвестный формат C4');if(!Array.isArray(p?.shots)||!p.shots.length)issues.push('Нет планов камеры');for(let [i,s] of (p?.shots||[]).entries()){if(!Number.isFinite(s.start)||!Number.isFinite(s.end)||s.start<0||s.end<=s.start||s.end>120)issues.push(`Некорректный интервал плана ${i+1}`);if(!['wide','track','low','close','orbit'].includes(s.camera))issues.push(`Недопустимый тип камеры ${i+1}`);if(i&&s.start<p.shots[i-1].end)issues.push(`Пересекающиеся планы ${i+1}`)}if(!Number.isFinite(p?.duration)||p.duration<1||p.duration>120)issues.push('Неверная продолжительность');if(typeof p?.title!=='string'||p.title.trim().length===0)issues.push('Не указано название');return issues;}
+function defaultProject(){return{schema:'anime-c4-hybrid-3d-v1',version:'C4',title:'Пепельный дозор — гибридная 3D-сцена',duration:16,fps:12,quality:'eco',shots:[{start:0,end:2,camera:'wide',label:'Вступление'},{start:2,end:4,camera:'track',label:'Рывок'},{start:4,end:5.4,camera:'low',label:'Удар'},{start:5.4,end:7,camera:'close',label:'Блок'},{start:7,end:9,camera:'orbit',label:'Уклонение'},{start:9,end:11,camera:'low',label:'Контратака'},{start:11,end:13.2,camera:'track',label:'Комбинация'},{start:13.2,end:16,camera:'wide',label:'Финал'}],subtitles:[{start:0.5,end:2,text:'Никто не отступит.'},{start:4.2,end:5.8,text:'Держи удар!'},{start:8.2,end:9.5,text:'Слишком медленно.'},{start:13.4,end:15.2,text:'На этом всё.'}],characters:[{id:'hero',name:'Аран',color:'#233d65'},{id:'enemy',name:'Страж',color:'#a52b39'}],settings:{cameraYaw:0,cameraDistance:1},legacy:null};}
+function adaptC3(data){if(!data||typeof data!=='object')throw Error('Пустой/неверный JSON');let p=defaultProject();if(data.schema==='anime-c4-hybrid-3d-v1'){let problems=validateProject(data);if(problems.length)throw Error(problems.join('; '));return structuredClone(data)}
+ // legacy C1/C2/C3 are preserved as payload, only known metadata is migrated
+ if(!Array.isArray(data.beats)||!Array.isArray(data.shots))throw Error('Требуется JSON проекта C1–C3 с beats и shots');p.legacy=structuredClone(data);p.title=(typeof data.title==='string'&&data.title.trim()?data.title:p.title);return p;}
+function parseOBJ(src){if(typeof src!=='string'||src.length>2e6)throw Error('OBJ слишком большой (ограничение: 2 МБ)');let v=[],f=[];for(const ln of src.split(/\r?\n/)){let a=ln.trim().split(/\s+/);if(a[0]==='v'&&a.length>=4){let p=a.slice(1,4).map(Number);if(p.every(Number.isFinite))v.push(p)}if(a[0]==='f'&&a.length>=4){let face=a.slice(1).map(k=>Number(k.split('/')[0]));if(face.every(k=>Number.isInteger(k)&&k>0&&k<=v.length))f.push(face.map(k=>k-1))}if(v.length>14000||f.length>14000)throw Error('OBJ: слишком много граней или вершин для слабого ПК');}if(!v.length||!f.length)throw Error('OBJ должен содержать вершины v и грани f');let mn=[Infinity,Infinity,Infinity],mx=[-Infinity,-Infinity,-Infinity];for(let q of v)for(let j=0;j<3;j++){mn[j]=Math.min(mn[j],q[j]);mx[j]=Math.max(mx[j],q[j])}let cent=mn.map((a,j)=>(a+mx[j])/2),size=Math.max(...mn.map((a,j)=>mx[j]-a),.001);return{v:v.map(q=>q.map((a,j)=>(a-cent[j])*3/size +(j===1?1.5:0))),f};}
+function cameraFor(project,t,aspect){let shot=project.shots.find(s=>t>=s.start&&t<s.end)||project.shots.at(-1),p=smooth((t-shot.start)/(shot.end-shot.start)),b=battleAt(t),x=(b.hero.x+b.enemy.x)/2,follow=x;let type=shot.camera,offset=[0,3.25,8.8],target=[follow,1.35,0],y=project.settings.cameraYaw||0,d=project.settings.cameraDistance||1;
+ if(type==='track'){offset=[-3.2,2.5,7];target=[follow,1.55,0]}if(type==='close'){offset=[1.3,2.1,4.0];target=[follow,1.75,0]}if(type==='low'){offset=[2.0,1.2,6.6];target=[follow,1.8,0]}if(type==='orbit'){offset=[Math.sin(p*PI)*5,3.1,Math.cos(p*PI)*7];target=[follow,1.55,0]}if(type==='wide'){offset=[0,3.45,9.0];target=[follow,1.5,-.1]}
+ let rotated=[Math.sin(y)*offset[2]+Math.cos(y)*offset[0],offset[1],Math.cos(y)*offset[2]-Math.sin(y)*offset[0]];let pos=[target[0]+rotated[0]*d,target[1]+rotated[1]*d,target[2]+rotated[2]*d];return{eye:pos,target,projection:perspective(50*PI/180,aspect,.075,85),view:lookAt(pos,target),shot};}
+function secondsToSRT(t){const ms=Math.max(0,Math.round(t*1000)),h=Math.floor(ms/3600000),m=Math.floor(ms/60000)%60,s=Math.floor(ms/1000)%60,mm=ms%1000;return`${('0'+h).slice(-2)}:${('0'+m).slice(-2)}:${('0'+s).slice(-2)},${('00'+mm).slice(-3)}`}
+function exportSRT(subtitles){return subtitles.map((s,i)=>`${i+1}\n${secondsToSRT(s.start)} --> ${secondsToSRT(s.end)}\n${s.text}`).join('\n\n')+'\n'}
+root.C4Core={PI,clamp,mix,smooth,identity,mul,translate,scale,rotX,rotY,rotZ,poseM,tr,normal,lookAt,perspective,MeshBuilder,C,battleAt,createEnvironment,actor,effects,defaultProject,validateProject,adaptC3,parseOBJ,cameraFor,exportSRT};
+})(typeof window!=='undefined'?window:globalThis);
+if(typeof module!=='undefined')module.exports=globalThis.C4Core;
+
+</script><script>
+/* WebGL1 forward renderer: real perspective + Z buffer, two-pass cel outline, 3D geometry and light. */
+(function(root){'use strict';const C=root.C4Core;
+const V=`attribute vec3 position;attribute vec3 normal;attribute vec3 color;uniform mat4 vp;uniform float outline;varying vec3 vNormal;varying vec3 vColor;varying vec3 vWorld;void main(){vec3 p=position+normalize(normal)*outline;vWorld=p;vNormal=normal;vColor=color;gl_Position=vp*vec4(p,1.0);}`;
+const F=`precision mediump float;varying vec3 vNormal;varying vec3 vColor;varying vec3 vWorld;uniform vec3 lightDir;uniform vec3 fogColor;uniform vec3 eye;uniform int outlines;void main(){if(outlines==1){gl_FragColor=vec4(.025,.035,.068,1.);return;}vec3 n=normalize(vNormal);float d=max(dot(n,normalize(lightDir)),0.);float l=d>.85?1.2:d>.5?.91:d>.21?.67:.43;vec3 v=normalize(eye-vWorld);float rim=pow(1.-max(dot(n,v),0.),3.);float distanceEye=length(eye-vWorld);float fog=smoothstep(10.,31.,distanceEye);vec3 col=vColor*l+vColor*rim*.26;gl_FragColor=vec4(mix(col,fogColor,fog*.72),1.);}`;
+function shader(gl,t,src){let s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
+function program(gl,v,f){let p=gl.createProgram();gl.attachShader(p,shader(gl,gl.VERTEX_SHADER,v));gl.attachShader(p,shader(gl,gl.FRAGMENT_SHADER,f));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));return p;}
+class ThreeDimensionalRenderer{
+ constructor(canvas){this.canvas=canvas;const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true,powerPreference:'low-power'});if(!gl)throw Error('WebGL недоступен. Проверьте драйвер видеокарты и аппаратное ускорение Chrome/Edge.');this.gl=gl;this.shader=program(gl,V,F);this.attribs={};this.uniforms={};for(let key of['position','normal','color'])this.attribs[key]=gl.getAttribLocation(this.shader,key);for(let key of['vp','outline','lightDir','fogColor','eye','outlines'])this.uniforms[key]=gl.getUniformLocation(this.shader,key);this.sceneBuffer=gl.createBuffer();this.actorBuffer=gl.createBuffer();gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.depthFunc(gl.LEQUAL);gl.clearColor(.037,.055,.105,1);this.buildEnvironment();this.lastStats={};}
+ buildEnvironment(){let b=new C.MeshBuilder();C.createEnvironment(b,0);this.static=b.arr();this.sceneTriangles=b.triangles;let gl=this.gl;gl.bindBuffer(gl.ARRAY_BUFFER,this.sceneBuffer);gl.bufferData(gl.ARRAY_BUFFER,this.static,gl.STATIC_DRAW);}
+ size(w,h){let canvas=this.canvas;canvas.width=w;canvas.height=h;this.gl.viewport(0,0,w,h)}
+ model(b,actorKey,person,t,imports){let imp=imports?.[actorKey];if(imp){let col=actorKey==='hero'?[.16,.44,.83]:[.75,.16,.3];b.group(C.poseM([person.x,0,person.z],[0,person.turn||0,0]),()=>b.fromOBJ(imp.v,imp.f,col))}else{C.actor(b,actorKey,person,t)}}
+ render(project,t,imports){const gl=this.gl,canvas=this.canvas,b=new C.MeshBuilder(),act=C.battleAt(t);this.model(b,'hero',act.hero,t,imports);this.model(b,'enemy',act.enemy,t,imports);C.effects(b,act);let a=b.arr(),cam=C.cameraFor(project,t,canvas.width/canvas.height);gl.bindBuffer(gl.ARRAY_BUFFER,this.actorBuffer);gl.bufferData(gl.ARRAY_BUFFER,a,gl.DYNAMIC_DRAW);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(this.shader);gl.uniformMatrix4fv(this.uniforms.vp,false,new Float32Array(C.mul(cam.projection,cam.view)));gl.uniform3f(this.uniforms.eye,...cam.eye);gl.uniform3f(this.uniforms.lightDir,-.53,.85,1);gl.uniform3f(this.uniforms.fogColor,.09,.10,.18);
+ // Outlined 3D triangle surfaces, not flat compositing
+ this.drawBuffer(this.sceneBuffer,this.static.length/9,false);this.drawBuffer(this.actorBuffer,a.length/9,true);
+ this.lastStats={triangles:this.sceneTriangles+b.triangles,mode:'WebGL 3D',camera:cam.shot.camera,event:act.name,time:t,collision:act.impact,objects:imports&&Object.keys(imports).length||0};return this.lastStats;
+ }
+ drawBuffer(buffer,n,ink){let gl=this.gl;gl.bindBuffer(gl.ARRAY_BUFFER,buffer);for(let key of['position','normal','color']){let loc=this.attribs[key];gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,36,{'position':0,'normal':12,'color':24}[key]);}
+ if(ink){gl.cullFace(gl.FRONT);gl.uniform1i(this.uniforms.outlines,1);gl.uniform1f(this.uniforms.outline,.026);gl.drawArrays(gl.TRIANGLES,0,n)}gl.cullFace(gl.BACK);gl.uniform1i(this.uniforms.outlines,0);gl.uniform1f(this.uniforms.outline,0);gl.drawArrays(gl.TRIANGLES,0,n);}
+}
+root.C4WebGL={ThreeDimensionalRenderer};
+})(typeof window!=='undefined'?window:globalThis);
+
+</script><script>
+/* True 3D vertices rendered on 2D Canvas using CPU projection and depth sorting.
+   Works without GPU/WebGL; color cel-shading approximate. Used when GPU path is denied. */
+(function(root){'use strict';const C=root.C4Core;
+class Software3DRenderer{
+ constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d');if(!this.ctx)throw Error('Нет ни WebGL, ни 2D Canvas');let e=new C.MeshBuilder();C.createEnvironment(e,0);this.static=e.arr();this.sceneTriangles=e.triangles;this.lastStats={};this.kind='software';}
+ size(w,h){this.canvas.width=w;this.canvas.height=h}
+ model(b,key,pos,t,imports){let imp=imports?.[key];if(imp){b.group(C.poseM([pos.x,0,pos.z],[0,pos.turn,0]),()=>b.fromOBJ(imp.v,imp.f,key==='hero'?[.19,.46,.85]:[.86,.22,.3]))}else C.actor(b,key,pos,t)}
+ render(project,t,imports){let dyn=new C.MeshBuilder(),a=C.battleAt(t);this.model(dyn,'hero',a.hero,t,imports);this.model(dyn,'enemy',a.enemy,t,imports);C.effects(dyn,a);let cam=C.cameraFor(project,t,this.canvas.width/this.canvas.height);let vp=C.mul(cam.projection,cam.view),ctx=this.ctx,W=this.canvas.width,H=this.canvas.height;
+ ctx.fillStyle='#090f1d';ctx.fillRect(0,0,W,H);
+ const polygons=[];for(let arr of [this.static,dyn.arr()])for(let i=0;i<arr.length;i+=27){let pts=[],depth=0,ok=true,n=[arr[i+3],arr[i+4],arr[i+5]],color=[arr[i+6],arr[i+7],arr[i+8]];for(let j=0;j<3;j++){const off=i+j*9,x=arr[off],y=arr[off+1],z=arr[off+2];let w=vp[3]*x+vp[7]*y+vp[11]*z+vp[15];if(w<.06){ok=false;break}let px=(vp[0]*x+vp[4]*y+vp[8]*z+vp[12])/w,py=(vp[1]*x+vp[5]*y+vp[9]*z+vp[13])/w,pz=(vp[2]*x+vp[6]*y+vp[10]*z+vp[14])/w;pts.push([(px+1)*W/2,(1-py)*H/2]);depth+=pz;if(Math.abs(px)>4||Math.abs(py)>4){ok=false;break}}
+ if(!ok)continue;let area=(pts[1][0]-pts[0][0])*(pts[2][1]-pts[0][1])-(pts[1][1]-pts[0][1])*(pts[2][0]-pts[0][0]);if(Math.abs(area)<.05)continue;
+ let bright=Math.max(0,n[0]*-.46+n[1]*.64+n[2]*.59);let band=bright>.75?1.08:bright>.4?.89:bright>.13?.7:.55;let fog=Math.max(0,Math.min(.58,(depth-1)/1.9));let rgb=color.map((v,i)=>Math.max(0,Math.min(255,Math.round(255*(v*band*(1-fog)+[.09,.10,.17][i]*fog)))));polygons.push({pts,z:depth/3,color:`rgb(${rgb.join(',')})`})}
+ polygons.sort((a,b)=>b.z-a.z);for(const p of polygons){ctx.beginPath();ctx.moveTo(...p.pts[0]);ctx.lineTo(...p.pts[1]);ctx.lineTo(...p.pts[2]);ctx.closePath();ctx.fillStyle=p.color;ctx.fill()}
+ // Vignette gives concept blocking atmosphere (not a substitute for original backgrounds).
+ const shade=ctx.createLinearGradient(0,0,0,H);shade.addColorStop(0,'rgba(1,3,12,.18)');shade.addColorStop(.6,'rgba(1,3,12,0)');shade.addColorStop(1,'rgba(0,0,10,.45)');ctx.fillStyle=shade;ctx.fillRect(0,0,W,H);
+ return this.lastStats={triangles:this.sceneTriangles+dyn.triangles,mode:'Software 3D (CPU perspective)',camera:cam.shot.camera,event:a.name,time:t,collision:a.impact,objects:imports?Object.keys(imports).length:0}
+ }
+}
+root.C4Fallback={Software3DRenderer};
+})(typeof window!=='undefined'?window:globalThis);
+
+</script><script>
+/* AI Anime Factory C5 — original jointed 3D blocking/animatic rig.
+ * No bundled licensed assets or pretrained models. Built-in FK geometry + two-bone IK.
+ * OBJ fallback remains rigid: no false claim of auto-rigging imported meshes.
+ */
+(function(root){'use strict';
+const C=root.C4Core;
+if(!C)throw Error('C4Core must load before C5Motion');
+const clamp=C.clamp, lerp=C.mix, PI=Math.PI;
+const KEYS={
+ hero:[
+ {t:0,swing:-.20,guard:.2,step:0,crouch:.05,lean:0,look:0},
+ {t:2,swing:-.8,guard:.3,step:-.3,crouch:.3,lean:.17,look:0},
+ {t:3.8,swing:-1,guard:0,step:.7,crouch:.23,lean:.28,look:-.1},
+ {t:4.7,swing:.95,guard:0,step:.35,crouch:.15,lean:.28,look:.17},
+ {t:5.8,swing:.1,guard:.8,step:.05,crouch:.22,lean:.14,look:.14},
+ {t:7.6,swing:-.3,guard:1,step:-.7,crouch:.44,lean:-.35,look:-.25},
+ {t:9.7,swing:-.45,guard:1,step:-.4,crouch:.37,lean:-.2,look:.1},
+ {t:11.6,swing:1,guard:0,step:.65,crouch:.27,lean:.35,look:.2},
+ {t:12.7,swing:-.45,guard:.3,step:-.35,crouch:.15,lean:.1,look:0},
+ {t:13.8,swing:1,guard:0,step:.85,crouch:.3,lean:.28,look:-.2},
+ {t:16,swing:.2,guard:.2,step:0,crouch:.09,lean:0,look:0}],
+ enemy:[
+ {t:0,swing:.15,guard:.6,step:0,crouch:.06,lean:0,look:0},
+ {t:2,swing:0,guard:.5,step:-.1,crouch:.18,lean:-.1,look:0},
+ {t:4.3,swing:-.6,guard:1,step:.25,crouch:.2,lean:-.2,look:.2},
+ {t:5.8,swing:.2,guard:1,step:-.4,crouch:.4,lean:-.22,look:-.2},
+ {t:7.8,swing:-1,guard:0,step:.65,crouch:.21,lean:.25,look:0},
+ {t:8.6,swing:1,guard:0,step:.4,crouch:.18,lean:.28,look:.12},
+ {t:9.7,swing:.85,guard:0,step:.65,crouch:.3,lean:.28,look:.18},
+ {t:11.6,swing:0,guard:.8,step:-.55,crouch:.32,lean:-.25,look:0},
+ {t:13.8,swing:-.6,guard:.3,step:-.4,crouch:.3,lean:-.3,look:.35},
+ {t:16,swing:0,guard:0,step:0,crouch:.68,lean:-.65,look:0}]
+};
+const channels=['swing','guard','step','crouch','lean','look'];
+let settings=null;
+function defaults(){return {intensity:1,acting:1,keys:{hero:structuredClone(KEYS.hero),enemy:structuredClone(KEYS.enemy)}}}
+function normalized(src){let p=defaults();if(src&&typeof src==='object'){
+ p.intensity=clamp(Number(src.intensity)||1,.1,2);p.acting=clamp(Number(src.acting)||1,.1,2);
+ for(let side of ['hero','enemy']){if(Array.isArray(src.keys?.[side]))p.keys[side]=src.keys[side].map(k=>({t:Number(k.t),...Object.fromEntries(channels.map(name=>[name,Number(k[name]??0)]))}));}
+ }
+ return p;
+}
+function validateConfig(a,duration=16){let errors=[];if(!a||typeof a!=='object'){return['Отсутствуют настройки 3D-рига C5']}
+ if(!Number.isFinite(a.intensity)||a.intensity<.1||a.intensity>2)errors.push('Мощность движения 0.1–2');
+ if(!Number.isFinite(a.acting)||a.acting<.1||a.acting>2)errors.push('Сила пластики 0.1–2');
+ for(let side of ['hero','enemy']){
+ let ks=a.keys?.[side];if(!Array.isArray(ks)||ks.length<2||ks.length>200){errors.push('Ключи '+side+': 2–200 штук');continue;}
+ let prev=-Infinity;for(const [i,k] of ks.entries()){
+ if(!Number.isFinite(k.t)||k.t<0||k.t>duration||k.t<=prev)errors.push('Время ключа '+side+' #'+i);prev=k.t;
+ for(const name of channels)if(!Number.isFinite(k[name])||Math.abs(k[name])>2.5)errors.push('Канал '+name+' у '+side+' #'+i);
+ }
+ }return errors;
+}
+function sample(keys,t){let a=keys[0],b=keys.at(-1);if(t<=a.t)return {...a};if(t>=b.t)return {...b};for(let i=1;i<keys.length;i++){if(t<=keys[i].t){a=keys[i-1];b=keys[i];break}}
+ let dt=b.t-a.t,u=dt?C.smooth((t-a.t)/dt):0;return{t,...Object.fromEntries(channels.map(n=>[n,lerp(a[n],b[n],u)]))};}
+function config(){return settings||defaults()}
+function sampleAt(role,t){return sample(config().keys[role],t)}
+function setConfig(src){const errors=validateConfig(src);if(errors.length)throw Error(errors.slice(0,5).join('; '));settings=src}
+function vec(a,b){return a.map((v,i)=>v-b[i])}function add(a,b){return a.map((v,i)=>v+b[i])}function mult(a,n){return a.map(x=>x*n)}function dot(a,b){return a.reduce((s,v,i)=>s+v*b[i],0)}function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}function mag(a){return Math.hypot(...a)}function norm(a){return mult(a,1/(mag(a)||1))}
+function jointMatrix(start,end){let y=norm(vec(end,start)),ref=Math.abs(y[2])>.97?[0,1,0]:[0,0,1],x=norm(cross(ref,y)),z=norm(cross(x,y));return[x[0],x[1],x[2],0,y[0],y[1],y[2],0,z[0],z[1],z[2],0,start[0],start[1],start[2],1]}
+function cylinderBetween(m,a,b,r,col){let h=mag(vec(a,b));if(h<.0001)return;m.group(jointMatrix(a,b),()=>m.cylinder(r,r*.91,h,col,9))}
+function ball(m,p,r,col){m.group(C.translate(...p),()=>m.sphere(r,r,r,col,9,6))}
+function twoBone(start,end,len1,len2,hint){let d=vec(end,start),l=mag(d)||.00001,along=norm(d),dc=clamp(l,.015,len1+len2-.001),proj=(len1*len1-len2*len2+dc*dc)/(2*dc),h=Math.sqrt(Math.max(0,len1*len1-proj*proj));let side=vec(hint,mult(along,dot(hint,along)));side=norm(side);if(mag(side)<.01)side=[0,0,1];return add(add(start,mult(along,proj)),mult(side,h));}
+function segmentChain(m,shoulder,hand,hint,L1,L2,r1,r2,color,accent){
+ let delta=vec(hand,shoulder),d=mag(delta),reach=Math.min(d,L1+L2-.002);
+ let wrist=d>L1+L2-.002?add(shoulder,mult(norm(delta),reach)):hand;
+ let elbow=twoBone(shoulder,wrist,L1,L2,hint);
+ cylinderBetween(m,shoulder,elbow,r1,color);cylinderBetween(m,elbow,wrist,r2,accent);
+ ball(m,shoulder,r1*1.1,color);ball(m,elbow,r1*.88,accent);ball(m,wrist,r2*.9,accent);return{elbow,wrist};} 
+const palette={hero:{armor:[.08,.18,.38],trim:[.20,.75,1],pant:[.04,.06,.13],skin:[.93,.70,.56],hair:[.018,.034,.07],steel:[.72,.81,.90]},enemy:{armor:[.42,.10,.16],trim:[.84,.62,.27],pant:[.16,.22,.31],skin:[.43,.51,.61],hair:[.22,.08,.1],steel:[.75,.79,.82]}};
+function buildActor(m,role,body,t){const cfg=config(),p=sampleAt(role,t),power=cfg.intensity,acting=cfg.acting,clr=palette[role],dir=role==='hero'?1:-1;
+ const crouch=clamp(p.crouch*acting,0,.75),lean=clamp(p.lean*acting,-.85,.85),step=p.step*power,guard=clamp(p.guard,0,1.8),swing=clamp(p.swing*power,-2,2),look=p.look*acting;
+ const bob=.017*Math.sin(t*4+(dir>0?0:1.4)),hipY=1.00-crouch*.36,torsoY=hipY+.47;
+ m.group(C.poseM([body.x,body.jump||0,body.z],[0,body.turn,0]),()=>{
+  // Grounded ankles and IK knees (not simple pose-swapping).
+  const pelvis=[0,hipY,0],lh=[-.22,hipY,0],rh=[.22,hipY,0];
+  m.group(C.poseM(pelvis,[0,0,lean*.13]),()=>{m.box(.53,.27,.38,clr.pant)});
+  for(let side of [-1,1]){
+   let h=side===-1?lh:rh,pace=(side===-1?1:-1)*step;
+   let ankle=[side*.24,.13,clamp(-pace*.29,-.38,.38)],heel=[side*.24,.12,ankle[2]-.13];
+   let knee=segmentChain(m,h,ankle,[0,.04,-.42-side*pace*.05],.56,.48,.145,.112,clr.pant,clr.steel).elbow;
+   ball(m,knee,.13,clr.trim);
+   m.group(C.poseM([ankle[0],.12,ankle[2]-.11]),()=>m.box(.29,.18,.48,clr.armor));
+  }
+  // Chest leaning and 3D face; hips remain separate from spine.
+  m.group(C.poseM([lean*.10,torsoY+bob,0],[0,look*.13,lean*.28]),()=>{
+   m.box(.77,.75,.36,clr.armor);
+   m.group(C.poseM([0,.06,-.205]),()=>m.box(.54,.34,.045,clr.trim));
+   m.group(C.poseM([0,.42,0]),()=>m.cylinder(.14,.13,.14,clr.skin,9));
+   m.group(C.poseM([0,.65,0],[0,look*.25,0]),()=>{
+    m.sphere(.235,.28,.21,clr.skin,12,7);
+    if(role==='hero'){
+     m.group(C.poseM([0,.2,.025]),()=>m.sphere(.245,.13,.23,clr.hair,10,6));
+     for(let i=-2;i<=2;i++)m.group(C.poseM([i*.085,.18,-.16],[.16+i*.12,0,0]),()=>m.tetra(.22,.075,clr.hair));
+    } else{m.group(C.poseM([0,.12,0]),()=>m.cylinder(.26,.25,.22,clr.hair,9));m.group(C.poseM([0,-.04,-.20]),()=>m.box(.46,.18,.09,clr.steel));}
+    for(let side of [-1,1])m.group(C.poseM([side*.088,.02,-.195]),()=>{m.sphere(.051,.03,.022,[.95,.95,.92],8,5);m.group(C.translate(0,0,-.021),()=>m.sphere(.022,.03,.012,role==='hero'?[.12,.68,.92]:[.95,.35,.28],8,5))});
+   });
+   // Upper torso deltas, independent shoulder-to-wrist IK in local coordinates.
+   for(let side of [-1,1]){
+    let arm=side>0?'weapon':'guard',sh=[side*.48,.25,0];
+    let hand;if(arm==='weapon'){
+     // Windup pulls sword above shoulder; contact sweeps down toward centreline.
+     hand=[side*(.60-.25*Math.max(0,swing)),.10+.34*(-swing)+.07*guard,-.39-.16*Math.abs(swing)];
+    }else hand=[side*(.62-.29*guard),-.10+.46*guard,-.28-.24*guard];
+    let hint=[side*.33,.06,-.47];hand=segmentChain(m,sh,hand,hint,.38,.38,.125,.105,clr.armor,clr.steel).wrist;
+    if(arm==='weapon'){
+     // Sword is parented to moving hand; tracks the actual wrist target.
+     let a=hand,blade=[a[0]-.17-.43*swing,a[1]+.75+.15*(-swing),a[2]-.11],guardA=[a[0],a[1]+.12,a[2]];
+     cylinderBetween(m,a,guardA,.038,[.09,.12,.17]);
+     cylinderBetween(m,guardA,blade,.057,clr.steel);ball(m,guardA,.09,clr.trim);
+     const tip=add(blade,mult(norm(vec(blade,guardA)),.16));cylinderBetween(m,blade,tip,.025,[.88,.96,1]);
+    }else{
+     m.group(C.poseM([hand[0],hand[1],hand[2]-.05],[.25*guard,0,0]),()=>m.box(.28,.40,.075,clr.trim));
+    }
+   }
+   if(role==='hero')for(let k=-2;k<=2;k++)m.group(C.poseM([k*.155,-.23,.28],[.14+.08*Math.sin(t*3+k),0,k*.04]),()=>m.box(.14,.82,.058,[.07,.09,.20]));
+  });
+ });
+}
+function addKey(a,role,t){let keys=a.keys[role],s=sample(keys,t);if(keys.some(k=>Math.abs(k.t-t)<.025))throw Error('На этом времени уже есть ключ');keys.push({...s,t});keys.sort((x,y)=>x.t-y.t);if(keys.length>200){keys.splice(keys.findIndex(k=>k.t===t),1);throw Error('Предел: 200 ключей')};return keys.findIndex(k=>k.t===t)}
+const oldDefault=C.defaultProject,oldAdapt=C.adaptC3,oldValidate=C.validateProject;
+function enhance(p,original){if(p.schema==='anime-c5-hybrid-3d-v1')return p;
+ const v={...p,schema:'anime-c5-hybrid-3d-v1',version:'C5',motion:defaults(),audioScore:{enabled:true,level:.65},dialogue:p.subtitles?.map((s,i)=>({...s,speaker:i%2?'Страж':'Аран'}))||[]};
+ if(original){v.legacyC4=structuredClone(original);}return v;}
+C.defaultProject=()=>enhance(oldDefault(),null);
+C.validateProject=p=>{
+ if(!p||p.schema!=='anime-c5-hybrid-3d-v1')return ['Неизвестная схема C5'];
+ const orig={...p,schema:'anime-c4-hybrid-3d-v1'},issues=oldValidate(orig);
+ issues.push(...validateConfig(p.motion,p.duration));
+ if(!p.audioScore||!Number.isFinite(p.audioScore.level)||p.audioScore.level<0||p.audioScore.level>1)issues.push('Громкость звуков боя должна быть 0–1');
+ if(!Array.isArray(p.dialogue)||p.dialogue.length>400)issues.push('Некорректные реплики');
+ else for(let [i,d] of p.dialogue.entries())if(!Number.isFinite(d.start)||!Number.isFinite(d.end)||d.start<0||d.end<=d.start||d.end>p.duration||typeof d.text!=='string'||d.text.length>500)issues.push('Неверная реплика '+(i+1));
+ return issues;
+};
+C.adaptC3=data=>{
+ if(data?.schema==='anime-c5-hybrid-3d-v1'){const errs=C.validateProject(data);if(errs.length)throw Error(errs.join('; '));return structuredClone(data)}
+ const previous=oldAdapt(data);return enhance(previous,data?.schema==='anime-c4-hybrid-3d-v1'?data:null);
+};
+C.actor=buildActor;
+root.C5Motion={defaults,validateConfig,sample,sampleAt,setConfig,config,addKey,channels,twoBone,jointMatrix,buildActor,KEYS};
+})(typeof window!=='undefined'?window:globalThis);
+
+</script><script>
+/* Original offline procedurally synthesized battle Foley (not Russian voice generation). */
+(function(root){'use strict';
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const HITS=[{t:2.65,type:'dash'},{t:4.43,type:'slash'},{t:5.62,type:'metal'},{t:7.5,type:'dash'},{t:9.85,type:'slash'},{t:11.35,type:'metal'},{t:12.18,type:'slash'},{t:13.56,type:'impact'}];
+const rate=22050;
+function render(duration=16,level=.65){duration=clamp(duration,1,120);level=clamp(level,0,1);const n=Math.ceil(duration*rate),data=new Float32Array(n);let seed=2398571;const noise=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return(seed/4294967295)*2-1};
+ const notes=[55,69.3,82.4,73.4];for(let i=0;i<n;i++){let t=i/rate,drone=Math.sin(2*Math.PI*notes[0]*t)*.037+Math.sin(2*Math.PI*notes[1]*t)*.019;let pulse=(Math.sin(Math.PI*2*t*.87)>.81?.018:0)*Math.sin(2*Math.PI*notes[2]*t);data[i]=drone+pulse;}
+ for(const {t,type} of HITS){let onset=Math.floor(t*rate),period=type==='dash'?.4:type==='impact'?.70:.5;
+  for(let k=0;k<period*rate&&onset+k<n;k++){let sec=k/rate,env=Math.exp(-sec*(type==='impact'?7:13));let nse=noise(),s=0;
+   if(type==='dash')s=nse*.14*Math.sin(Math.PI*sec/period)+Math.sin(2*Math.PI*(310-210*sec/period)*sec)*.04;
+   if(type==='slash')s=nse*.27+Math.sin(2*Math.PI*(900-600*sec/period)*sec)*.1;
+   if(type==='metal')s=Math.sin(2*Math.PI*1172*sec)*.28+Math.sin(2*Math.PI*1763*sec)*.17+nse*.07;
+   if(type==='impact')s=nse*.26+Math.sin(2*Math.PI*(80-35*sec)*sec)*.4;
+   data[onset+k]+=env*s;
+  }
+ }
+ for(let i=0;i<n;i++)data[i]=Math.tanh(data[i]*1.65)*level;return data;}
+function wav(duration=16,level=.65){const pcm=render(duration,level),b=new ArrayBuffer(44+pcm.length*2),v=new DataView(b),text=(p,s)=>{for(let i=0;i<s.length;i++)v.setUint8(p+i,s.charCodeAt(i))};
+ text(0,'RIFF');v.setUint32(4,b.byteLength-8,true);text(8,'WAVE');text(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);text(36,'data');v.setUint32(40,pcm.length*2,true);
+ for(let i=0;i<pcm.length;i++)v.setInt16(44+2*i,Math.round(clamp(pcm[i],-1,1)*32767),true);return new Blob([b],{type:'audio/wav'});}
+function buffer(ctx,duration=16,level=.65){const pcm=render(duration,level),a=ctx.createBuffer(1,pcm.length,rate);a.copyToChannel(pcm,0);return a;}
+function playInto(ctx,destination,duration=16,level=.65){const s=ctx.createBufferSource();s.buffer=buffer(ctx,duration,level);s.connect(destination);s.start(0);return s;}
+function speakRussian(text){if(!root.speechSynthesis||!root.SpeechSynthesisUtterance)throw Error('Браузер не поддерживает speechSynthesis');root.speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang='ru-RU';u.rate=.93;root.speechSynthesis.speak(u);return u;}
+root.C5Audio={rate,HITS,render,wav,buffer,playInto,speakRussian};
+})(typeof window!=='undefined'?window:globalThis);
+
+</script><script>
+(function(){'use strict';const C=window.C4Core,$=id=>document.getElementById(id);let project=C.defaultProject(),renderer,playing=false,recorder=null,stream=null,audioElement=null,audioObjectURL=null,audioCtx=null,audioSrc=null,audioDest=null,at=0,lastStamp=0,lastFrame=0,imported={};const notices=[];
+function status(s){$('record-state').textContent=s}function dl(content,name,type='application/octet-stream'){let obj=new Blob([content],{type}),url=URL.createObjectURL(obj),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),9000)}
+function syncEditor(){ $('project-title').value=project.title;$('quality').value=project.quality||'eco';$('yaw').value=project.settings.cameraYaw||0;$('distance').value=project.settings.cameraDistance||1;$('scrub').max=project.duration;const timeline=$('timeline');timeline.innerHTML='';for(let shot of project.shots){let e=document.createElement('div');e.className='cut';e.style.width=((shot.end-shot.start)/project.duration*100)+'%';e.title=shot.label;e.textContent=shot.label;timeline.appendChild(e)}let head=document.createElement('div');head.className='head';head.id='timeline-head';timeline.appendChild(head);renderShotList();resize();}
+function renderShotList(){let p=$('shot-list');p.replaceChildren();for(let [index,shot] of project.shots.entries()){let line=document.createElement('div');line.className='shot-row';let name=document.createElement('span');name.textContent=`${String(index+1).padStart(2,'0')} ${shot.start.toFixed(1)}–${shot.end.toFixed(1)} с · ${shot.label}`;let sel=document.createElement('select');for(let v of ['wide','track','low','close','orbit']){let o=document.createElement('option');o.value=v;o.textContent={wide:'Общий',track:'Следящая',low:'Низкая',close:'Крупный',orbit:'Облёт'}[v];sel.appendChild(o)}sel.value=shot.camera;sel.addEventListener('change',()=>{shot.camera=sel.value;renderScene();qa()});line.append(name,sel);p.appendChild(line)}}
+function resize(){const hd=project.quality==='hd';renderer.size(hd?1280:640,hd?720:360);renderScene()}
+function updateTimeText(){const n=Math.floor(at/60),seconds=(at%60).toFixed(2).padStart(5,'0');$('timecode').textContent=String(n).padStart(2,'0')+':'+seconds;$('scrub').value=at;$('timeline-head').style.left=(at/project.duration*100)+'%'}
+function renderScene(){if(!renderer)return;let stats=renderer.render(project,at,imported),anim=C.battleAt(at),sub=project.subtitles.find(s=>at>=s.start&&at<=s.end);$('subtitle').textContent=sub?.text||'';$('render-status').textContent=renderer.kind==='software'?'3D CPU · перспектива':'WEBGL · настоящий 3D';$('stats').textContent=`Треугольники: ${stats.triangles.toLocaleString('ru-RU')} · FPS проекта: ${project.fps} · Камера: ${stats.camera} · Этап: ${stats.event}${Object.keys(imported).length?' · импортированные OBJ: '+Object.keys(imported).length:''}`;$('event-details').textContent=`${anim.name}\nГерой: X=${anim.hero.x.toFixed(2)}, Z=${anim.hero.z.toFixed(2)}\nПротивник: X=${anim.enemy.x.toFixed(2)}, Z=${anim.enemy.z.toFixed(2)}\nАтака героя: ${anim.hero.attack.toFixed(2)} · Блок противника: ${anim.enemy.block.toFixed(2)}\nУрон/контакт: ${anim.impact?'визуальная фаза удара':'нет контакта'}`;$('distance-check').textContent=Math.hypot(anim.hero.x-anim.enemy.x,anim.hero.z-anim.enemy.z).toFixed(2)+' м условно';$('impact-check').textContent=anim.impact?'Активная фаза':'Ожидание';updateTimeText();}
+function loop(now){requestAnimationFrame(loop);if(lastStamp===0)lastStamp=now;let dt=Math.min(.33,(now-lastStamp)/1000);lastStamp=now;if(playing){at+=dt;if(at>=project.duration){at=project.duration;stopPlayback();if(recorder&&recorder.state==='recording')setTimeout(()=>recorder.stop(),100)}if(now-lastFrame>1000/(renderer.kind==='software'?6:Math.min(project.fps||12,30))){lastFrame=now;renderScene()}}}
+function stopPlayback(){playing=false;$('play').textContent='▶ Воспроизвести';if(audioElement){audioElement.pause();} if(window.C5Studio)window.C5Studio.stopScore(); }
+function togglePlay(){if(playing){stopPlayback();return;}if(at>=project.duration-.01)at=0;playing=true;$('play').textContent='❚❚ Пауза';if(audioElement){audioElement.currentTime=at;audioElement.play().catch(()=>notices.push('Браузер не разрешил автовоспроизведение аудио'))}window.C5Studio?.startScore(at);}
+function qa(){let issues=C.validateProject(project);let a=C.battleAt(5.8),dist=Math.hypot(a.hero.x-a.enemy.x,a.hero.z-a.enemy.z);if(dist>2.5)issues.push('Удар вне зоны: сближение участников необходимо проверить');let note=['WebGL: '+(renderer?'инициализирован':'недоступен'),'3D: настоящие полигональные модели + глубина + перспектива','Процедурная анимация: постановка, не mocap','RU озвучка: '+(audioElement?'файл импортирован':'не загружена (обязательно для серии)'),'Импорт C1–C3: '+(project.legacy?'оригинал встроен без изменения':'нет'),'Модели OBJ: '+Object.keys(imported).join(', '),'Ключи 3D: герой '+(project.motion?.keys?.hero?.length||0)+', противник '+(project.motion?.keys?.enemy?.length||0),'Русские голоса: '+(audioElement?'импортированный файл':'НЕ записаны'),'Синтез Foley: '+(project.audioScore?.enabled?'активен и идёт в WebM':'выключен'),'Схема JSON: '+project.schema];$('issues').textContent=(issues.length?'ОШИБКИ:\n'+issues.map(s=>'• '+s).join('\n'):'СТРУКТУРНЫХ ОШИБОК НЕ НАЙДЕНО')+'\n\n'+note.join('\n');return{issues,details:note,stats:renderer?.lastStats||{},timestamp:new Date().toISOString()}}
+function jsonSave(){project.title=$('project-title').value.trim()||'Без названия';dl(JSON.stringify(project,null,2),'AI_ANIME_FACTORY_C5_FULL_PROJECT.json','application/json')}
+function applyImportedOBJSources(){window.C5Motion?.setConfig(project.motion);window.C5Studio?.refresh();imported={};for(let key of['hero','enemy'])if(project.models?.[key]){try{imported[key]=C.parseOBJ(project.models[key]);}catch(e){notices.push(key+': '+e.message)}}}
+async function importJSON(f){try{let text=await f.text();if(text.length>7e6)throw Error('Превышен предел импорта 7 МБ');let candidate=C.adaptC3(JSON.parse(text));project=candidate;applyImportedOBJSources();restoreAudio();at=0;stopPlayback();syncEditor();qa();status('Проект импортирован. '+(project.legacy?'Оригинальный C1–C3 JSON сохранён внутри legacy.':'Данные C4 загружены.'))}catch(e){status('Импорт отклонён. Текущий проект не изменился. Причина: '+e.message);}}
+async function loadOBJ(key,file){try{let src=await file.text();let parsed=C.parseOBJ(src);project.models??={};project.models[key]=src;imported[key]=parsed;renderScene();qa();status(`OBJ импортирован: ${file.name}. ${parsed.v.length} вершин / ${parsed.f.length} граней. Деформация скелета OBJ пока недоступна.`)}catch(e){status('Не удалось импортировать OBJ: '+e.message)}}
+async function loadAudio(file){try{if(audioSrc){audioSrc.disconnect();audioSrc=null;}if(audioObjectURL)URL.revokeObjectURL(audioObjectURL);audioObjectURL=URL.createObjectURL(file);audioElement=new Audio(audioObjectURL);audioElement.preload='auto';if(file.size<=6e6){project.audio={name:file.name,type:file.type,base64:await toDataURL(file)}}else{project.audio={name:file.name,type:file.type,note:'Файл не встроен в JSON: превышено 6 МБ; храните отдельно'}}status('Звуковая дорожка загружена: '+file.name);qa()}catch(e){status('Ошибка загрузки аудио: '+e.message)}}
+function toDataURL(file){return new Promise((yes,no)=>{let r=new FileReader();r.onload=()=>yes(r.result);r.onerror=no;r.readAsDataURL(file)})}
+function restoreAudio(){if(audioSrc){audioSrc.disconnect();audioSrc=null;}if(project.audio?.base64){if(audioObjectURL)URL.revokeObjectURL(audioObjectURL);audioObjectURL=project.audio.base64;audioElement=new Audio(audioObjectURL);}else audioElement=null}
+async function record(){if(recorder&&recorder.state==='recording')return;let btn=$('record');btn.disabled=true;at=0;stopPlayback();at=0;renderScene();let fps=project.fps||12;let chunks=[];try{
+ stream=$('stage').captureStream(fps);
+ audioCtx??=new (window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();
+ audioDest=audioCtx.createMediaStreamDestination();
+ // Foley PCM is actually routed into MediaRecorder, not merely played in speakers.
+ if(project.audioScore?.enabled){window.C5Audio.playInto(audioCtx,audioDest,project.duration,project.audioScore.level);}
+ if(audioElement){audioElement.pause();audioElement.currentTime=0;if(!audioSrc)audioSrc=audioCtx.createMediaElementSource(audioElement);audioSrc.disconnect();audioSrc.connect(audioDest);audioSrc.connect(audioCtx.destination);}
+ for(let a of audioDest.stream.getAudioTracks())stream.addTrack(a);
+ const pref=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];let mime=pref.find(x=>MediaRecorder.isTypeSupported(x))||'';recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};recorder.onerror=e=>{status('Ошибка записи: '+(e.error?.message||e.message));btn.disabled=false};recorder.onstop=()=>{let blob=new Blob(chunks,{type:mime||'video/webm'});dl(blob,'AI_ANIME_FACTORY_C5_3D_FOLEY_SCENE.webm',blob.type);btn.disabled=false;for(let t of stream.getTracks())t.stop();status(`Запись завершена, ${blob.size} байт. Проверьте звук в плеере и содержимое в FFprobe.`);recorder=null};recorder.start(200);status('Записывается полноценная сцена: '+project.duration+' секунд. '+(audioElement?'Аудиодорожка подключена.':'Аудиофайл отсутствует, ролик будет без голоса.'));togglePlay();
+ }catch(e){btn.disabled=false;status('Ошибка записи: '+e.message);if(stream)for(let t of stream.getTracks())t.stop();}}
+function attach(){ $('play').addEventListener('click',togglePlay);$('restart').addEventListener('click',()=>{stopPlayback();at=0;renderScene()});$('scrub').addEventListener('input',e=>{stopPlayback();at=Number(e.target.value);renderScene()});$('quality').addEventListener('change',e=>{project.quality=e.target.value;resize()});$('yaw').addEventListener('input',e=>{project.settings.cameraYaw=Number(e.target.value);renderScene()});$('distance').addEventListener('input',e=>{project.settings.cameraDistance=Number(e.target.value);renderScene()});$('project-title').addEventListener('change',e=>project.title=e.target.value);$('new-project').addEventListener('click',()=>{if(!confirm('Создать новый проект? Сначала сохраните текущую работу JSON.'))return;project=C.defaultProject();window.C5Motion?.setConfig(project.motion);window.C5Studio?.refresh();imported={};audioElement=null;at=0;stopPlayback();syncEditor();qa()});$('save-json').addEventListener('click',jsonSave);$('load-json').addEventListener('click',()=>$('file-json').click());$('file-json').addEventListener('change',e=>{if(e.target.files[0])importJSON(e.target.files[0]);e.target.value=''});$('hero-obj').addEventListener('change',e=>e.target.files[0]&&loadOBJ('hero',e.target.files[0]));$('enemy-obj').addEventListener('change',e=>e.target.files[0]&&loadOBJ('enemy',e.target.files[0]));$('clear-models').addEventListener('click',()=>{imported={};delete project.models;renderScene();qa()});$('audio-file').addEventListener('change',e=>e.target.files[0]&&loadAudio(e.target.files[0]));$('export-frame').addEventListener('click',()=>{let a=document.createElement('a');a.download='AI_ANIME_FACTORY_C5_3D_FRAME.png';a.href=$('stage').toDataURL('image/png');a.click()});$('export-srt').addEventListener('click',()=>dl(C.exportSRT(project.subtitles),'C5_RUSSIAN.srt','text/plain;charset=utf-8'));$('record').addEventListener('click',record);$('check').addEventListener('click',qa);$('export-report').addEventListener('click',()=>dl(JSON.stringify(qa(),null,2),'C5_QA_REPORT.json','application/json'))}
+try{try{renderer=new window.C4WebGL.ThreeDimensionalRenderer($('stage'));}catch(glError){renderer=new window.C4Fallback.Software3DRenderer($('stage'));notices.push('WebGL недоступен: '+glError.message+'; включён CPU 3D.');}attach();syncEditor();qa();requestAnimationFrame(loop);window.__C4_TEST__={get project(){return project},get renderer(){return renderer},get imported(){return imported},setTime:t=>{at=C.clamp(t,0,project.duration);renderScene()},loadCandidate:x=>{let candidate=C.adaptC3(x);let old=project;project=candidate;try{applyImportedOBJSources();restoreAudio();at=0;syncEditor();qa()}catch(e){project=old;applyImportedOBJSources();restoreAudio();syncEditor();throw e}},get report(){return qa()},stopPlayback,record,resize,renderScene};}catch(e){$('render-status').textContent='Ошибка WebGL';$('stats').textContent=e.stack||e.message;console.error(e)}
+})();
+
+</script><script>
+/* C5 animation / Foley / Russian lines controls. Uses the existing C4 camera and 3D renderers. */
+(function(root){'use strict';
+const C=root.C4Core,M=root.C5Motion,A=root.C5Audio,$=id=>document.getElementById(id);
+const get=()=>root.__C4_TEST__?.project;
+let selectedRole='hero',selectedIndex=0,scorePlayer=null,scoreURL=null;
+function msg(s){$('c5-pose-status').textContent=s}
+function dl(blob,name){let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
+function projectQA(){const p=get();if(!p)return;let e=C.validateProject(p);msg(e.length?'Ошибки: '+e.slice(0,8).join('; '):'Параметры движения сохранены в полном C5 JSON. Данные C1–C4 не перезаписываются.')}
+function setMotion(){let p=get();if(!p)return;let e=M.validateConfig(p.motion,p.duration);if(e.length){msg('Ошибка: '+e.join('; '));return;}M.setConfig(p.motion);root.__C4_TEST__.renderScene();projectQA()}
+function currentKeys(){return get()?.motion?.keys?.[selectedRole]||[]}
+function redrawKeyMenu(){let keys=currentKeys(),sel=$('c5-key');sel.replaceChildren();keys.forEach((k,i)=>{let o=document.createElement('option');o.value=String(i);o.textContent=`${String(i+1).padStart(2,'0')}: ${k.t.toFixed(2)} с`;sel.appendChild(o)});selectedIndex=Math.max(0,Math.min(keys.length-1,selectedIndex));sel.value=String(selectedIndex);refreshChannels()}
+function refreshChannels(){let k=currentKeys()[selectedIndex],area=$('c5-pose-fields');area.replaceChildren();if(!k)return;
+ const labels={swing:'Замах / клинок',guard:'Защита / блок',step:'Шаг / перенос веса',crouch:'Приседание',lean:'Наклон корпуса',look:'Поворот головы'};
+ for(let name of M.channels){let field=document.createElement('div');field.className='field';let lab=document.createElement('label');lab.textContent=labels[name]+' · ';let out=document.createElement('b');out.textContent=k[name].toFixed(2);lab.appendChild(out);let input=document.createElement('input');input.type='range';input.min=name==='crouch'||name==='guard'?0:-2;input.max=name==='crouch'||name==='guard'?1.5:2;input.step=.05;input.value=k[name];input.dataset.channel=name;input.addEventListener('input',()=>{k[name]=Number(input.value);out.textContent=k[name].toFixed(2);setMotion()});field.append(lab,input);area.appendChild(field)}
+}
+function refreshDialog(){const p=get(),sel=$('c5-line');sel.replaceChildren();for(let [i,subtitle] of p.subtitles.entries()){let op=document.createElement('option');op.value=String(i);op.textContent=`${subtitle.start.toFixed(1)}с ${subtitle.text.slice(0,34)}`;sel.appendChild(op)}sel.value='0';showDialog()}
+function showDialog(){let p=get(),i=Number($('c5-line').value)||0,line=p.subtitles[i];if(!line)return;$('c5-text').value=line.text;$('c5-speaker').value=p.dialogue[i]?.speaker||'';}
+function saveDialog(){let p=get(),i=Number($('c5-line').value)||0,text=$('c5-text').value.trim();if(!text){$('c5-audio-status').textContent='Текст реплики не может быть пустым';return;}p.subtitles[i].text=text;p.dialogue[i]={...p.subtitles[i],speaker:$('c5-speaker').value.trim()||'Персонаж'};refreshDialog();$('c5-line').value=String(i);showDialog();root.__C4_TEST__.renderScene();$('c5-audio-status').textContent='Русская реплика и субтитр сохранены в проекте.'}
+function stopScore(){if(scorePlayer){scorePlayer.pause();scorePlayer=null}if(scoreURL){URL.revokeObjectURL(scoreURL);scoreURL=null}}
+function startScore(t=0){stopScore();const p=get();if(!p?.audioScore?.enabled)return;scoreURL=URL.createObjectURL(A.wav(p.duration,p.audioScore.level));scorePlayer=new Audio(scoreURL);scorePlayer.currentTime=Math.max(0,Math.min(p.duration-.05,t));scorePlayer.play().catch(e=>{$('c5-audio-status').textContent='Браузер заблокировал автоматический звук: '+e.message});}
+function refresh(){let p=get();if(!p)return;try{M.setConfig(p.motion)}catch(e){msg(e.message);return}
+ $('c5-power').value=p.motion.intensity;$('c5-acting').value=p.motion.acting;$('c5-power-value').textContent=p.motion.intensity.toFixed(2);$('c5-acting-value').textContent=p.motion.acting.toFixed(2);
+ $('c5-gain').value=p.audioScore?.level??.65;$('c5-gain-value').textContent=Number(p.audioScore?.level??.65).toFixed(2);$('c5-foley').checked=!!p.audioScore?.enabled;
+ selectedRole=$('c5-actor').value||'hero';selectedIndex=0;redrawKeyMenu();refreshDialog();projectQA()}
+function attach(){
+ $('c5-actor').addEventListener('change',e=>{selectedRole=e.target.value;selectedIndex=0;redrawKeyMenu()});
+ $('c5-key').addEventListener('change',e=>{selectedIndex=Number(e.target.value);refreshChannels();const k=currentKeys()[selectedIndex];if(k)root.__C4_TEST__.setTime(k.t)});
+ for(let [id,name,out] of [['c5-power','intensity','c5-power-value'],['c5-acting','acting','c5-acting-value']])$(''+id).addEventListener('input',e=>{let p=get(),val=Number(e.target.value);p.motion[name]=val;$(out).textContent=val.toFixed(2);setMotion()});
+ $('c5-add-key').addEventListener('click',()=>{try{let p=get(),t=Number($('scrub').value),idx=M.addKey(p.motion,selectedRole,t);selectedIndex=idx;redrawKeyMenu();setMotion();msg('Новый ключ создан: '+t.toFixed(2)+' с')}catch(e){msg('Нельзя добавить ключ: '+e.message)}});
+ $('c5-delete-key').addEventListener('click',()=>{let keys=currentKeys();if(keys.length<=2){msg('Два ключа обязательны');return}keys.splice(selectedIndex,1);selectedIndex=Math.max(0,selectedIndex-1);redrawKeyMenu();setMotion()});
+ $('c5-pose-export').addEventListener('click',()=>dl(new Blob([JSON.stringify(get().motion,null,2)],{type:'application/json'}),'C5_JOINT_ANIMATION.json'));
+ $('c5-line').addEventListener('change',showDialog);$('c5-line-save').addEventListener('click',saveDialog);
+ $('c5-speak').addEventListener('click',()=>{try{A.speakRussian($('c5-text').value);$('c5-audio-status').textContent='Речь ru-RU воспроизводится браузером, НЕ записывается в WebM. Для видео импортируйте WAV/MP3.'}catch(e){$('c5-audio-status').textContent=e.message}});
+ $('c5-gain').addEventListener('input',e=>{let p=get();p.audioScore.level=Number(e.target.value);$('c5-gain-value').textContent=p.audioScore.level.toFixed(2);stopScore();projectQA()});
+ $('c5-foley').addEventListener('change',e=>{get().audioScore.enabled=e.target.checked;stopScore();projectQA()});
+ $('c5-wav').addEventListener('click',()=>dl(A.wav(get().duration,get().audioScore.level),'C5_ORIGINAL_BATTLE_FOLEY.wav'));
+ $('c5-preview').addEventListener('click',()=>{startScore(0);$('c5-audio-status').textContent='Проигрывается синтезированная дорожка боя: звуки без русских голосов.'});
+}
+try{if(!get())throw Error('C4 base editor not initialized');attach();refresh();root.C5Studio={refresh,stopScore,startScore,get project(){return get()}};}catch(e){console.error('C5 controls failed',e);let k=$('c5-pose-status');if(k)k.textContent='Ошибка C5: '+e.message}
+})(window);
+
+</script><script>
+/* CINEMATIC C6 — season/episode/scene assembly, validation and subtitle timing.
+   Original 3D C5 scene source is always retained verbatim inside each clip. */
+(function(root){'use strict';
+const SCHEMA='anime-c6-episode-production-v1';
+const clone=x=>JSON.parse(JSON.stringify(x));
+const id=()=>('clip-'+Math.random().toString(36).slice(2,11));
+const clean=s=>String(s||'').trim();
+function makeScene(p,name='Новая сцена',start=0,end=16){return{id:id(),name,in:start,out:end,project:clone(p)};}
+function demo(p){let rootScene=clone(p), second=clone(p);second.title='Разворот боя';second.settings.cameraYaw=.55;second.settings.cameraDistance=.85;second.shots=second.shots.map(s=>({...s,camera:['close','orbit','track','low'][second.shots.indexOf(s)%4]}));
+ const third=clone(p);third.title='Финальная контратака';third.settings.cameraYaw=-.4;
+ return{schema:SCHEMA,version:'C6',seasonTitle:'Пепельный дозор · сезон 1 (демо)',episodes:[
+ {id:'ep-01',name:'01 · Перед поединком',scenes:[makeScene(rootScene,'Встреча',0,4),makeScene(second,'Первое столкновение',4,9)]},
+ {id:'ep-02',name:'02 · Контратака',scenes:[makeScene(third,'Возвращение бойца',9,13),makeScene(third,'Последний удар',13,16)]}
+ ],updatedAt:'2026-10-21',manualReviews:{}};}
+function runtime(scene){return scene.out-scene.in;}
+function duration(ep){return ep.scenes.reduce((n,s)=>n+runtime(s),0)}
+function scan(pack){let errors=[],warnings=[];
+ if(!pack||typeof pack!=='object'||pack.schema!==SCHEMA)return{errors:['Неверная схема C6'],warnings:[]};
+ if(!clean(pack.seasonTitle)||clean(pack.seasonTitle).length>150)errors.push('Название сезона: 1–150 символов');
+ if(!Array.isArray(pack.episodes)||!pack.episodes.length||pack.episodes.length>12)return{errors:['Нужно 1–12 серий'],warnings};
+ let ids=new Set();
+ for(let [i,ep] of pack.episodes.entries()){
+  if(!/^ep-[a-zA-Z0-9-]{1,24}$/.test(String(ep.id||''))||ids.has(ep.id))errors.push('Повторяющийся или неправильный ID серии '+(i+1));ids.add(ep.id);
+  if(!clean(ep.name)||clean(ep.name).length>130)errors.push('Название серии '+(i+1));
+  if(!Array.isArray(ep.scenes)||ep.scenes.length<1||ep.scenes.length>120){errors.push('В серии '+(i+1)+' должно быть 1–120 сцен');continue}
+  let clipIds=new Set();
+  for(let [j,s] of ep.scenes.entries()){
+   let mark=`Серия ${i+1}, сцена ${j+1}`;
+   if(!clean(s.id)||clipIds.has(s.id))errors.push(mark+': ID дублируется или пуст');clipIds.add(s.id);
+   if(!clean(s.name)||clean(s.name).length>120)errors.push(mark+': название');
+   if(!Number.isFinite(s.in)||!Number.isFinite(s.out)||s.in<0||s.out<=s.in||s.out-s.in<.2||s.out>120)errors.push(mark+': неверные границы');
+   const p=s.project;
+   if(!p||!['anime-c5-hybrid-3d-v1','anime-c4-hybrid-3d-v1'].includes(p.schema))errors.push(mark+': ожидается полный C5/C4 исходный JSON');
+   if(!Number.isFinite(p?.duration)||s.out>p.duration+1e-6)errors.push(mark+': отрезок выходит за пределы 3D-сцены');
+   if(!Array.isArray(p?.shots)||!p.shots.length||!Array.isArray(p?.subtitles))errors.push(mark+': отсутствует раскадровка или субтитры');
+   if(!p?.motion?.keys?.hero||!p?.motion?.keys?.enemy)warnings.push(mark+': нет ключей C5, возможно это только C4');
+   if(!p.audio?.base64)warnings.push(mark+': реальный русский голос не встроен в JSON; эффектов Foley недостаточно');
+   if(p?.models?.hero||p?.models?.enemy)warnings.push(mark+': импорт OBJ неподвижен относительно скелета; проверить анимацию вручную');
+  }
+  if(duration(ep)>3600)errors.push('Серия '+(i+1)+' длится больше часа');
+ }
+ if(JSON.stringify(pack).length>40e6)errors.push('Проект больше 40 МБ: разделите исходные медиа');
+ return{errors,warnings};}
+function locate(ep,time){if(!Number.isFinite(time))throw Error('Время не число');let cursor=0;for(let i=0;i<ep.scenes.length;i++){let s=ep.scenes[i],d=runtime(s);if(time<cursor+d||i===ep.scenes.length-1)return{index:i,scene:s,local:Math.min(s.out,Math.max(s.in,s.in+time-cursor)),start:cursor,end:cursor+d};cursor+=d;}throw Error('В серии нет сцен');}
+function subtitles(ep){let entries=[],offset=0;for(const s of ep.scenes){for(const line of s.project.subtitles||[]){let a=Math.max(line.start,s.in),b=Math.min(line.end,s.out);if(b<=a||!clean(line.text))continue;entries.push({start:offset+a-s.in,end:offset+b-s.in,text:line.text,speaker:line.speaker||''});}offset+=runtime(s);}return entries;}
+function srt(ep){let t=subtitles(ep);let fmt=x=>{let ms=Math.max(0,Math.round(x*1000)),a=Math.floor(ms/3600000),b=Math.floor(ms/60000)%60,c=Math.floor(ms/1000)%60,d=ms%1000;return `${String(a).padStart(2,'0')}:${String(b).padStart(2,'0')}:${String(c).padStart(2,'0')},${String(d).padStart(3,'0')}`};return t.map((v,i)=>`${i+1}\n${fmt(v.start)} --> ${fmt(v.end)}\n${v.text}`).join('\n\n')+'\n'}
+function importC5(p){if(!p||!['anime-c5-hybrid-3d-v1','anime-c4-hybrid-3d-v1'].includes(p.schema))throw Error('Ожидается полный C5/C4 JSON');const fresh=demo(p);fresh.seasonTitle=clean(p.title)+' · сериал';fresh.episodes=[{id:'ep-01',name:'01 · '+clean(p.title),scenes:[makeScene(p,clean(p.title),0,p.duration)]}];return fresh;}
+root.C6Core={SCHEMA,clone,makeScene,demo,duration,runtime,scan,locate,subtitles,srt,importC5};
+})(typeof window!=='undefined'?window:globalThis);
+
+</script><script>
+/* C6 integrated nonlinear edit and timed whole-episode playback.
+   Do not overwrite prior episode scene before successfully loading a new one. */
+(function(root){'use strict';
+const K=root.C6Core,api=root.__C4_TEST__,$=id=>document.getElementById(id);
+if(!K||!api)throw Error('C6: сначала должны загрузиться C5 Studio + EpisodeCore');
+let pack=K.demo(api.project),epIndex=0,sceneIndex=0,active=null,watching=false,playhead=0,prevTime=0,lastRender=0;
+const clone=K.clone;
+function report(s){$('c6-status').textContent=s}
+function episode(){return pack.episodes[epIndex]}
+function scene(){return episode().scenes[sceneIndex]}
+function captureActive(){if(active){let e=pack.episodes[active.ep],s=e?.scenes[active.sc];if(s&&s.id===active.id)s.project=clone(api.project);}}
+function loadScene(e=epIndex,s=sceneIndex){let target=pack.episodes[e]?.scenes[s];if(!target)throw Error('Нет такой сцены');
+  let previous=active,previousData=previous&&pack.episodes[previous.ep]?.scenes[previous.sc]?.project;
+  if(previous&&previous.id===target.id){epIndex=e;sceneIndex=s;return;}
+  captureActive();try{api.stopPlayback();api.loadCandidate(target.project);}
+  catch(error){if(previous&&previousData){try{api.loadCandidate(previousData)}catch(_e){}}throw error}
+  epIndex=e;sceneIndex=s;active={ep:e,sc:s,id:target.id};root.C5Studio?.refresh();
+}
+function paintMenus(){let p=$('c6-ep'),s=$('c6-scene');p.replaceChildren();pack.episodes.forEach((e,i)=>{let opt=new Option(e.name,String(i));p.add(opt)});p.value=String(epIndex);s.replaceChildren();episode().scenes.forEach((v,i)=>{let opt=new Option(`${i+1}: ${v.name} (${K.runtime(v).toFixed(1)}с)`,String(i));s.add(opt)});s.value=String(sceneIndex);
+ const z=scene();$('c6-season-title').value=pack.seasonTitle;$('c6-ep-title').value=episode().name;$('c6-scene-title').value=z.name;$('c6-in').value=z.in.toFixed(2);$('c6-out').value=z.out.toFixed(2);$('c6-timeline').max=String(K.duration(episode()));$('c6-time-label').textContent=playhead.toFixed(2)+' / '+K.duration(episode()).toFixed(2)+' с';}
+function audit(){captureActive();const r=K.scan(pack);$('c6-qa').textContent=(r.errors.length?'ОШИБКИ:\n'+r.errors.join('\n'):'Нет структурных ошибок C6.')+'\nПредупреждения ('+r.warnings.length+'):\n'+r.warnings.slice(0,7).join('\n');return r;}
+function setEpisodeTime(t,force=false){let ep=episode(),dur=K.duration(ep);playhead=Math.min(dur,Math.max(0,t));let item=K.locate(ep,playhead);if(!active||active.id!==item.scene.id){loadScene(epIndex,item.index);paintMenus()}
+ api.setTime(item.local);$('c6-timeline').value=playhead;$('c6-time-label').textContent=playhead.toFixed(2)+' / '+dur.toFixed(2)+' с';return item;}
+function stop(){watching=false;$('c6-play').textContent='▶ Смотреть целую серию'}
+function tick(now){requestAnimationFrame(tick);if(!watching){prevTime=now;return}let dt=Math.max(0,Math.min((now-prevTime)/1000,.25));prevTime=now;playhead+=dt;const dur=K.duration(episode());if(playhead>=dur){playhead=dur;stop()}
+ if(now-lastRender>120||!watching){lastRender=now;try{setEpisodeTime(playhead)}catch(e){stop();report(e.message)}}}
+function trigger(blob,name){let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),12000)}
+function selectEp(n){stop();captureActive();let old=epIndex;try{loadScene(n,0);playhead=0;paintMenus();setEpisodeTime(0);audit()}catch(e){epIndex=old;paintMenus();report('Ошибка: '+e.message)}}
+function selectScene(n){stop();captureActive();let old=sceneIndex;try{loadScene(epIndex,n);let st=episode().scenes.slice(0,n).reduce((t,s)=>t+K.runtime(s),0);playhead=st;paintMenus();setEpisodeTime(playhead);audit()}catch(e){sceneIndex=old;paintMenus();report('Ошибка: '+e.message)}}
+function saveCut(){stop();captureActive();let s=scene(),name=$('c6-scene-title').value.trim(),title=$('c6-ep-title').value.trim(),a=Number($('c6-in').value),b=Number($('c6-out').value);if(!name||!title||!Number.isFinite(a)||!Number.isFinite(b)||a<0||b<=a||b>s.project.duration||b-a<.2){report('Ошибка: название обязательное, фрагмент минимум 0,2 с в пределах исходной сцены');return}let prev=[s.name,episode().name,s.in,s.out];s.name=name;episode().name=title;s.in=a;s.out=b;let res=K.scan(pack);if(res.errors.length){[s.name,episode().name,s.in,s.out]=prev;report('Исправьте ошибки: '+res.errors[0]);return}playhead=0;paintMenus();audit();report('Изменения сцены сохранены')}
+function addEpisode(){stop();captureActive();if(pack.episodes.length>=12){report('Максимум 12 серий');return}let n=pack.episodes.length+1;pack.episodes.push({id:`ep-${String(n).padStart(2,'0')}`,name:`${String(n).padStart(2,'0')} · Новая серия`,scenes:[K.makeScene(api.project,'Сцена 1',0,Math.min(8,api.project.duration))]});selectEp(n-1);report('Новая серия добавлена; далее редактируйте кадры и голоса.')}
+function addScene(){stop();captureActive();let e=episode();if(e.scenes.length>=120){report('Максимум 120 сцен в серии');return}let p=clone(api.project),s=K.makeScene(p,'Новая сцена '+(e.scenes.length+1),0,Math.min(8,p.duration));e.scenes.splice(sceneIndex+1,0,s);selectScene(sceneIndex+1);report('Сцена создана на базе прежней, параметры можно менять отдельно')}
+function deleteScene(){stop();captureActive();let e=episode();if(e.scenes.length===1){report('Последнюю сцену удалять нельзя');return}let idx=sceneIndex;e.scenes.splice(idx,1);active=null;selectScene(Math.max(0,idx-1));report('Сцена удалена только из C6; резерв JSON не затронут')}
+function move(n){stop();captureActive();let e=episode(),k=sceneIndex,j=k+n;if(j<0||j>=e.scenes.length)return;[e.scenes[k],e.scenes[j]]=[e.scenes[j],e.scenes[k]];active=null;selectScene(j);report('Порядок монтажа обновлён')}
+async function importFull(file){let text=await file.text();if(text.length>42e6){report('Проект слишком большой для браузерного импорта');return}let raw;try{raw=JSON.parse(text)}catch(e){report('Повреждённый JSON отклонён: '+e.message);return}let candidate;
+ try{candidate=raw.schema===K.SCHEMA?raw:K.importC5(raw);let r=K.scan(candidate);if(r.errors.length)throw Error(r.errors.slice(0,5).join('; '));let first=candidate.episodes[0].scenes[0];root.C4Core.adaptC3(first.project);}
+ catch(e){report('Импорт отклонён; данные не менялись: '+e.message);return}
+ stop();let old=pack;captureActive();try{api.loadCandidate(candidate.episodes[0].scenes[0].project);pack=candidate;epIndex=0;sceneIndex=0;active={ep:0,sc:0,id:pack.episodes[0].scenes[0].id};playhead=0;root.C5Studio?.refresh();paintMenus();setEpisodeTime(0);audit();report('Полный C6 проект импортирован. Исторический C5 JSON сохранён в составе сцены.')}
+ catch(e){pack=old;report('Импорт не применён: '+e.message)}}
+function bind(){ $('c6-ep').addEventListener('change',e=>selectEp(Number(e.target.value)));$('c6-scene').addEventListener('change',e=>selectScene(Number(e.target.value)));
+ $('c6-add-ep').addEventListener('click',addEpisode);$('c6-add-scene').addEventListener('click',addScene);$('c6-delete-scene').addEventListener('click',deleteScene);$('c6-up').addEventListener('click',()=>move(-1));$('c6-down').addEventListener('click',()=>move(1));
+ $('c6-save-cut').addEventListener('click',saveCut);$('c6-commit').addEventListener('click',()=>{captureActive();audit();report('Параметры 3D и русская речь сохранены в сцене C6.')});
+ $('c6-season-title').addEventListener('change',e=>{pack.seasonTitle=e.target.value.trim();audit()});
+ $('c6-timeline').addEventListener('input',e=>{stop();try{setEpisodeTime(Number(e.target.value))}catch(err){report(err.message)}});
+ $('c6-play').addEventListener('click',()=>{if(watching){stop();return}if(playhead>=K.duration(episode())-.001)playhead=0;api.stopPlayback();watching=true;prevTime=performance.now();$('c6-play').textContent='❚❚ Пауза серии';report('Просмотр серии; звук русских голосов при пакетном рендере добавляется отдельно')});
+ $('c6-export-json').addEventListener('click',()=>{captureActive();pack.seasonTitle=$('c6-season-title').value.trim();let v=audit();if(v.errors.length){report('Исправьте ошибки перед сохранением: '+v.errors[0]);return}trigger(new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),'PROJECT_C6_SEASON.json');report('Полный сезон JSON скачан; сохраните его отдельно от ZIP.')});
+ $('c6-export-srt').addEventListener('click',()=>{captureActive();trigger(new Blob([K.srt(episode())],{type:'text/plain;charset=utf-8'}),`C6_EPISODE_${epIndex+1}_RU.srt`)});
+ $('c6-import-json').addEventListener('click',()=>$('c6-file').click());$('c6-file').addEventListener('change',async e=>{let f=e.target.files[0];if(f)await importFull(f);e.target.value=''}) }
+try{bind();loadScene(0,0);paintMenus();audit();requestAnimationFrame(tick);report('C6 готова: две демонстрационные серии. Укажите имена и длительность сцен, затем экспортируйте полный сезон JSON.');root.C6Studio={get project(){captureActive();return pack},loadProject:async raw=>{let file={text:async()=>JSON.stringify(raw)};await importFull(file)},setEpisodeTime,selectEp,selectScene,stop,scan:audit};}
+catch(e){report('Ошибка запуска C6: '+e.stack);console.error(e)}
+})(window);
+
+</script></body></html>
