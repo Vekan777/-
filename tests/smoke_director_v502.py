@@ -37,9 +37,9 @@ def main():
             page.reload(wait_until="load")
             page.wait_for_function("() => window.v502Director && window.v501Visual && window.v50FinalQA")
             checks=page.evaluate("""() => ({
-                enabled:P.v502Director.enabled,
+                enabled:window.v50FinalQA.currentProject().v502Director.enabled,
                 allVersions:['v35Frame','v48Manifest','v50AuditProject','v502Director'].map(
-                   n=>typeof window[n]!=='undefined'||typeof eval(n)!=='undefined'),
+                   n=>typeof window[n]!=='undefined'),
                 errors:window.v50FinalQA.audit().errors})""")
             assert checks["enabled"] and all(checks["allVersions"]),checks
             assert not checks["errors"],checks["errors"][:8]
