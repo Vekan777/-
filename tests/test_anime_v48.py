@@ -47,6 +47,6 @@ class EpisodeV48(unittest.TestCase):
   py=(ROOT/"scripts/render_anime_v48.py").read_text()
   for tok in ("V48_RENDER_CHECKPOINT.json","FFprobe","--qa-short",
    "resume_done(","--mp4","libx264","-c:a","aac",
-   "v37SubtitleFile","v36-export","project_sha256","html_sha256"):
+   "v48BatchBridge.subtitles","v36-export","project_sha256","html_sha256"):
    self.assertIn(tok,py,tok)
 if __name__=="__main__":unittest.main()
