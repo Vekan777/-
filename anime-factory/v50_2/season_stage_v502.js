@@ -26,9 +26,15 @@ function seasonArt(g,episode,scene,t,pairs){
  const f=Math.max(0,Math.min(.999, t/Math.max(.01,scene.duration)));
  const active=shots.find(x=>f>=x.from&&f<x.to);
  if(!active || !['hero','partner','over','impact'].includes(active.kind))return;
- const key=active.kind==='hero'?keyRole[pairs[0][0]]:
-   active.kind==='partner'?keyRole[pairs[1][0]]:
-   active.kind==='impact'?'battle':(episode===4?'portal':'world');
+ // Choose illustrated emotion variants according to scene beats.
+ const selected=active.kind==='hero'?pairs[0][0]:active.kind==='partner'?pairs[1][0]:null;
+ const variant=selected==='hero'&&scene.kind==='fight'?'akira_screaming':
+               selected==='hero'&&episode===5?'akira_power':
+               selected==='lover'&&scene.kind==='romance'?'miyu_worried':
+               selected==='friend'&&(scene.kind==='betrayal'||episode>=4)?'ren_worried':
+               selected==='rival'&&scene.kind==='betrayal'?'saira_detail':null;
+ const key=active.kind==='impact'?'battle':selected?(variant||keyRole[selected]):
+           (episode===4?'portal':'world');
  const img=gallery[key];if(!img?.complete||!img?.naturalWidth)return;
  const local=(f-active.from)/Math.max(.0001,active.to-active.from);
  const W=960,H=540;
@@ -41,10 +47,14 @@ function seasonArt(g,episode,scene,t,pairs){
  }else{
   g.save();g.filter='blur(17px) brightness(.41)';
   g.drawImage(img,(W-cw)/2,(H-ch)/2,cw,ch);g.restore();
-  const contain=Math.min((W-115)/img.naturalWidth,(H-58)/img.naturalHeight);
+  // Small deterministic camera and breath action, not false face rigging.
+  const timeSec=Math.max(0,t),breath=Math.sin(timeSec*2.1+episode*.6)*.006;
+  const contain=Math.min((W-115)/img.naturalWidth,(H-58)/img.naturalHeight)*
+                (1+breath+local*.026);
   const iw=img.naturalWidth*contain,ih=img.naturalHeight*contain;
-  const x=active.kind==='hero'?W*.17:W*.67;
-  g.drawImage(img,Math.max(5,Math.min(W-iw-5,x-iw*.48)),(H-ih)*.51,iw,ih);
+  const x=(active.kind==='hero'?W*.17:W*.67)+Math.sin(local*3.14)*11;
+  const y=(H-ih)*.51+Math.sin(timeSec*1.6+episode)*3;
+  g.drawImage(img,Math.max(5,Math.min(W-iw-5,x-iw*.48)),y,iw,ih);
  }
  g.fillStyle='#071225';g.fillRect(0,0,W,22);g.fillRect(0,H-25,W,25);
  g.font='600 12px sans-serif';g.fillStyle='#e9eef9';
