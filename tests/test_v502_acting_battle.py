@@ -37,6 +37,15 @@ def main():
     name=f"EP{ei+1}_SC{si+1}.png";(output/name).write_bytes(raw)
     records.append(dict(episode=ei+1,scene=si+1,sha256=hashval))
   assert len(set(hashes))>=30
+  # Earlier builds falsely passed because subtitle variations changed hashes,
+  # although all six fights displayed the same reused battle illustration.
+  from PIL import Image
+  battle_center=[]
+  for ei in range(1,7):
+   image=Image.open(output/f"EP{ei}_SC3.png").convert("RGB")
+   center=image.crop((40,38,600,300))
+   battle_center.append(hashlib.sha256(center.tobytes()).hexdigest())
+  assert len(set(battle_center))>=4,("Same still reused for all fights",battle_center)
   ep=page.evaluate("()=>window.v50FinalQA.currentProject().episodes[0]")
   t1=ep["scenes"][0]["duration"]*.29;t2=ep["scenes"][0]["duration"]*.65
   first=page.evaluate("([e,t])=>window.v502ActingQA.frame(e,t,640)",[0,t1])
