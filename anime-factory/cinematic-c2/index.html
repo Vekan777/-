@@ -1,0 +1,190 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Anime Factory — CINEMATIC C2</title>
+<style>
+:root{color-scheme:dark;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;--ink:#e6eaf8;--muted:#aab5cf;--panel:#151d31;--blue:#7addf9;--edge:#33415d}
+*{box-sizing:border-box}body{margin:0;background:#0a0f1c;color:var(--ink)}header{display:flex;align-items:center;justify-content:space-between;gap:1.4rem;background:linear-gradient(96deg,#151e3b,#151126);border-bottom:1px solid var(--edge);padding:15px 3.5vw;flex-wrap:wrap}
+h1{font-size:22px;margin:0;letter-spacing:.03em}.tag{display:inline-block;background:#253c56;color:#bfeafe;border-radius:4px;padding:2px 7px;font-size:11px}p{margin:.4rem 0}.muted{color:var(--muted)}main{max-width:1550px;margin:20px auto;padding:0 16px;display:grid;grid-template-columns:minmax(420px,1.65fr) minmax(305px,.8fr);gap:15px}section{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px;margin-bottom:14px}h2{font-size:16px;margin:1px 0 11px}button,select,input[type=number],input[type=text]{background:#283653;color:#f4f7ff;border:1px solid #495b83;border-radius:7px;padding:8px 11px;font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}button:hover:not(:disabled){background:#3b5178}.primary{background:#245b91;border-color:#438bd0}.danger{border-color:#9b5060}.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}canvas{display:block;width:100%;aspect-ratio:16/9;border:1px solid #3a4867;background:#141b34;border-radius:7px}.canvas-wrap{position:relative}.stamp{position:absolute;right:12px;top:12px;pointer-events:none;color:#fff;background:#0b1023ba;border:1px solid #ffffff3d;border-radius:6px;padding:3px 8px;font-size:11px}.slider{width:100%;accent-color:var(--blue)}.events{display:flex;flex-direction:column;gap:5px;max-height:330px;overflow-y:auto}.event{width:100%;text-align:left;font-size:12px;background:#1d2b44;border-left:3px solid #6b9fbd;display:flex;justify-content:space-between;gap:6px}.event.active{border-left-color:#e7aaff;background:#334663}.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin:8px 0}.field label{display:block;font-size:12px;color:#c4d0e2;margin-bottom:4px}.field input[type=file]{width:100%;font-size:12px;max-width:100%}.help{font-size:12px;color:var(--muted)}.status{padding:8px 10px;border-radius:7px;background:#203247;white-space:pre-wrap;font-size:12px}.issue{border-left:3px solid #e0b06b;margin:5px 0;padding:4px 8px;background:#2c2c35;font-size:12px}.issue.err{border-left-color:#e07a7a}.value{color:#bdeafe}.timeline{height:38px;background:#101b30;position:relative;overflow:hidden;border-radius:6px;margin-top:5px}.shot{position:absolute;top:4px;bottom:4px;border-right:2px solid #94a0d9;background:#2f4666;color:#ecf7ff;padding:4px;font-size:10px;white-space:nowrap;overflow:hidden}.marker{position:absolute;top:0;bottom:0;width:2px;background:#8feafa;pointer-events:none}.badge2{color:#ffd79e}textarea{background:#0e182d;border:1px solid #475f85;border-radius:8px;color:white;font:12px/1.45 monospace;width:100%;min-height:135px;padding:10px;resize:vertical}.full{grid-column:1/-1}a{color:#a5deff}@media(max-width:870px){main{display:block}.cols{grid-template-columns:1fr}header{padding:12px 16px}}
+
+<style>
+.c2-panel{border-color:#4476a6;background:linear-gradient(150deg,#1a2745,#151d31 66%)}.c2-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}.c2-gallery-card{background:radial-gradient(ellipse at 48% 30%,#314768,#0d192e 68%);border:1px solid #4b6792;border-radius:10px;min-width:0;overflow:hidden;text-align:center}.c2-gallery-card img{width:100%;height:240px;object-fit:contain;display:block}.c2-gallery-card div{padding:6px 3px 9px;color:#b8d7ed;font-size:11px}.c2-colors{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin:9px 0}.c2-colors label{background:#22324f;display:flex;align-items:center;justify-content:space-between;border-radius:6px;padding:6px;font-size:12px}.c2-colors input{width:47px;height:29px;border:0;padding:0;background:transparent}@media(max-width:590px){.c2-gallery-card img{height:175px}} 
+</style></head><body>
+<header><div><h1>AI ANIME FACTORY <span class="tag">CINEMATIC C2 / CHARACTER IDENTITY & BATTLES</span></h1><p class="muted">Оригинальная боевая сцена • дизайнер персонажей • 3 ракурса • 9 поз • русские реплики • WebM</p></div><div class="toolbar"><button id="load-demo">Новая демонстрация</button><button id="export-json">Сохранить весь проект JSON</button><button id="import-json-btn">Загрузить JSON</button><input hidden type="file" id="import-json" accept=".json,application/json"></div></header>
+<main>
+<div>
+<section><div class="toolbar"><h2 style="flex:1">Режиссёрский монитор</h2><select id="quality" aria-label="Качество предпросмотра"><option value="640,360,12">Эконом: 640×360, 12 к/с</option><option value="1280,720,24" selected>HD: 1280×720, 24 к/с</option></select></div>
+<div class="canvas-wrap"><canvas id="screen" width="1280" height="720"></canvas><div class="stamp">C2 ВЕКТОРНЫЙ ЧЕРНОВИК — НЕ СТУДИЙНАЯ РИСОВКА</div></div>
+<input type="range" class="slider" id="seek" min="0" max="14" step=".01" value="0" aria-label="Позиция воспроизведения"><div class="toolbar"><button class="primary" id="play">▶ Воспроизвести</button><button id="rewind">↺ С начала</button><span class="value" id="clock">00:00.00 / 00:14.00</span><span class="muted" id="shot-name">План</span></div><div class="timeline" id="timeline"></div>
+<p class="help">C2 использует оригинальные процедурные SVG-образы с разными ракурсами и позами. Это редактируемые черновики, а не качество студии; для финального изображения импортируйте свой арт.</p></section>
+<section><h2>Импорт профессионального арта и русской озвучки</h2><div class="cols">
+<div><div class="field"><label>Фон сцены, PNG / JPG / WebP</label><input id="image-background" type="file" accept="image/png,image/jpeg,image/webp"></div><div class="field"><label>Нова — оригинальный персонаж, PNG с прозрачностью</label><input id="image-nova" type="file" accept="image/png,image/webp"></div><div class="field"><label>Страж — оригинальный противник, PNG с прозрачностью</label><input id="image-warden" type="file" accept="image/png,image/webp"></div><div class="field"><label>Передний план / дым, PNG с прозрачностью</label><input id="image-foreground" type="file" accept="image/png,image/webp"></div></div>
+<div><div class="field"><label>Реплика b02 (Нова), русский WAV / MP3 / OGG</label><input id="audio-b02" type="file" accept="audio/wav,audio/mpeg,audio/ogg,audio/mp3"></div><div class="field"><label>Реплика b08 (Страж), русский WAV / MP3 / OGG</label><input id="audio-b08" type="file" accept="audio/wav,audio/mpeg,audio/ogg,audio/mp3"></div><div class="field"><label>Реплика b12 (Нова), русский WAV / MP3 / OGG</label><input id="audio-b12" type="file" accept="audio/wav,audio/mpeg,audio/ogg,audio/mp3"></div><div class="field"><label><input type="checkbox" id="rights"> Я подтверждаю права на импортированный арт и звук</label></div><button id="tts-preview">Произнести реплики на русском (если есть голос ОС)</button><p class="help">Системный голос — только для прослушивания, <strong>не записывается</strong> в WebM. Для записи используйте загруженные аудиофайлы.</p></div></div></section>
+<section class="c2-panel"><h2>CHARACTER STUDIO C2 — единый дизайн и разные ракурсы</h2>
+<p class="help">Рабочий офлайн-генератор исходного векторного дизайна (без сетевых моделей). Генерирует уникальные силуэты, лицо, экипировку и оружие на базе постоянной карточки персонажа; импорт PNG/WebP заменяет конкретную позу/ракурс. Художественные правки остаются обязательными.</p>
+<div class="toolbar"><label>Герой <select id="c2-actor"><option value="nova">Нова</option><option value="warden">Страж</option></select></label><label>Ракурс <select id="c2-view"><option value="front">Анфас</option><option value="threequarter" selected>¾</option><option value="profile">Профиль</option></select></label><label>Поза <select id="c2-pose"><option value="idle">Покой</option><option value="ready" selected>Стойка</option><option value="windup">Замах</option><option value="dash">Рывок</option><option value="slash">Удар</option><option value="block">Блок</option><option value="dodge">Уклонение</option><option value="hit">Попадание</option><option value="recover">Возврат</option></select></label><label>Лицо <select id="c2-expression"><option value="neutral">Спокойное</option><option value="focused" selected>Сосредоточенное</option><option value="angry">Злость</option><option value="hurt">Боль</option><option value="confident">Уверенность</option></select></label></div>
+<div class="toolbar"><input type="text" id="c2-new-actor-name" maxlength="60" placeholder="Имя нового героя" aria-label="Имя нового героя"><button id="c2-add-actor">+ Добавить героя (до 12)</button></div><div id="c2-gallery" class="c2-gallery"></div><div id="c2-fingerprint" class="help"></div>
+<div class="cols"><div><div class="field"><label>Имя персонажа</label><input type="text" id="c2-name" maxlength="60" style="width:100%"></div><div class="field"><label>Отличительные признаки для согласованности</label><input type="text" id="c2-signature" maxlength="160" style="width:100%"></div><div class="field"><label>Тип фигуры и костюма</label><select id="c2-archetype"><option value="scout">Быстрый разведчик</option><option value="guardian">Тяжёлый рыцарь</option><option value="mystic">Маг / посох</option><option value="duelist">Дуэлянт / рапира</option><option value="ranger">Следопыт / лук</option><option value="mechanist">Механист / броня</option></select></div><div id="c2-colors" class="c2-colors">
+<label>Волосы / шлем <input type="color" id="c2-hair"></label><label>Глаза <input type="color" id="c2-eye"></label><label>Кожа <input type="color" id="c2-skin"></label><label>Костюм <input type="color" id="c2-primary"></label><label>Акцент <input type="color" id="c2-accent"></label><label>Тени <input type="color" id="c2-shadow"></label><label>Оружие <input type="color" id="c2-weapon"></label></div><button id="c2-apply" class="primary">Применить дизайн ко ВСЕМ планам</button></div>
+<div><div class="field"><label>Загрузить PNG/WebP для выбранного ракурса и позы (рекомендовано от 400×600 с прозрачностью)</label><input type="file" id="c2-import" accept="image/png,image/webp"></div><div class="field"><label><input type="checkbox" id="c2-asset-rights"> Я подтверждаю наличие прав на этот файл</label></div><button id="c2-add-sprite">Загрузить в библиотеку поз</button><div id="c2-upload-result" class="status" role="status">По умолчанию используются процедурные SVG-черновики.</div><div class="field"><label><input type="checkbox" id="c2-human-reviewed"> Я лично проверил лицо, стиль, костюм и ракурсы</label></div><div class="field"><label>Заметки по художественному качеству</label><textarea id="c2-note" placeholder="Что исправить в лице, пропорциях, оружии, перед финальным рендером"></textarea></div><button id="c2-save-notes">Сохранить заметки</button> <button id="c2-export-sheet">Экспорт библии персонажей</button> <button id="c2-contact-png">PNG лист: 3 ракурса × 3 позы</button></div></div>
+</section>
+<section><h2>Экспорт материалов производства</h2><div class="toolbar"><button id="record" class="primary">● Записать сцену WebM</button><button id="export-srt">Экспорт русских субтитров SRT</button><button id="export-plan">Режиссёрский план JSON</button><button id="export-frame">PNG кадр</button></div><div class="status" id="record-status" role="status">Видео 14 сек. Запись идёт в реальном времени; для MP4 используйте FFmpeg/CONVERT_TO_MP4_WINDOWS.bat из архива.</div></section>
+<section><h2>Изменение хореографии (без программирования)</h2><div class="cols"><div class="field"><label>Событие боя</label><select style="width:100%" id="beat-select"></select></div><div class="field"><label>Время события (сек)</label><input id="beat-time" type="number" min="0" max="14" step="0.01" style="width:100%"></div></div>
+<div class="cols"><div class="field"><label>Тип события</label><input type="text" id="beat-action" style="width:100%"></div><div class="field"><label>Дистанция удара (для контакта)</label><input type="number" step=".01" min=".01" max="1" id="beat-reach" style="width:100%"></div></div>
+<div class="field"><label>Режиссёрское намерение или русский текст реплики</label><input type="text" id="beat-text" style="width:100%"></div>
+<button id="save-beat">Применить правки и проверить</button><p class="help">Ключевые кадры персонажей, положения камеры и длительность планов доступны в полной структуре проекта JSON. Экспорт не удаляет предыдущие файлы.</p></section>
+</div>
+<div>
+<section><h2>Ритм боя и причинность</h2><div class="events" id="events"></div></section>
+<section class="c2-panel"><h2>C2 — согласованность внешности персонажей</h2><p class="status" id="c2-result"></p><div id="c2-issues"></div><p class="help">Утверждение «есть лицензионный арт» не доказывается алгоритмом; только вы можете проверить происхождение медиа, работу художника и качество.</p></section><section><h2>Углублённая проверка сцены C1</h2><div id="qa-summary"></div><div id="qa-details"></div><button id="qa-run">Проверить снова</button></section>
+<section><h2>Производственная последовательность</h2><p class="help">1. Драматическая цель → 2. Разбивка ударов → 3. Расстояния и телеграфирование → 4. Планы и монтажная ось → 5. Арт и отдельные ракурсы → 6. Анимация → 7. Эффекты и звук → 8. QA → 9. WebM/MP4.</p><p class="help">Шаги 1–4 автоматизированы частично. Профессиональное рисование, модельная/фонемная синхронизация речи и 3D-моделирование в C1 ещё не автоматизированы.</p></section>
+<section><h2>Резервное копирование</h2><p class="help">Кнопка «Сохранить весь проект JSON» включает внесённые изменения и вложенные изображения/аудио (data URL); крупные файлы могут сделать резерв тяжёлым. Видеоролик — отдельный файл. Сохраняйте копии на диск.</p></section>
+</div>
+</main>
+<script src="cinematic_core.js"></script><script src="character_core_c2.js"></script><script>
+'use strict';
+const C=window.CinematicCore,$=s=>document.querySelector(s),canvas=$('#screen'),ctx=canvas.getContext('2d');
+let p=C.makeDemo(),t=0,playing=false,recording=false,startTS=0,fromT=0,raf=null,lastTTS=-1;
+let images={},sounds={},audioCtx=null;
+const now=()=>performance.now()/1000;
+const timeStr=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${(n%60).toFixed(2).padStart(5,'0')}`;
+function download(name,type,content){const blob=content instanceof Blob?content:new Blob([content],{type});const a=document.createElement('a');let u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),15000);}
+function imageFromData(url){return new Promise((resolve,reject)=>{if(!url){resolve(null);return}const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Повреждённое изображение'));img.src=url;});}
+async function refreshMedia(){images={};sounds={};for(const [key,val] of Object.entries(p.media.images||{}))try{images[key]=await imageFromData(val);}catch(e){console.warn(key,e)};for(const [key,val] of Object.entries(p.media.audio||{}))if(val)sounds[key]=val;}
+function background(W,H,t){
+  let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#060c1e');g.addColorStop(.53,'#17223b');g.addColorStop(1,'#3d3345');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  for(let i=0;i<9;i++){const x=(i*241)%W,w=W*(.05+(i%4)*.009);ctx.fillStyle=`rgba(9,13,31,${.25+i*.043})`;ctx.beginPath();ctx.moveTo(x,H*.71);ctx.lineTo(x-w*.34,H*.34);ctx.lineTo(x+w*.12,H*(.25+.03*(i%3)));ctx.lineTo(x+w,H*.74);ctx.fill();}
+  const grd=ctx.createRadialGradient(W*.72,H*.27,1,W*.72,H*.27,W*.28);grd.addColorStop(0,'#87c0ff55');grd.addColorStop(1,'transparent');ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#242436';ctx.fillRect(0,H*.82,W,H*.18);
+  for(let j=0;j<28;j++){const x=((j*119+17)%1000)/1000*W; const y=(.1+((j*57)%75)/100)*H;ctx.fillStyle=j%3?'#a8b5d41b':'#b4e1ff34';ctx.beginPath();ctx.arc(x+Math.sin(t*.32+j)*W*.005,y+Math.sin(t*.8+j)*H*.012,1+(j%3),0,Math.PI*2);ctx.fill();}
+}
+function paintFigure(id,model,cam,W,H,t){
+ const x=model.x*W,y=H*(.84+model.y),u=W/1280;
+ ctx.save();ctx.translate(x,y);ctx.scale(model.facing||1,1);
+ const isHero=id==='nova',accent=isHero?'#72e8ff':'#e0a0ff';
+ ctx.fillStyle='#02091595';ctx.beginPath();ctx.ellipse(0,0,(isHero?85:105)*u,18*u,0,0,Math.PI*2);ctx.fill();
+ const img=images[id];if(img){let h=(p.actors.find(a=>a.id===id)?.h||420)*u,w=h*img.width/img.height;const angle=model.pose==='hit'?-.1:model.pose==='dash'?.09:0;ctx.translate(0,-12*u);ctx.rotate(angle);ctx.drawImage(img,-w*.5,-h,w,h);ctx.restore();return;}
+ // Painted graphic-novel stand-ins with DIFFERENT silhouettes; still intentionally labeled as placeholders.
+ const q=u,pose=model.pose||'idle',dash=pose==='dash',slash=pose==='slash',block=pose==='block',hit=pose==='hit';
+ ctx.translate(0,(-3+Math.sin(t*2+(isHero?0:2))*3)*q);
+ const leaned=dash?22:hit?-17:slash?13:0;ctx.rotate((leaned*Math.PI/180));
+ ctx.scale(q,q);
+ const poly=(arr,fill,stroke,width=2)=>{ctx.beginPath();ctx.moveTo(arr[0],arr[1]);for(let j=2;j<arr.length;j+=2)ctx.lineTo(arr[j],arr[j+1]);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}};
+ const seg=(arr,stroke,width=5)=>{ctx.beginPath();ctx.moveTo(arr[0],arr[1]);for(let j=2;j<arr.length;j+=2)ctx.lineTo(arr[j],arr[j+1]);ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();};
+ if(isHero){
+   // Nóva: slender, asymmetrical cloak, long icy hair, small double blades.
+   ctx.shadowColor='#61deff';ctx.shadowBlur=15;
+   poly([-43,-208,-70,-150,-123,-84,-65,-102,-38,-86,49,-101,79,-155,44,-207],'#182a4b','#3e7196',2);
+   ctx.shadowBlur=0;
+   poly([-35,-107,-9,-110,0,-36,-25,2,-51,-2],'#172840','#3b5a73',2);
+   poly([14,-113,37,-102,46,-11,13,5,-2,-10],'#223450','#6bbcd1',2);
+   poly([-48,-15,-20,-18,-17,5,-52,10],'#121a31','#74cde3',2);
+   poly([14,-9,46,-8,58,13,24,12],'#121a31','#74cde3',2);
+   poly([-33,-233,23,-235,45,-126,7,-111,-29,-121,-53,-161],'#253a5b','#5793b5',3);
+   poly([-17,-227,0,-212,-6,-128,-21,-127],'#a7d9e7',null,0);
+   poly([-23,-209,38,-207,27,-187,-28,-183],'#314e72','#9bcce6',2);
+   // Right arm with actual attack extension tied to phase.
+   const handX=slash?113:block?5:76,handY=slash?-238:block?-234:-144;
+   seg([-42,-215,-66,-171,-83,-147],'#233a57',20);seg([-42,-215,-66,-171,-83,-147],'#8bcadc',2);
+   seg([36,-215,52,-185,handX,handY],'#2c5274',19);seg([36,-215,52,-185,handX,handY],'#84d9e9',2);
+   poly([-27,-294,5,-306,29,-281,25,-235,-4,-225,-29,-247],'#ded7db','#7094ad',2);
+   poly([-38,-286,-7,-337,4,-315,22,-345,40,-284,20,-291,-7,-287,-22,-266],'#162642','#5b9dc8',3);
+   // distinct flowing braid
+   seg([-16,-278,-44,-255,-54,-213,-45,-186],'#a9e9ff',9);seg([-17,-278,-44,-255,-54,-213,-45,-186],'#336a97',3);
+   poly([7,-266,20,-266,25,-260,13,-258],'#75efff',null,0);
+   // two narrow daggers with visible hilts, length and thumb guarding.
+   seg([handX,handY,handX+22,handY-8],'#22324f',11);seg([handX+20,handY-9,handX+(slash?104:55),handY-(slash?85:74)],'#e7fbff',7);seg([handX+20,handY-9,handX+(slash?104:55),handY-(slash?85:74)],'#69d4ff',2);
+   seg([-83,-147,-101,-127],'#26314a',8);seg([-101,-127,-151,-177],'#cfedfd',6);
+ } else {
+   // The Warden: broad armored body, huge shoulders, angular helmet and glaive.
+   ctx.shadowColor='#c48cff';ctx.shadowBlur=25;
+   poly([-36,-227,-104,-212,-134,-119,-101,-39,-42,-75,54,-88,119,-54,145,-164,85,-228],'#241831','#845caa',3);
+   ctx.shadowBlur=0;
+   poly([-42,-111,-2,-112,-3,-19,-41,11,-65,-4],'#3e334f','#a78cc3',2);
+   poly([8,-116,51,-108,62,-4,32,11,0,-19],'#4a3958','#b598c7',3);
+   poly([-64,0,-33,-10,-25,14,-69,19],'#261d36','#956eaf',2);
+   poly([33,-10,66,-5,77,19,30,20],'#261d36','#956eaf',2);
+   poly([-54,-241,-71,-256,-111,-238,-117,-182,-71,-168,-55,-188],'#514261','#b393c9',3);
+   poly([50,-235,78,-260,116,-233,104,-166,67,-174,48,-199],'#514261','#b393c9',3);
+   poly([-65,-234,53,-238,77,-111,33,-102,-7,-144,-48,-111,-82,-149],'#3b2d4b','#b698cc',4);
+   poly([-27,-218,-7,-197,17,-220,22,-169,-3,-146,-29,-174],'#77558c','#deb8ff',3);
+   seg([-28,-143,30,-146],'#6e577c',10);
+   const handX=slash?124:block?5:100,handY=slash?-252:block?-237:-177;
+   seg([-72,-217,-96,-171,-80,-131],'#523e64',28);seg([-72,-217,-96,-171,-80,-131],'#ad8cb9',3);
+   seg([78,-221,110,-205,handX,handY],'#523f68',28);seg([78,-221,110,-205,handX,handY],'#b69dc8',3);
+   // angular helmet, NOT same face as Nóva
+   poly([-47,-297,-32,-328,0,-339,41,-319,50,-289,31,-237,-31,-239],'#392c51','#bc9fdc',4);
+   poly([-57,-303,-85,-323,-40,-318,-22,-286],'#4c3566','#a98acb',2);
+   poly([45,-318,88,-334,54,-284,22,-286],'#4c3566','#a98acb',2);
+   poly([-24,-281,-2,-274,16,-281,7,-265,-13,-264],'#9b66d7',null,0);
+   ctx.shadowColor='#eac0ff';ctx.shadowBlur=11;
+   seg([-18,-279,-5,-277],'#eecbff',4);seg([11,-277,25,-280],'#eecbff',4);
+   ctx.shadowBlur=0;
+   // one giant glaive: different scale, heavy weapon silhouette
+   seg([handX,handY,handX+29,handY-14],'#302843',18);
+   seg([handX+10,handY+70,handX+111,handY-143],'#c2bbcf',10);
+   poly([handX+107,handY-146,handX+158,handY-203,handX+163,handY-148,handX+133,handY-111],'#bcb1d3','#faf2ff',3);
+ }
+ ctx.restore();
+ ctx.save();ctx.font=`${12*q}px system-ui`;ctx.textAlign='center';ctx.fillStyle='#ffffffb8';ctx.fillText((p.actors.find(a=>a.id===id)||{name:id}).name,x,y-475*q);ctx.restore();
+}
+function impacts(s,W,H){for(const e of s.hits){const dt=Math.abs(e.dt),intensity=Math.pow(1-dt/.19,2);const a=s.actors[e.actor],b=s.actors[e.target];if(!a||!b)continue;const x=(a.x+b.x)*.5*W,y=H*.49;
+ ctx.save();ctx.translate(x,y);ctx.globalAlpha=intensity;for(let i=0;i<24;i++){const angle=i*2.39996+e.dt*2;let rad=(42+i*4.3)*W/1280;ctx.strokeStyle=i%3===0?'#fff':i%3===1?'#9ce8ff':'#c1a0ff';ctx.lineWidth=(i%4+1)*W/1280;ctx.beginPath();ctx.moveTo(Math.cos(angle)*rad*.18,Math.sin(angle)*rad*.18);ctx.lineTo(Math.cos(angle)*rad,Math.sin(angle)*rad);ctx.stroke();}ctx.fillStyle='#fff';ctx.shadowColor='#9be2ff';ctx.shadowBlur=40*W/1280;ctx.beginPath();ctx.arc(0,0,16*W/1280,0,Math.PI*2);ctx.fill();ctx.restore();}}
+function render(v){const s=C.stateAt(p,v),W=canvas.width,H=canvas.height;ctx.save();ctx.clearRect(0,0,W,H);
+ const shot=s.shot;const shake=s.hits.reduce((o,h)=>o+Math.max(0,1-Math.abs(h.dt)/.19)*5,0)*(W/1280);const jx=shake*Math.sin(v*193),jy=shake*Math.cos(v*151);
+ ctx.translate(W/2+jx,H/2+jy);ctx.scale(shot.zoom,shot.zoom);ctx.translate(-shot.cx*W,-shot.cy*H);
+ const bg=images.background;if(bg) {let ar=bg.width/bg.height,ratio=W/H;if(ar>ratio){const wd=H*ar;ctx.drawImage(bg,-(wd-W)/2,0,wd,H);}else{const ht=W/ar;ctx.drawImage(bg,0,-(ht-H)/2,W,ht);}}else background(W,H,v);
+ const charList=p.actors.slice().sort((a,b)=>(C.stateAt(p,v).actors[a.id].y||0)-(C.stateAt(p,v).actors[b.id].y||0));charList.forEach(a=>paintFigure(a.id,s.actors[a.id],shot,W,H,v));impacts(s,W,H);
+ if(images.foreground)ctx.drawImage(images.foreground,0,0,W,H);
+ ctx.restore();
+ // Camera-space effects after the movement, so impact still reads.
+ const hit=s.hits[0];if(hit){const alpha=.23*Math.max(0,1-Math.abs(hit.dt)/.19);ctx.fillStyle=`rgba(211,233,255,${alpha})`;ctx.fillRect(0,0,W,H);}
+ let vign=ctx.createRadialGradient(W/2,H/2,H*.1,W/2,H/2,W*.65);vign.addColorStop(0,'transparent');vign.addColorStop(1,'#000b1cc0');ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#080e1bbb';ctx.fillRect(0,0,W,H*.045);ctx.fillRect(0,H*.955,W,H*.045);
+ if(s.dialogue){ctx.fillStyle='#080e1cdd';ctx.fillRect(W*.13,H*.83,W*.74,H*.095);ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.font=`600 ${Math.max(11,Math.floor(W*.023))}px sans-serif`;const speaker=p.actors.find(a=>a.id===s.dialogue.actor)?.name||s.dialogue.actor;ctx.fillText(`${speaker}: ${s.dialogue.text}`,W/2,H*.895,W*.70);}
+ ctx.fillStyle='#dce5f8cc';ctx.font=`${Math.max(11,W*.012)}px monospace`;ctx.textAlign='left';ctx.fillText(`C2 / ${s.shot.kind} / ${v.toFixed(2)}s`,W*.035,H*.069);
+ $('#clock').textContent=`${timeStr(v)} / ${timeStr(p.duration)}`;$('#shot-name').textContent=shot.kind;$('#seek').value=v;
+ const marker=$('#playhead');if(marker)marker.style.left=`${v/p.duration*100}%`;
+ $('#events').querySelectorAll('[data-time]').forEach(el=>el.classList.toggle('active',Math.abs(Number(el.dataset.time)-v)<.24));
+}
+function buildTimeline(){const box=$('#timeline');box.replaceChildren();for(const shot of p.shots){let el=document.createElement('div');el.className='shot';el.style.left=shot.start/p.duration*100+'%';el.style.width=(shot.end-shot.start)/p.duration*100+'%';el.textContent=shot.kind;el.title=`${shot.start}–${shot.end} / ${shot.kind}`;box.appendChild(el);}const marker=document.createElement('div');marker.className='marker';marker.id='playhead';box.appendChild(marker);}
+function buildBeats(){const box=$('#events'),sel=$('#beat-select');box.replaceChildren();sel.replaceChildren();for(const b of p.beats){const btn=document.createElement('button');btn.className='event';btn.dataset.time=b.t;btn.textContent=`${timeStr(b.t)}  ${b.action} · ${b.actor} ${b.contact||''}`;btn.title=b.intent||b.text||'';btn.addEventListener('click',()=>{stop();t=b.t;render(t);sel.value=b.id;editBeat()});box.appendChild(btn);const opt=document.createElement('option');opt.value=b.id;opt.textContent=`${b.id} — ${b.action}`;sel.appendChild(opt)}editBeat();buildTimeline();}
+function editBeat(){const b=p.beats.find(x=>x.id===$('#beat-select').value);if(!b)return;$('#beat-time').value=b.t;$('#beat-action').value=b.action;$('#beat-reach').value=b.reach||'';$('#beat-text').value=b.action==='dialogue'?b.text||'':b.intent||'';}
+function validate(){const out=C.audit(p);$('#qa-summary').textContent=out.ok?`Контроль движения: ошибок ${out.errors}, предупреждений ${out.warnings}`:`ОШИБКИ: ${out.errors}, предупреждений ${out.warnings}. Исправьте, прежде чем выпускать!`;
+ $('#qa-summary').style.color=out.ok?'#b9f0d2':'#ff9999';const div=$('#qa-details');div.replaceChildren();for(const x of out.issues){const el=document.createElement('div');el.className='issue '+(x.severity==='error'?'err':'');el.textContent=`${x.ref}: ${x.message}`;div.appendChild(el);}if(!out.issues.length)div.textContent='Нет автоматических замечаний. Художественная приёмка всё равно обязательна.';return out;}
+function stop(){playing=false;cancelAnimationFrame(raf);$('#play').textContent='▶ Воспроизвести';}
+function play(){if(playing){stop();return}if(t>=p.duration)t=0;playing=true;fromT=t;startTS=now();$('#play').textContent='❚❚ Пауза';lastTTS=-1;tick();}
+function tick(){if(!playing)return;t=Math.min(p.duration,fromT+(now()-startTS));render(t);if(t>=p.duration){stop();return}raf=requestAnimationFrame(tick);}
+function chooseQuality(){const [w,h,f]=($('#quality').value||'1280,720,24').split(',').map(Number);canvas.width=w;canvas.height=h;p.fps=f;render(t);validate();}
+function fileData(file){if(!file)return Promise.resolve(null);if(file.size>12*1024*1024)throw new Error('Один файл должен быть не больше 12 МБ. Для тяжёлых материалов используйте сжатие или внешнюю монтажную систему.');return new Promise((ok,err)=>{let fr=new FileReader();fr.onload=()=>ok(fr.result);fr.onerror=()=>err(new Error('Ошибка чтения'));fr.readAsDataURL(file);});}
+for(const id of ['background','foreground','nova','warden'])$('#image-'+id).addEventListener('change',async e=>{try{const f=e.target.files[0];if(f){p.media.images[id]=await fileData(f);images[id]=await imageFromData(p.media.images[id]);validate();render(t);}}catch(err){alert(err.message)}});
+for(const id of ['b02','b08','b12'])$('#audio-'+id).addEventListener('change',async e=>{try{const f=e.target.files[0];if(f){p.media.audio[id]=await fileData(f);sounds[id]=p.media.audio[id];validate();}}catch(err){alert(err.message)}});
+$('#rights').addEventListener('change',e=>{p.rights.importedAssetsVerified=!!e.target.checked;validate();});
+$('#qa-run').addEventListener('click',validate);
+$('#beat-select').addEventListener('change',editBeat);
+$('#save-beat').addEventListener('click',()=>{let b=p.beats.find(x=>x.id===$('#beat-select').value);if(!b)return;const previous=JSON.parse(JSON.stringify(p.beats));const newTime=Number($('#beat-time').value);if(!Number.isFinite(newTime)||newTime<0||newTime>p.duration){alert('Время вне сцены');return}b.t=newTime;b.action=$('#beat-action').value.trim();const reach=Number($('#beat-reach').value);if(b.contact&&reach>0)b.reach=reach;if(b.action==='dialogue')b.text=$('#beat-text').value;else b.intent=$('#beat-text').value;p.beats.sort((a,b)=>a.t-b.t);const a=validate();if(!a.ok){if(!confirm('Проверка обнаружила ошибки. Сохранить изменения для дальнейшей правки?'))p.beats=previous;}buildBeats();render(t);});
+$('#seek').addEventListener('input',e=>{stop();t=Number(e.target.value);render(t);});$('#play').addEventListener('click',play);$('#rewind').addEventListener('click',()=>{stop();t=0;render(0)});$('#quality').addEventListener('change',chooseQuality);
+$('#load-demo').addEventListener('click',async()=>{if(!confirm('Начать новую сцену? Перед этим сохраните JSON.'))return;stop();p=C.makeDemo();t=0;await refreshMedia();buildBeats();validate();render(t);$('#rights').checked=false;});
+$('#export-json').addEventListener('click',()=>download('cinematic_C1_project_full.json','application/json;charset=utf-8',JSON.stringify(p,null,2)));
+$('#import-json-btn').addEventListener('click',()=>$('#import-json').click());$('#import-json').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const candidate=JSON.parse(await f.text());if(!candidate||candidate.schema!=='ai-anime-cinematic-c1'||!Array.isArray(candidate.actors)||!Array.isArray(candidate.shots)||!Array.isArray(candidate.beats)||!candidate.tracks||!candidate.media)throw new Error('Поддерживается только корректный проект CINEMATIC C1. Для V50 нужен будущий адаптер.');let a=C.audit(candidate);if(candidate.c2&&candidate.c2.schema!=='ai-anime-cinematic-c2')throw new Error('Повреждённая или несовместимая C2-схема');window.CharacterCoreC2.ensure(candidate);const ca=window.CharacterCoreC2.audit(candidate);if(!ca.ok)throw new Error('C2 импорт содержит ошибки: '+ca.issues.filter(i=>i.severity==='error').map(i=>i.message).join('; '));if(!a.ok)throw new Error('В проекте найдены ошибки: '+a.issues.filter(i=>i.severity==='error').map(i=>i.message).join('; '));stop();p=candidate;t=0;await refreshMedia();$('#rights').checked=!!p.rights?.importedAssetsVerified;buildBeats();validate();render(0);}catch(err){alert('Импорт отклонён: '+err.message)}e.target.value='';});
+$('#export-srt').addEventListener('click',()=>download('cinematic_C1_ru.srt','text/plain;charset=utf-8','\ufeff'+C.subtitleSrt(p)));
+$('#export-plan').addEventListener('click',()=>download('cinematic_C1_director_plan.json','application/json;charset=utf-8',JSON.stringify({title:p.title,plan:C.exportPlan(p),audit:C.audit(p)},null,2)));
+$('#export-frame').addEventListener('click',()=>canvas.toBlob(blob=>{if(blob)download(`cinematic_C1_${t.toFixed(2)}.png`,'image/png',blob)},'image/png'));
+$('#tts-preview').addEventListener('click',()=>{if(!window.speechSynthesis){alert('Системный TTS здесь недоступен');return;}speechSynthesis.cancel();const voices=speechSynthesis.getVoices(),russian=voices.find(v=>v.lang.toLowerCase().startsWith('ru'));if(!russian){alert('В системе или браузере не установлен голос для русского языка. Импортируйте аудио WAV/MP3/OGG.');return;}for(const b of p.beats.filter(x=>x.action==='dialogue')){let u=new SpeechSynthesisUtterance(b.text);u.lang='ru-RU';u.voice=russian;u.rate=b.actor==='warden'?.86:.98;u.pitch=b.actor==='warden'?.8:1.1;speechSynthesis.speak(u);}});
+async function decodeData(ctx,data){const bytes=atob(data.slice(data.indexOf(',')+1));const buf=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)buf[i]=bytes.charCodeAt(i);return ctx.decodeAudioData(buf.buffer);}
+$('#record').addEventListener('click',async()=>{
+ if(recording)return;if(!window.MediaRecorder||!canvas.captureStream){alert('Нужен Chrome/Edge с поддержкой MediaRecorder');return;}const audit=validate();if(!audit.ok){alert('Исправьте ошибки сцены перед экспортом');return;}
+ stop();t=0;render(0);recording=true;$('#record').disabled=true;const output=$('#record-status');output.textContent='Подготовка аудио и видеозаписи...';let actx=null,stream=null,recorder=null;
+ try{
+   const mime=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));if(!mime)throw new Error('Нет поддерживаемого WebM-кодека');
+   stream=canvas.captureStream(p.fps);const audioIDs=p.beats.filter(b=>b.action==='dialogue'&&sounds[b.id]);
+   if(audioIDs.length){actx=new(window.AudioContext||window.webkitAudioContext)();await actx.resume();const dest=actx.createMediaStreamDestination();for(const b of audioIDs){try{let buf=await decodeData(actx,sounds[b.id]);let src=actx.createBufferSource();src.buffer=buf;src.connect(dest);src.start(actx.currentTime+b.t);}catch(err){throw new Error('Аудио '+b.id+' не декодируется: '+err.message);}}
+     for(const tr of dest.stream.getAudioTracks())stream.addTrack(tr);
+   }
+   let chunks=[];recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:4500000});
+   const finished=new Promise((resolve,reject)=>{recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};recorder.onstop=resolve;recorder.onerror=e=>reject(e.error||new Error('Ошибка кодирования WebM'));});
+   recorder.start(1000);const start=now();
+   await new Promise(resolve=>{const loop=()=>{t=Math.min(p.duration,now()-start);render(t);output.textContent=`Запись ${t.toFixed(1)} / ${p.duration} секунд. Не закрывайте вкладку.`;if(t>=p.duration){resolve();return;}requestAnimationFrame(loop)};loop()});
+   recorder.stop();await finished;const video=new Blob(chunks,{type:mime});if(video.size<1000)throw new Error('Записанный видеопоток слишком мал');download('CINEMATIC_C2_SCENE.webm',mime,video);output.textContent=`Файл WebM записан (${(video.size/1048576).toFixed(2)} МБ). Аудио: ${audioIDs.length} загруженных клипов.`;
+ }catch(e){output.textContent='Ошибка: '+e.message;alert('Ошибка видеозаписи: '+e.message);if(recorder&&recorder.state!=='inactive')recorder.stop();}
+ finally{if(stream)stream.getTracks().forEach(tr=>tr.stop());if(actx)await actx.close();recording=false;$('#record').disabled=false;}
+});
+(async()=>{await refreshMedia();buildBeats();validate();render(0);})();
+</script><script src="character_studio_c2.js"></script></body></html>
