@@ -185,7 +185,7 @@ def main():
     reports=[]
     for i in indices:
         print("V50.2 OFFLINE RENDER",i+1,a.width,a.fps,flush=True)
-        reports.append(render(a.html,a.project and project,a.out,i,a.width,a.fps,a.preview_only))
+        reports.append(render(a.html,project,a.out,i,a.width,a.fps,a.preview_only))
         print("COMPLETE",i+1,reports[-1]["frames"],flush=True)
     report={"schema":"AIAnimeFactory/V502/OfflineHighQuality/1",
             "sourceCanonSha256":canon,"episodes":reports,
