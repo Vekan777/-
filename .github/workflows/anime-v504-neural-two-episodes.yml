@@ -1,0 +1,209 @@
+name: AI Anime Factory V50.4 Five RU Voices and Two Newly Rendered Episodes
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/revoice_v504_silero.py"
+      - ".github/workflows/anime-v504-neural-two-episodes.yml"
+      - "anime-factory/v50_4/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  genuinely-neural-two-episodes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Canon + program syntax deep QA
+        run: |
+          python -m py_compile scripts/revoice_v504_silero.py
+          node tests/test_deep_qa_v50.js
+          python scripts/expand_season_v502.py --project /dev/null --out /tmp/validate --validate-only
+      - name: Install media, browser and CPU neural synthesis
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
+          python -m pip install numpy soundfile playwright==1.56.0 pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+      - name: Download MIT Silero V5 CIS Base neural model directly and check binary
+        run: |
+          mkdir -p dist/V504
+          curl -fLsS --retry 5 --retry-all-errors --retry-delay 4 \
+            --connect-timeout 20 --max-time 480 \
+            -o dist/V504/silero_v5_cis_base.pt \
+            https://models.silero.ai/models/tts/ru/v5_cis_base.pt
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('dist/V504/silero_v5_cis_base.pt')
+          assert p.stat().st_size>25_000_000,'Full checkpoint missing'
+          print('REAL SILERO CIS BASE binary',p.stat().st_size,
+                'SHA256',hashlib.sha256(p.read_bytes()).hexdigest())
+          PY
+      - name: Reconstruct exact six-episode Russian pilot canon
+        run: |
+          python anime-factory/v50_2/build_complete_v502.py \
+            --out dist/V504/V502_BOOTSTRAP.html
+          python scripts/produce_2d_pilot_v501.py \
+            --html dist/V504/V502_BOOTSTRAP.html --out dist/V504/base_pilot --tts
+          python scripts/postprocess_v502.py \
+            --project dist/V504/base_pilot/PROJECT_PILOT_V50.json \
+            --output dist/V504/PROJECT_V502_TWO_EP.json
+          python scripts/expand_season_v502.py \
+            --project dist/V504/PROJECT_V502_TWO_EP.json \
+            --out dist/V504/PROJECT_SOURCE_SIX.json --tts --sound
+      - name: Generate 72 ACTUAL neural Russian utterances, two distinct female voices
+        run: |
+          python scripts/revoice_v504_silero.py \
+            --project dist/V504/PROJECT_SOURCE_SIX.json \
+            --output dist/V504/PROJECT_FIVE_NEURAL_RUSSIAN.json \
+            --model dist/V504/silero_v5_cis_base.pt --episodes 1,2,3,4,5,6
+      - name: Verify 5 actual voice sources, timing, subtitles, canon and 72 Russian lines
+        run: |
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          original=Path('dist/V504/PROJECT_SOURCE_SIX.json')
+          new=Path('dist/V504/PROJECT_FIVE_NEURAL_RUSSIAN.json')
+          a=json.loads(original.read_text(encoding='utf-8'))
+          b=json.loads(new.read_text(encoding='utf-8'))
+          assert a['pilotProductionV50']['originalV50ProjectSha256']==b['pilotProductionV50']['originalV50ProjectSha256']
+          assert a['seasonScriptV502']['originalFirstTwoEpisodesSha256']==b['seasonScriptV502']['originalFirstTwoEpisodesSha256']
+          m=b['v504NeuralDub']
+          assert m['scenes']==36 and m['utterances']==72,m
+          assert len(set(m['voices'].values()))==5
+          assert not m['phonemeAligned'] and not m['humanPerformanceApproved']
+          for ep_old,ep in zip(a['episodes'],b['episodes']):
+            assert ep_old['memoryLost']==ep['memoryLost']
+            for x,y in zip(ep_old['scenes'],ep['scenes']):
+              assert [(z['speaker'],z['text']) for z in x['lines']]==[(z['speaker'],z['text']) for z in y['lines']]
+              assert len(y['subtitlesV37']['cues'])==len(y['lines'])==2
+              assert len(y['audioV36']['voice']['segmentsV501'])==2
+              for l,c in zip(y['lines'],y['subtitlesV37']['cues']):
+                assert abs(l['start']-c['start'])<.003
+                assert c['end']<=y['duration']+.003
+              assert 'data:audio/mpeg;base64,' in y['audioV36']['voice']['embeddedV47'][:33]
+          assert hashlib.sha256(original.read_bytes()).hexdigest()==m['sourceSHA256']
+          print('PASS 36 SCENES 72 REAL NEURAL VOICE LINES 5 UNIQUE RUSSIAN CAST')
+          PY
+      - name: Build 6-episode studio with genuinely neural full-season project embedded
+        run: |
+          python anime-factory/v50_2/build_season_v502.py \
+            --project dist/V504/PROJECT_FIVE_NEURAL_RUSSIAN.json \
+            --out dist/V504/AI_ANIME_FACTORY_V504_NEURAL_SIX_SCENES.html
+          python - <<'PY'
+          import json,importlib.util
+          from pathlib import Path
+          p=Path('tests/test_season_v502.py').resolve()
+          spec=importlib.util.spec_from_file_location('v502_qa',p)
+          qa=importlib.util.module_from_spec(spec);spec.loader.exec_module(qa)
+          project=json.loads(Path('dist/V504/PROJECT_FIVE_NEURAL_RUSSIAN.json').read_text())
+          # V50.2 regression expects byte-identical episodes 1-2. Neural
+          # dubbing changes audio/durations intentionally, not dialogue.
+          qa.browser_frames(Path('dist/V504/AI_ANIME_FACTORY_V504_NEURAL_SIX_SCENES.html'),
+            project,Path('dist/V504/BROWSER_QA'))
+          print('Neural V50.4 24 scene browser QA PASSED')
+          PY
+      - name: Record TWO NEW Russian episodes directly from full animation engine
+        run: |
+          python scripts/render_six_pilots_v502.py \
+            --html dist/V504/AI_ANIME_FACTORY_V504_NEURAL_SIX_SCENES.html \
+            --project dist/V504/PROJECT_FIVE_NEURAL_RUSSIAN.json \
+            --out dist/V504/TWO_REAL_EPISODES \
+            --episodes 1,2 --width 960 --fps 12
+      - name: Verify H264 AAC at 960x540 12 fps, real non-silent voice, subtitles
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess,re,json
+          for n in (1,2):
+            p=Path(f'dist/V504/TWO_REAL_EPISODES/episode_{n:02d}.mp4')
+            assert p.stat().st_size>100000,p
+            j=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries',
+                'stream=codec_name,codec_type,width,height,nb_frames:format=duration',
+                '-of','json',str(p)]))
+            assert {'aac','h264'} <= {x['codec_name'] for x in j['streams']}
+            v=next(s for s in j['streams'] if s['codec_type']=='video')
+            assert v['width']==960 and v['height']==540
+            assert int(v['nb_frames'])>720,v
+            assert float(j['format']['duration'])>60
+            vol=subprocess.run(['ffmpeg','-hide_banner','-nostats','-i',str(p),
+                '-vn','-af','volumedetect','-f','null','-'],
+                capture_output=True,text=True,check=True).stderr
+            m=re.search(r'max_volume:\s*(-?[\d.]+) dB',vol)
+            assert m and float(m.group(1))>-38,vol[-600:]
+            assert Path(f'dist/V504/TWO_REAL_EPISODES/episode_{n:02d}.srt').stat().st_size>200
+            print('V50.4 VERIFIED episode',n,int(v['nb_frames']),
+                 round(float(j['format']['duration']),2),'seconds',m.group(1),'dB')
+          PY
+      - name: Create complete Windows playback/editing archive, NOT an art-final release
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,hashlib,zipfile
+          root=Path('dist/V504')
+          out=root/'AI_ANIME_FACTORY_V504_FIVE_VOICES_TWO_EPISODES_WINDOWS.zip'
+          project=json.loads((root/'PROJECT_FIVE_NEURAL_RUSSIAN.json').read_text())
+          assert project['v504NeuralDub']['utterances']==72
+          with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+            filemap={
+              root/'AI_ANIME_FACTORY_V504_NEURAL_SIX_SCENES.html':'AI_Anime_Factory_V50_4_NEURAL.html',
+              root/'PROJECT_FIVE_NEURAL_RUSSIAN.json':'PROJECT_FIVE_NEURAL_RUSSIAN.json',
+              root/'V504_DUB_QA.json':'QA/V504_DUB_QA.json',
+              root/'BROWSER_QA/V502_EP03_EP06_BROWSER_QA.json':'QA/BROWSER_QA.json',
+              Path('scripts/revoice_v504_silero.py'):'SOURCE/revoice_v504_silero.py',
+              Path('scripts/render_six_pilots_v502.py'):'render_six_pilots_v502.py',
+              Path('anime-factory/v50_4/README_RU.md'):'README_RU.md'
+            }
+            for x,y in filemap.items():
+              if not x.exists():raise FileNotFoundError(x)
+              z.write(x,y)
+            for n in (1,2):
+              for ext in ('.mp4','.srt'):
+                f=root/f'TWO_REAL_EPISODES/episode_{n:02d}{ext}'
+                z.write(f,'VIDEOS/'+f.name)
+            for p in (root/'TWO_REAL_EPISODES').glob('ep*_frame*.png'):
+              z.write(p,'FRAME_SAMPLES/'+p.name)
+            z.writestr('RUN_WINDOWS.bat',
+                '@echo off\r\nstart "" "%~dp0AI_Anime_Factory_V50_4_NEURAL.html"\r\n')
+            z.writestr('RENDER_2_EP_WINDOWS.bat',
+                '@echo off\r\ncd /d "%~dp0"\r\n'
+                'py -3 render_six_pilots_v502.py --html AI_Anime_Factory_V50_4_NEURAL.html '
+                '--project PROJECT_FIVE_NEURAL_RUSSIAN.json --out NEW_VIDEOS '
+                '--episodes 1,2 --width 640 --fps 6\r\npause\r\n')
+          with zipfile.ZipFile(out) as z:assert z.testzip() is None
+          print('WINDOWS V50.4 PACKAGE',out,out.stat().st_size,
+                hashlib.sha256(out.read_bytes()).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V504_FIVE_VOICE_SIX_EPISODE_PROJECT_AND_QA
+          path: |
+            dist/V504/PROJECT_FIVE_NEURAL_RUSSIAN.json
+            dist/V504/V504_DUB_QA.json
+            dist/V504/BROWSER_QA/
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: V504_NEW_TWO_RUSSIAN_EPISODES_960_540
+          path: dist/V504/TWO_REAL_EPISODES/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V504_WINDOWS_FIVE_VOICES_TWO_EPISODES
+          path: dist/V504/AI_ANIME_FACTORY_V504_FIVE_VOICES_TWO_EPISODES_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
