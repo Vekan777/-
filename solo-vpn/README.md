@@ -1,9 +1,27 @@
-# Solo VPN — Android build workspace
+# Solo VPN V8 — GitHub build workspace
 
-This is an isolated branch for building the user's **Solo VPN V8** Android client. The repository default branch `main` is unchanged.
+**Branch:** `solo-vpn-v8-build` (isolated from the unrelated `main` project).
 
-Status: work in progress. The full WireGuard-based app requires Android Gradle Plugin 8.7.3, Gradle 8.11.1, Android SDK 35, and its dependencies.
+## Available sources
 
-**Important:** A successful debug APK does **not** mean a live VPN is provisioned. This project needs a separately configured HTTPS API, a dedicated WireGuard server, and payment-provider credentials. Do not publish a debug APK as a production VPN.
+- `android-project.tgz.b64` — Android V8 WireGuard source bundle (Gradle 8.11.1, Android Gradle Plugin 8.7.3, SDK 35). A **small 48×48 variant** of the selected anime avatar is used only in this cloud build to keep upload size modest; the full-resolution image is retained in the local V8 archive.
+- `web-api-project.tgz.b64` — website, FastAPI service, Linux deployment examples, docs and tests. No real API/payment/server secrets included.
+- `.github/workflows/build-solo-vpn-android.yml` — Android debug APK workflow. Open the GitHub Actions tab to download the successful build artifact.
 
-User's chosen Solo VPN branding, 7-day trial, and paid access rules remain part of the local V8 source archive; this branch is the isolated CI workspace.
+These sources are stored as compressed base64 text in this branch for reliable transfer via the GitHub connector.
+
+## How to unpack (Ubuntu/Linux/macOS)
+
+```bash
+mkdir -p android-src web-api-src
+base64 -d solo-vpn/android-project.tgz.b64 | tar xz -C android-src
+base64 -d solo-vpn/web-api-project.tgz.b64 | tar xz -C web-api-src
+```
+
+## Build result and restrictions
+
+The cloud workflow builds an **actual Android WireGuard debug APK**, signed with Android's **debug certificate**. This is not a signed production release, not configured with a real API endpoint, and not yet tested against an operational VPN host. The seven-day trial and payment logic requires the separately deployed and configured backend.
+
+To run the website/backend locally, see `web-api-src/OWNER_LAUNCH_GUIDE_RU.md` after unpacking.
+
+Do not commit any signing keystores, Stripe credentials, real `.env`, access tokens or VPN private keys.
