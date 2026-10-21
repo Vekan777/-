@@ -34,7 +34,10 @@ jobs:
       - name: Install Android API 35 and Build Tools
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
-          sdkmanager 'platforms;android-35' 'build-tools;35.0.1'
+          SDK_MANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          if [ -z "$SDK_MANAGER" ]; then echo 'SDK command-line tools missing'; exit 1; fi
+          echo "Using $SDK_MANAGER"
+          "$SDK_MANAGER" 'platforms;android-35' 'build-tools;35.0.1'
 
       - name: Restore V8 Android project and verify checksum
         run: |
