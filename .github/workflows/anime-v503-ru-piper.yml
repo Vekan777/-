@@ -22,14 +22,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/v503/piper /tmp/v503/voices dist/v503
-          curl -fLsS --retry 3 --connect-timeout 20 --max-time 240 \
+          curl -fLsS --retry 5 --retry-all-errors --retry-delay 3 --connect-timeout 20 --max-time 240 \
             -o /tmp/v503/piper.tgz \
             "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz"
           tar -xzf /tmp/v503/piper.tgz -C /tmp/v503
           test -x /tmp/v503/piper/piper
           for voice in denis dmitri; do
             for ext in onnx onnx.json; do
-              curl -fLsS --retry 3 --connect-timeout 20 --max-time 300 \
+              curl -fLsS --retry 5 --retry-all-errors --retry-delay 3 --connect-timeout 20 --max-time 300 \
                 -o "/tmp/v503/voices/ru_RU-$voice-medium.$ext" \
                 "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/$voice/medium/ru_RU-$voice-medium.$ext?download=true"
             done
