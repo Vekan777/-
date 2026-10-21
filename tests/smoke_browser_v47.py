@@ -156,6 +156,17 @@ def main():
     kinds={a["codec_type"] for a in probe.get("streams",[])}
     if not {"video","audio"}.issubset(kinds):
      raise AssertionError("WebM missing actual video and audio after JSON rehydration")
+   # An audio track might contain nothing. Confirm restored WAV produces real
+   # audible samples in the final recorded media, not just an empty track.
+   if shutil.which("ffmpeg"):
+    verify=subprocess.run(["ffmpeg","-hide_banner","-nostats","-i",str(movie),
+      "-vn","-af","volumedetect","-f","null","-"],capture_output=True,
+      text=True,timeout=50)
+    import re
+    match=re.search(r"max_volume:\\s*(-?[\\d.]+) dB",verify.stderr)
+    if verify.returncode!=0 or match is None or float(match.group(1))<-42:
+     raise AssertionError("V47 JSON restoration created silent audio: "+
+      verify.stderr[-1000:])
    if errors:raise AssertionError("Browser JavaScript errors: "+"; ".join(errors[:5]))
    (out/"V47_QA.json").write_text(json.dumps({
     "version":47,"embedded_real_voice_and_music":True,
