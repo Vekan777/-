@@ -120,8 +120,8 @@ def patch(html,engine,studio):
   '<button class="accent" id="v36-export">Записать V45 с настоящими 2D-слоями</button>')
  # Actual painted frame: use imported background before V19 near/far effects.
  html=once(html,
-  "drawBG(g,w,h,s.background,sec,q.lighting,q.effects);cin14Layers(g,w,h,s,sec,'far');",
-  "if(!v45DrawBackground(g,w,h,s,sec))drawBG(g,w,h,s.background,sec,q.lighting,q.effects);cin14Layers(g,w,h,s,sec,'far');")
+  "drawBG(g,w,h,s.background,sec,q.lighting,q.effects);",
+  "if(!v45DrawBackground(g,w,h,s,sec))drawBG(g,w,h,s.background,sec,q.lighting,q.effects);")
  # Only injected in the true V15 cutout drawing path; modifies actual PNG layer pivot.
  html=once(html,
   "g.translate(ox+(Number(p.x)||0),oy+(Number(p.y)||0));g.rotate(rot);const k=clamp(Number(p.scale)||1,.5,1.5);g.scale(k,k);g.translate(-ox,-oy);",
