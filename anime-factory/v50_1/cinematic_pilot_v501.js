@@ -11,7 +11,7 @@ const v501Profiles=Object.freeze({
  friend:{id:'friend',hair:'#27362b',edge:'#619177',eye:'#e5ba7b',coat:'#253f37',trim:'#b2be8f',skin:'#dab59b',aura:'#b8ffc1',length:1.02,head:0.96,weapon:'dagger'},
  rival:{id:'rival',hair:'#281c33',edge:'#a65468',eye:'#e8ac79',coat:'#593044',trim:'#d8a579',skin:'#e2b19c',aura:'#ffaa83',length:1.04,head:0.94,weapon:'spear'},
  enemy:{id:'enemy',hair:'#251d2b',edge:'#863c69',eye:'#ff6669',coat:'#28192d',trim:'#bc667b',skin:'#a8939d',aura:'#f45f9d',length:1.14,head:1,weapon:'staff'},
- guardian:{id:'guardian',hair:'#101922',edge:'#455265',eye:'#ff515e',coat:'#151f2f',trim:'#a14356',skin:'#333c48',aura:'#ff5d78',length:1.23,head:1.04,weapon:'axe'}
+ guardian:{id:'guardian',hair:'#101922',edge:'#455265',eye:'#ff515e',coat:'#151f2f',trim:'#a14356',skin:'#333c48',aura:'#ff5d78',length:1.05,head:1.04,weapon:'axe'}
 });
 const v501Ease=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
 const v501Lerp=(a,b,t)=>a+(b-a)*v501Ease(t);
@@ -115,45 +115,65 @@ function v501Eye(g,x,y,color,blink){
  g.fillStyle='#fff';g.beginPath();g.arc(-1,-2,2,0,7);g.fill();g.restore();
 }
 function v501Hair(g,id,p,t){
- const left=id==='lover'? -71:-59;
- const hairGr=g.createLinearGradient(0,-365,110,-230);
- hairGr.addColorStop(0,p.edge);hairGr.addColorStop(.56,p.hair);hairGr.addColorStop(1,'#091a26');
+ const hairGr=g.createLinearGradient(0,-395,55,-330);
+ hairGr.addColorStop(0,p.edge);hairGr.addColorStop(.5,p.hair);hairGr.addColorStop(1,'#142539');
+ // Clear facial recognition zone: do not put hair over eyes or mouth.
  if(id==='lover'){
-   v501Shape(g,[[-62,-309],[-87,-216],[-68,-126],[-49,-166],[-33,-250],[51,-252],[66,-147],[90,-171],[75,-269],[57,-337]],hairGr,'#d7badb',2.4);
+   v501Shape(g,[[-62,-352],[-85,-248],[-64,-125],[-50,-188],
+     [-46,-343],[40,-345],[62,-175],[88,-144],[69,-335]],hairGr,'#d7badb',2);
+   v501Shape(g,[[-55,-366],[-39,-394],[28,-395],[58,-369],
+      [49,-355],[25,-362],[-25,-356]],hairGr,p.edge,1.4);
  }else if(id==='friend'){
-   v501Shape(g,[[-68,-340],[-86,-300],[-68,-257],[52,-273],[75,-311],[40,-356]],hairGr,p.edge,2);
-   v501Shape(g,[[-59,-307],[-95,-260],[-63,-269],[-48,-241],[8,-300],[65,-246],[68,-305],[31,-341]],hairGr);
+   v501Shape(g,[[-66,-353],[-71,-391],[-45,-407],[32,-402],[68,-375],
+      [57,-350],[20,-360],[-20,-352]],hairGr,p.edge,2);
+   v501Shape(g,[[-50,-366],[-25,-348],[-8,-356],[5,-343],
+      [20,-360],[36,-348],[50,-360],[27,-380],[-30,-377]],hairGr,p.edge,1.5);
  }else if(id==='rival'){
-   v501Shape(g,[[-70,-329],[-85,-206],[-62,-229],[36,-246],[75,-211],[76,-323]],hairGr,p.edge,2);
+   v501Shape(g,[[-59,-357],[-75,-295],[-61,-217],[-48,-262],[-45,-355],
+      [38,-352],[55,-228],[74,-217],[64,-344]],hairGr,p.edge,2);
+   v501Shape(g,[[-55,-373],[-20,-399],[40,-391],[58,-367],
+      [27,-357],[2,-368],[-34,-357]],hairGr,p.edge,2);
  }else if(id==='guardian'){
-   for(let n=0;n<5;n++)v501Shape(g,[[n*26-67,-324],[n*30-75,-409-n%2*12],[n*28-48,-327]],p.hair,p.edge,2);
+   for(let n=0;n<5;n++)
+     v501Shape(g,[[n*23-58,-363],[n*25-65,-410-n%2*10],
+       [n*24-43,-368]],p.hair,p.edge,2);
  }else{
-   v501Shape(g,[[-67,-315],[-98,-291],[-54,-278],[-52,-252],[35,-278],[79,-266],[70,-307],[32,-348]],hairGr,p.edge,2);
-   for(let n=0;n<4;n++)v501Shape(g,[[-49+n*27,-327],[-79+n*26,-255],[-24+n*29,-285]],n%2?p.hair:p.edge);
+   v501Shape(g,[[-67,-370],[-87,-381],[-53,-390],[-28,-405],
+     [23,-404],[52,-386],[79,-379],[56,-360],[17,-366],[-31,-354]],
+     hairGr,p.edge,2);
+   for(let n=0;n<5;n++)
+     v501Shape(g,[[-53+n*23,-381],[-61+n*23,-344],
+       [-32+n*23,-359]],n%2?p.hair:p.edge);
  }
 }
 function v501Weapon(g,p,attack=0){
- g.save();g.rotate(attack*.55);
+ // Every weapon grip stays connected to the right hand near local (20,110).
+ g.save();g.rotate(attack*.6);
  if(p.weapon==='sword'){
-   // distinct broad cyan blade
-   v501Shape(g,[[54,-180],[114,-287],[122,-290],[101,-171]],'#97f7ff','#d9feff',3);
-   v501Line(g,[[57,-183],[113,-281]],'#ffffff',2);
-   v501Line(g,[[45,-164],[76,-190]],'#caa46c',7);
-   v501Line(g,[[56,-175],[34,-147]],'#293348',9);
-   v501Glow(g,114,-280,25,'#63eaff',.32);
+   v501Line(g,[[18,117],[49,70]],'#273c53',11);
+   v501Line(g,[[23,91],[68,102]],'#b5a477',8);
+   v501Shape(g,[[49,71],[125,-37],[143,-56],[133,-18],
+     [61,79]],'#77d8eb','#e8ffff',2.5);
+   v501Line(g,[[60,64],[133,-39]],'#d7ffff',2);
+   v501Glow(g,132,-31,23,'#59e4f9',.23);
  }else if(p.weapon==='staff'){
-   v501Line(g,[[55,-134],[74,-351]],'#b5a6d9',10);
-   v501Glow(g,75,-362,40,'#f2bbf7',.34);
-   v501Shape(g,[[75,-397],[57,-366],[75,-336],[96,-366]],'#e6d5f8','#fff',3);
+   v501Line(g,[[23,136],[89,-110]],'#ad9bb7',10);
+   v501Shape(g,[[90,-146],[73,-113],[89,-92],[107,-115]],
+      '#ffe2e9','#fff0ef',2);
+   v501Glow(g,89,-118,31,'#ffd7fa',.33);
  }else if(p.weapon==='dagger'){
-   v501Shape(g,[[55,-148],[95,-199],[105,-194],[76,-134]],'#c3efd7','#f5ffc9',2);
-   v501Line(g,[[45,-143],[73,-160]],'#b8aa79',8);
+   v501Line(g,[[19,118],[45,79]],'#b2a883',10);
+   v501Shape(g,[[40,85],[90,20],[86,45],[54,92]],
+     '#bfe4ce','#f5fff0',2);
  }else if(p.weapon==='spear'){
-   v501Line(g,[[60,-135],[87,-410]],'#ae8279',9);
-   v501Shape(g,[[87,-455],[71,-401],[86,-393],[107,-405]],'#e8bf8f','#fdf0da',2);
+   v501Line(g,[[25,141],[94,-115]],'#b0907c',9);
+   v501Shape(g,[[95,-158],[78,-113],[94,-103],[113,-117]],
+      '#f5dcb6','#fff7dd',2.2);
  }else{
-   v501Line(g,[[49,-139],[102,-274]],'#9ba0af',12);
-   v501Shape(g,[[95,-304],[136,-343],[167,-316],[150,-246],[104,-264]],'#353a49',p.trim,4);
+   v501Line(g,[[22,126],[66,9]],'#929ba7',13);
+   v501Shape(g,[[68,-14],[116,-48],[149,-11],[128,51],[76,36]],
+      '#444959',p.trim,4);
+   v501Line(g,[[80,24],[123,-5]],'#e0abba',2);
  }
  g.restore();
 }
@@ -322,7 +342,7 @@ function v501SceneDraw(g,ei,scene,localTime){
    }
    if(si===3)p.arm=.05+Math.sin(f*3.14)*.10;
    if(si===4&&i===0)p.lean=.06;
-   const sc=si===2&&i===1?0.93:key==='guardian'?1:si===3?0.9:0.94;
+   const sc=si===2&&i===1?0.85:key==='guardian'?0.86:si===3?0.9:0.94;
    v501Actor(g,key,px,py,sc,i===0?1:-1,p,localTime,v501Local);
  }
  if(si===2)v501BattleFX(g,f,motion,localTime);
