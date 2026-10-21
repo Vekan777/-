@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V42):
+AI ANIME FACTORY (текущий редактор V43):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -91,6 +91,7 @@ AI ANIME FACTORY (текущий редактор V42):
    anime-factory\\v40\\AI_Anime_Factory_V40_CHARACTER_ART.html
    anime-factory\\v41\\AI_Anime_Factory_V41_SILHOUETTE_STUDIO.html
    anime-factory\\v42\\AI_Anime_Factory_V42_STAGE_DEPTH.html
+   anime-factory\\v43\\AI_Anime_Factory_V43_ACTION_DIRECTOR.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -213,6 +214,12 @@ def prepare(root, source_dist):
                  "anime-factory/v42/stage_v42.js",
                  "anime-factory/v42/build_stage_v42.py",
                  "anime-factory/v42/README_RU.md",
+                 "anime-factory/v43/director_v43.js",
+                 "anime-factory/v43/build_director_v43.py",
+                 "anime-factory/v43/README_RU.md",
+                 "scripts/build_anime_v43.py",
+                 "tests/test_anime_v43.py",
+                 "tests/smoke_browser_v43.py",
                  "scripts/build_anime_v42.py",
                  "tests/test_anime_v42.py",
                  "tests/smoke_browser_v42.py",
@@ -434,6 +441,14 @@ def prepare(root, source_dist):
         stage42_builder.build().encode("utf-8")
     )
 
+    director43_path=root/"anime-factory"/"v43"/"build_director_v43.py"
+    director43_spec=importlib.util.spec_from_file_location("anime_v43_director",director43_path)
+    director43_builder=importlib.util.module_from_spec(director43_spec)
+    director43_spec.loader.exec_module(director43_builder)
+    data["anime-factory/v43/AI_Anime_Factory_V43_ACTION_DIRECTOR.html"]=(
+        director43_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -501,6 +516,11 @@ def prepare(root, source_dist):
         with zipfile.ZipFile(optional_v42) as z:
             if z.testzip():raise ValueError("V42 ZIP CRC failed")
         data["legacy/"+optional_v42.name]=optional_v42.read_bytes()
+    optional_v43=source_dist/"AI_ANIME_FACTORY_V43_ACTION_DIRECTOR_WINDOWS.zip"
+    if optional_v43.is_file():
+        with zipfile.ZipFile(optional_v43) as z:
+            if z.testzip():raise ValueError("V43 CRC32 error")
+        data["legacy/"+optional_v43.name]=optional_v43.read_bytes()
 
     data["README_RU.txt"] = README_RU.encode("utf-8")
     data["RUN_V7_WINDOWS.bat"] = BAT_GUI.encode("utf-8")
@@ -550,7 +570,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V42 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V43 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())
