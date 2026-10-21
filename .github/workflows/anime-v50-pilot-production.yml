@@ -1,0 +1,93 @@
+name: V50 2D pilot episodes and artistic evidence (non-final)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/production_v50/**"
+      - "scripts/produce_2d_pilot_v50.py"
+      - "tests/smoke_pilot_v50.py"
+      - ".github/workflows/anime-v50-pilot-production.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot-technical-and-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check scripts, dialogue schema and V50 source
+        run: |
+          python -m py_compile scripts/produce_2d_pilot_v50.py tests/smoke_pilot_v50.py
+          python scripts/produce_2d_pilot_v50.py --validate-only
+          python anime-factory/v50/build_final_v50.py --selftest
+          node tests/test_deep_qa_v50.js
+      - name: Install real Chromium, FFmpeg and offline Russian preview TTS
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+          espeak-ng --voices=ru
+          ffprobe -version
+      - name: Build unchanged V50 2D studio
+        run: python anime-factory/v50/build_final_v50.py --output dist/AI_Anime_Factory_V50_FINAL_2D.html
+      - name: Produce real portable 2-episode pilot project with dialogue and scene WAV-to-MP3
+        run: |
+          python scripts/produce_2d_pilot_v50.py --html dist/AI_Anime_Factory_V50_FINAL_2D.html --out dist/V50_PILOT_2D --tts
+      - name: Confirm canon, subtitles, non-empty speech, V50 deep quality and 12 real frames
+        run: |
+          python tests/smoke_pilot_v50.py --html dist/AI_Anime_Factory_V50_FINAL_2D.html --project dist/V50_PILOT_2D/PROJECT_PILOT_V50.json --out dist/V50_PILOT_2D/REVIEW_FRAMES
+      - name: Actually render two full pilot episodes into WebM and H264/AAC MP4 (NOT QA-short)
+        run: |
+          python scripts/render_anime_v48.py --html dist/AI_Anime_Factory_V50_FINAL_2D.html --project dist/V50_PILOT_2D/PROJECT_PILOT_V50.json --out dist/V50_PILOT_2D/VIDEO --episodes 1,2 --fps 6 --mp4
+          python scripts/render_anime_v48.py --html dist/AI_Anime_Factory_V50_FINAL_2D.html --project dist/V50_PILOT_2D/PROJECT_PILOT_V50.json --out dist/V50_PILOT_2D/VIDEO --episodes 1,2 --fps 6 --mp4 > dist/V50_PILOT_2D/RESUME_QA.txt
+          test "$(grep -c 'V48 VERIFIED RESUME / SKIPPED' dist/V50_PILOT_2D/RESUME_QA.txt)" -eq 2
+      - name: Verify output codecs, duration and audible sound independently
+        run: |
+          python - <<'PY'
+          import json,subprocess,re
+          from pathlib import Path
+          d=Path('dist/V50_PILOT_2D/VIDEO')
+          for i in (1,2):
+            p=d/f'episode_{i:02d}.mp4'
+            assert p.stat().st_size>20000,p
+            probe=json.loads(subprocess.run(['ffprobe','-v','error',
+              '-show_entries','stream=codec_name,codec_type:format=duration',
+              '-of','json',str(p)],check=True,capture_output=True,text=True).stdout)
+            codecs={s.get('codec_name') for s in probe['streams']}
+            assert {'h264','aac'}.issubset(codecs),codecs
+            assert float(probe['format']['duration'])>50,probe
+            s=subprocess.run(['ffmpeg','-hide_banner','-nostats','-i',str(p),
+              '-vn','-af','volumedetect','-f','null','-'],capture_output=True,text=True)
+            assert s.returncode==0
+            m=re.search(r'max_volume:\s*(-?[\d.]+) dB',s.stderr)
+            assert m and float(m.group(1))>-45,s.stderr[-700:]
+            print('pilot episode',i,'video/audio verified; needs HUMAN ART REVIEW')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V50_2D_PILOT_REVIEW_FRAMES_AND_PROJECT
+          path: |
+            dist/V50_PILOT_2D/PROJECT_PILOT_V50.json
+            dist/V50_PILOT_2D/PILOT_PRODUCTION_QA.json
+            dist/V50_PILOT_2D/REVIEW_FRAMES/
+            dist/V50_PILOT_2D/RESUME_QA.txt
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: V50_2D_PILOT_TWO_REAL_MP4_WEBM
+          path: dist/V50_PILOT_2D/VIDEO/
+          retention-days: 30
+          if-no-files-found: error
