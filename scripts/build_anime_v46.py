@@ -50,17 +50,16 @@ def assemble(dest):
  for rel in ("anime-factory/v46/animation_engine_v46.js",
   "anime-factory/v46/build_animation_v46.py",
   "anime-factory/v46/README_RU.md",
-  "anime-factory/engine/anime_production_engine_v46.js",
   "scripts/build_anime_v46.py","tests/test_anime_v46.py",
   "tests/smoke_browser_v46.py",
   "anime-factory/roadmap/2D_FINAL_TO_V50_RU.md"):
   path=ROOT/rel
   if not path.is_file():raise FileNotFoundError(str(path))
   files["source/V46_"+path.name]=path.read_bytes()
- manifest={"schema":"AnimeFactoryV46ArtEngineRelease/1","version":45,
+ manifest={"schema":"AnimeFactoryV46AnimationRelease/1","version":46,
   "oldV45SHA256":sha(old),"originalV19SHA256":sha(V19.read_bytes()),
   "preserves":"original V19 + all V20-V45 sources + complete V45 release",
-  "development":"V46 animation keyframes and reusable clip library, V46–V50 not claimed as done",
+  "development":"V46 editable keyframes and clips; V47–V50 not claimed finished",
   "files":[{"path":name,"bytes":len(content),"sha256":sha(content)}
    for name,content in sorted(files.items())]}
  files["BUILD_MANIFEST.json"]=json.dumps(manifest,ensure_ascii=False,indent=2).encode("utf-8")
@@ -84,8 +83,9 @@ def assemble(dest):
   for name in ("source/assembly_v35.js","source/audio_v36.js",
     "source/V40_character_art_v40.js","source/V41_silhouette_v41.js",
     "source/V42_stage_v42.js","source/V43_director_v43.js",
-    "source/V45_keyposes_v45.js","source/V45_anime_production_engine_v45.js",
-    "source/V45_art_assets_v45.js","CONVERT_MP4_WINDOWS.bat"):
+    "source/V44_keyposes_v44.js","source/V45_anime_production_engine_v45.js",
+    "source/V45_art_assets_v45.js","source/V46_animation_engine_v46.js",
+    "CONVERT_MP4_WINDOWS.bat"):
    if name not in z.namelist():raise ValueError("Historical source missing: "+name)
  if out.stat().st_size>90*1024*1024:raise ValueError("V46 package exceeds GitHub file cap")
  print("V46 ZIP VERIFIED",out,out.stat().st_size,
