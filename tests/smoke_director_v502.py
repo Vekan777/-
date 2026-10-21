@@ -47,7 +47,9 @@ def main():
             for episode in range(2):
                 for scene in range(6):
                     sc=data["episodes"][episode]["scenes"][scene]
-                    times=(.08,.33,.57,.86)
+                    times=(.08,.33,.71,.86) if sc["kind"]=="fight" else (
+                           (.08,.33,.51,.86) if sc["kind"]=="betrayal" else
+                           (.08,.33,.57,.86))
                     starts=sum(s["duration"]-.35 for s in data["episodes"][episode]["scenes"][:scene])
                     for phase,fraction in enumerate(times):
                         t=float(sc["duration"])*fraction
