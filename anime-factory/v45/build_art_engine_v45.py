@@ -45,6 +45,7 @@ PANEL=r"""
 </div>
 <div class="card">
  <h2>Локации, фоны и художественная постановка</h2>
+ <div class="field"><label>Выберите конкретную сцену для фона и предпросмотра</label><select id="v45-scene"></select></div>
  <p>Смените текущую сцену в прежнем редакторе «Сценарии» или «Анимация», затем загрузите фон; импорт встроен в рендер всех эпизодов.</p>
  <div class="flex">
   <button id="v45-bg-import" onclick="document.getElementById('v45-bg-file').click()">Загрузить фон PNG/WebP/JPEG</button>
