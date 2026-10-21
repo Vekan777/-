@@ -114,5 +114,5 @@ window.v502CleanCutsQA=Object.freeze({
   finally{P.v502CleanCuts.enabled=old;}
  }
 });
-}if(P)v502Settings(); // Sync startup checkbox for preloaded offline pilot.
+if(P)v502Settings(); // Sync startup checkbox for preloaded offline pilot.
 })();
