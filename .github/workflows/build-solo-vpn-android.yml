@@ -8,6 +8,12 @@ on:
       - 'solo-vpn/solo-avatar-256.png.b64'
       - '.github/workflows/build-solo-vpn-android.yml'
   workflow_dispatch:
+    inputs:
+      api_origin:
+        description: 'Real HTTPS API URL, e.g. https://vpn.example.com; placeholder builds for UI tests only'
+        required: false
+        type: string
+        default: 'https://www.YOUR_DOMAIN.example'
 
 permissions:
   contents: read
@@ -50,8 +56,15 @@ jobs:
           echo '8a6fcb89f783f8c736ef49396f41ea86c1b131c863bcdb9cc4a87bc9459c610e  solo-vpn/build/android/app/src/main/res/drawable/solo_avatar.png' | sha256sum -c -
 
       - name: Build original WireGuard Android client
+        env:
+          SOLO_API_ORIGIN: ${{ inputs.api_origin || 'https://www.YOUR_DOMAIN.example' }}
         working-directory: solo-vpn/build/android
-        run: gradle --no-daemon --stacktrace :app:assembleDebug '-PsoloApiUrl=https://www.YOUR_DOMAIN.example' -PsoloChannel=direct
+        run: |
+          if ! [[ "$SOLO_API_ORIGIN" =~ ^https://[A-Za-z0-9.-]+$ ]]; then
+            echo 'API origin must be an HTTPS origin with no path or query'
+            exit 1
+          fi
+          gradle --no-daemon --stacktrace :app:assembleDebug "-PsoloApiUrl=$SOLO_API_ORIGIN" -PsoloChannel=direct
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
