@@ -46,6 +46,7 @@ V46_ANIMATION = BASE / "anime-factory" / "v46" / "AI_Anime_Factory_V46_ANIMATION
 V47_VOICE = BASE / "anime-factory" / "v47" / "AI_Anime_Factory_V47_PORTABLE_VOICE.html"
 V48_EPISODE = BASE / "anime-factory" / "v48" / "AI_Anime_Factory_V48_EPISODE_ENGINE.html"
 V49_UNIFIED = BASE / "anime-factory" / "v49" / "AI_Anime_Factory_V49_UNIFIED_STUDIO.html"
+V50_FINAL_2D = BASE / "anime-factory" / "v50" / "AI_Anime_Factory_V50_FINAL_2D.html"
 
 
 class Studio:
@@ -60,7 +61,7 @@ class Studio:
         header = ttk.Frame(win, padding=12)
         header.pack(fill="x")
         ttk.Label(header, text="AI RESCUE FACTORY V7", font=("Segoe UI", 20, "bold")).pack(anchor="w")
-        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V49",
+        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V50",
                   font=("Segoe UI", 10)).pack(anchor="w")
         controls = ttk.Frame(win, padding=(12, 4))
         controls.pack(fill="x")
@@ -114,6 +115,7 @@ class Studio:
             ("Открыть Anime Factory V47 Portable Voice", lambda: self.open_html(V47_VOICE)),
             ("Открыть Anime Factory V48 Episode Production", lambda: self.open_html(V48_EPISODE)),
             ("Открыть Anime Factory V49 Unified Studio", lambda: self.open_html(V49_UNIFIED)),
+            ("Открыть Anime Factory V50 FINAL 2D", lambda: self.open_html(V50_FINAL_2D)),
             ("Открыть Anime Factory V20.3", lambda: self.open_html(V20)),
             ("Открыть папку проекта", self.show_workspace)
         ]
