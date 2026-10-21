@@ -34,6 +34,7 @@ V34_STORYBOARD = BASE / "anime-factory" / "v34" / "AI_Anime_Factory_V34_STORYBOA
 V35_ASSEMBLY = BASE / "anime-factory" / "v35" / "AI_Anime_Factory_V35_SCENE_ASSEMBLY.html"
 V36_AUDIO = BASE / "anime-factory" / "v36" / "AI_Anime_Factory_V36_AUDIO_EPISODE_EXPORT.html"
 V37_SUBTITLES = BASE / "anime-factory" / "v37" / "AI_Anime_Factory_V37_SUBTITLES_DELIVERY.html"
+V38_CINEMA = BASE / "anime-factory" / "v38" / "AI_Anime_Factory_V38_CINEMATIC_FINISHING.html"
 
 
 class Studio:
@@ -48,7 +49,7 @@ class Studio:
         header = ttk.Frame(win, padding=12)
         header.pack(fill="x")
         ttk.Label(header, text="AI RESCUE FACTORY V7", font=("Segoe UI", 20, "bold")).pack(anchor="w")
-        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V37",
+        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V38",
                   font=("Segoe UI", 10)).pack(anchor="w")
         controls = ttk.Frame(win, padding=(12, 4))
         controls.pack(fill="x")
@@ -90,6 +91,7 @@ class Studio:
             ("Открыть Anime Factory V35 Scene Assembly", lambda: self.open_html(V35_ASSEMBLY)),
             ("Открыть Anime Factory V36 Audio & Episode Export", lambda: self.open_html(V36_AUDIO)),
             ("Открыть Anime Factory V37 Subtitles Delivery", lambda: self.open_html(V37_SUBTITLES)),
+            ("Открыть Anime Factory V38 Cinematic Finishing", lambda: self.open_html(V38_CINEMA)),
             ("Открыть Anime Factory V20.3", lambda: self.open_html(V20)),
             ("Открыть папку проекта", self.show_workspace)
         ]
