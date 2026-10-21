@@ -1,0 +1,44 @@
+name: V50.2 Clean Cuts source and patch structure
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v50_2/clean_cuts_v502.js"
+      - "anime-factory/v50_2/CLEAN_CUTS_QA_RU.md"
+      - "scripts/apply_clean_cuts_v502.py"
+      - ".github/workflows/anime-v502-clean-cuts.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-source-not-artistic-signoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: JavaScript/Python syntax and standalone source validation
+        run: |
+          node --check anime-factory/v50_2/clean_cuts_v502.js
+          python -m py_compile scripts/apply_clean_cuts_v502.py
+          python - <<'PY'
+          from pathlib import Path
+          js=Path("anime-factory/v50_2/clean_cuts_v502.js").read_text()
+          src=Path("scripts/apply_clean_cuts_v502.py").read_text()
+          assert "globalAlpha=1" in js
+          assert "v502MotionRig" not in js or "Motion" in js
+          assert "v502CleanCutsQA" in js and "v501SceneDraw=function" in js
+          assert "EXPECTED_RIG_SHA256" in src
+          assert "SOURCE/motion_rig_v502.js" in src
+          print("V50.2 PATCH SOURCE CHECK PASSED — artistic approval remains pending")
+          PY
+      - name: Verify original V50 canon and existing editor deep regression
+        run: |
+          node tests/test_deep_qa_v50.js
