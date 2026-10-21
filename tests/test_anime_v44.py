@@ -31,7 +31,7 @@ class V44Tests(unittest.TestCase):
  def test_true_pose_not_only_overlay(self):
   for tok in ("const v44PrevDynamics=v24Dynamics,v44PrevFoot=v24FootPose;",
    "v24Dynamics=function(s,t,role)","v24FootPose=function(s,t,role,side,baseX,baseY)",
-   "const contact=v25Contact(s,seconds);",
+   "contact=v25Contact(s,seconds);",
    "defender&&contact.outcome==='hit'","defender&&contact.outcome==='dodge'",
    "new MediaRecorder(","V44_TRUE_KEYPOSES_EPISODE_",
    "AI_ANIME_FACTORY_V43","AI_ANIME_FACTORY_V44"):
