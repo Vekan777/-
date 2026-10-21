@@ -211,3 +211,33 @@ $('v48-manifest').onclick=()=>download('V48_SEASON_MANIFEST.json',
  new Blob([JSON.stringify(v48Manifest(),null,2)],{type:'application/json;charset=utf-8'}));
 $('v48-project').onclick=v48ExportProject;
 $('v48-record').onclick=v48RecordOne;
+
+/* Narrow export bridge. No private variables are accessed by Playwright.
+   Read-only catalog/subtitle methods; QA truncation is explicitly test-only.
+*/
+window.v48BatchBridge=Object.freeze({
+ count:()=>P?.episodes?.length||0,
+ episode:i=>{
+  const ep=P?.episodes?.[i];if(!ep)throw Error('Episode not found '+i);
+  const p=v35Plan(ep);
+  return {title:ep.title,number:ep.number,duration:p.duration,
+   scenes:p.rows.length,subtitles:v37Timeline(ep).cues.length};
+ },
+ subtitles:(i,format)=>{
+  const ep=P?.episodes?.[i];if(!ep)throw Error('Episode not found');
+  if(!['srt','vtt'].includes(format))throw Error('Unsupported subtitle type');
+  return v37SubtitleFile(ep,format);
+ },
+ testShorten:()=>{
+  if(!P||P.episodes.length<2)throw Error('QA requires two episodes');
+  P.episodes=P.episodes.slice(0,2);
+  for(const ep of P.episodes){
+   ep.scenes=ep.scenes.slice(0,1);
+   ep.scenes[0].duration=2.7;
+   if(ep.scenes[0].audioV36?.voice?.embeddedV47)
+    ep.scenes[0].audioV36.voice.offset=0;
+  }
+  P.version=48;save();
+  return P.episodes.length;
+ }
+});
