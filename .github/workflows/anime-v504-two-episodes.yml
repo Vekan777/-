@@ -1,0 +1,185 @@
+name: Anime V50.4 five-role Russian voices and two episodes
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/voice_v504_five_roles.py"
+      - "scripts/lipsync_v504_russian.py"
+      - "anime-factory/v50_2/acting_battle_v502.js"
+      - ".github/workflows/anime-v504-two-episodes.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Syntax and plot canon QA
+        run: |
+          node --check anime-factory/v50_2/acting_battle_v502.js
+          python -m py_compile scripts/voice_v504_five_roles.py scripts/lipsync_v504_russian.py
+          node tests/test_deep_qa_v50.js
+      - name: Install video and modern build-host voice engines
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data unzip
+          python -m pip install numpy==1.26.4 playwright==1.56.0 pillow soundfile omegaconf
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.5.1
+          python -m playwright install --with-deps chromium
+      - name: Download verified male Piper models plus Rhubarb Linux release
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v504/voices /tmp/v504/rhb dist/v504
+          curl -fLsS --retry 4 --max-time 240 -o /tmp/v504/piper.tgz \
+            https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
+          tar -xzf /tmp/v504/piper.tgz -C /tmp/v504
+          test -x /tmp/v504/piper/piper
+          for v in denis dmitri; do
+            for ext in onnx onnx.json; do
+              curl -fLsS --retry 4 --max-time 300 \
+                "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/$v/medium/ru_RU-$v-medium.$ext?download=true" \
+                -o "/tmp/v504/voices/ru_RU-$v-medium.$ext"
+            done
+          done
+          python - <<'PY'
+          import hashlib,json,pathlib
+          expected={'denis':'15fab56e11a097858ee115545d0f697fc2a316c41a291a5362349fb870411b0a',
+                    'dmitri':'f073356ebc4bd0f80c5af58df2953a5988bd5bdab1eb38635ce960b071fbefcb'}
+          for name,digest in expected.items():
+             p=pathlib.Path('/tmp/v504/voices')/('ru_RU-'+name+'-medium.onnx')
+             assert hashlib.sha256(p.read_bytes()).hexdigest()==digest
+          print('Authentic male Piper models verified')
+          PY
+          curl -fLsS --retry 4 https://api.github.com/repos/DanielSWolf/rhubarb-lip-sync/releases/latest -o /tmp/v504/rhb-release.json
+          python - <<'PY' >/tmp/v504/rhb-url
+          import json
+          assets=json.load(open('/tmp/v504/rhb-release.json'))['assets']
+          matches=[a['browser_download_url'] for a in assets
+                   if 'linux' in a['name'].lower() and a['name'].lower().endswith('.zip')]
+          if len(matches)!=1:raise RuntimeError('Expected one Linux Rhubarb ZIP release, found '+str(matches))
+          print(matches[0])
+          PY
+          curl -fLsS --retry 4 "$(cat /tmp/v504/rhb-url)" -o /tmp/v504/rhb.zip
+          unzip -q /tmp/v504/rhb.zip -d /tmp/v504/rhb
+          find /tmp/v504/rhb -type f -name rhubarb -exec chmod +x {} \;
+          find /tmp/v504/rhb -type f -name rhubarb | head -1 >/tmp/v504/rhubarb-bin
+      - name: Rebuild six original scripts and source audio from ORIGINAL canon
+        run: |
+          python anime-factory/v50_2/build_complete_v502.py --out dist/v504/base.html
+          python scripts/produce_2d_pilot_v501.py --html dist/v504/base.html --out dist/v504/pilot --tts
+          python scripts/postprocess_v502.py --project dist/v504/pilot/PROJECT_PILOT_V50.json \
+            --output dist/v504/two_original.json
+          python scripts/expand_season_v502.py --project dist/v504/two_original.json \
+            --out dist/v504/six_original.json --tts --sound
+      - name: Synthesize all 24 two-episode dialogues in FOUR actual voice timbres
+        run: |
+          export LD_LIBRARY_PATH=/tmp/v504/piper
+          python scripts/voice_v504_five_roles.py --project dist/v504/six_original.json \
+            --out dist/v504/neural_voices.json --piper-bin /tmp/v504/piper/piper \
+            --voices-dir /tmp/v504/voices --episodes 1,2
+      - name: Analyze real Russian recording mouth shapes
+        run: |
+          python scripts/lipsync_v504_russian.py --project dist/v504/neural_voices.json \
+            --out dist/v504/complete_lip_voice.json \
+            --rhubarb "$(cat /tmp/v504/rhubarb-bin)" --episodes 1,2
+      - name: Verify plot, voice distinction, every subtitle and mouth cue
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('dist/v504')
+          a=json.loads((root/'six_original.json').read_text())
+          b=json.loads((root/'complete_lip_voice.json').read_text())
+          assert len(b['episodes'])==6
+          assert a['pilotProductionV50']['originalV50ProjectSha256']==b['pilotProductionV50']['originalV50ProjectSha256']
+          assert [[(l['speaker'],l['text']) for s in e['scenes'] for l in s['lines']] for e in a['episodes']]==[[ (l['speaker'],l['text']) for s in e['scenes'] for l in s['lines']] for e in b['episodes']]
+          roles=set();models=set();cue_total=0
+          for ep in b['episodes'][:2]:
+            assert len(ep['scenes'])==6
+            for scene in ep['scenes']:
+              assert len(scene['lines'])==len(scene['subtitlesV37']['cues'])==2
+              segments=scene['audioV36']['voice']['segmentsV501']
+              assert len(segments)==2
+              for line,seg in zip(scene['lines'],segments):
+                roles.add(line['speaker']);models.add(seg['sourceV503'])
+                assert line['start']+line['duration']<=scene['duration']+.12
+              cues=scene['v504Lip']['cues']
+              assert len(cues)>=3
+              assert all(0<=x['start']<x['end']<=scene['duration']+.01 for x in cues)
+              cue_total+=len(cues)
+          assert {'Акира','Мию','Рэн','Сайра'}<=roles
+          assert all('ESPEAK' not in x for x in models),models
+          assert cue_total>=45,cue_total
+          print('REAL NEURAL FOUR CHARACTERS / 24 LINES /',cue_total,'RUSSIAN LIP CUES',models)
+          PY
+      - name: Build full existing editor with new V50.4 voice and mouth data
+        run: |
+          python anime-factory/v50_2/build_acting_v502.py \
+            --project dist/v504/complete_lip_voice.json --out dist/v504/V504_EDITOR.html
+      - name: Produce two real full-length technical episodes
+        run: |
+          python scripts/render_six_pilots_v502.py --html dist/v504/V504_EDITOR.html \
+            --project dist/v504/complete_lip_voice.json \
+            --episodes 1,2 --width 640 --fps 6 --out dist/v504/VIDEO
+      - name: Validate both fresh MP4 H264/AAC and actual non-silent sound
+        run: |
+          python - <<'PY'
+          import json,re,subprocess
+          from pathlib import Path
+          movies=sorted(Path('dist/v504/VIDEO').glob('episode_*.mp4'))
+          assert len(movies)==2,movies
+          for m in movies:
+            probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-of','json',
+              '-show_entries','stream=codec_name:format=duration',str(m)]))
+            assert {'h264','aac'}<={s['codec_name'] for s in probe['streams']}
+            assert float(probe['format']['duration'])>65
+            a=subprocess.run(['ffmpeg','-nostats','-i',str(m),'-vn','-af',
+              'volumedetect','-f','null','-'],capture_output=True,text=True)
+            v=re.search(r'max_volume:\s*(-?[\d.]+) dB',a.stderr)
+            assert v and float(v.group(1))>-45
+            print('PASS MP4',m.name,probe['format']['duration'],v.group(1),'dB')
+          PY
+      - name: Export technical review ZIP with TWO episodes and original source
+        run: |
+          python - <<'PY'
+          import pathlib,zipfile
+          root=pathlib.Path('dist/v504')
+          target=root/'AI_ANIME_FACTORY_V504_TWO_EPISODES_FIVE_VOICE_ENGINE.zip'
+          with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+            for name in ('V504_EDITOR.html','complete_lip_voice.json','V504_VOICE_QA.json'):
+              z.write(root/name,name)
+            for folder in ('VIDEO','V504_FIVE_ACTOR_SAMPLES'):
+              for p in (root/folder).glob('*'):
+                if p.is_file():z.write(p,folder+'/'+p.name)
+            for name in ('scripts/voice_v504_five_roles.py','scripts/lipsync_v504_russian.py',
+                         'anime-factory/v50_2/acting_battle_v502.js'):
+              z.write(name,'SOURCE/'+pathlib.Path(name).name)
+            z.writestr('README_RU.txt',
+              'V50.4: ДВЕ РЕАЛЬНЫЕ ТЕХНИЧЕСКИЕ СЕРИИ, НЕ СТУДИЙНЫЙ ФИНАЛ.\n'
+              'Акира Piper Denis; Рэн Piper Dmitri; Мию Silero ru_albina;\n'
+              'Сайра Silero ru_zhadyra; Архонт Silero ru_eduard, если есть реплика.\n'
+              'Silero CIS Base MIT. Lip Rhubarb — приблизительная фонетика, не ручная.\n'
+              'Сюжет/диалоги прежние. 2 MP4/HTML/JSON/WAV/исходники.\n'
+              'Художественный QA и коммерческие права всех медиа ещё не утверждены.\n')
+          with zipfile.ZipFile(target) as z:assert z.testzip() is None
+          print('ZIP',target,target.stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V504_RUSSIAN_NEURAL_QA_AND_VOICE_SAMPLES
+          path: |
+            dist/v504/V504_VOICE_QA.json
+            dist/v504/V504_FIVE_ACTOR_SAMPLES/
+            dist/v504/complete_lip_voice.json
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: V504_TWO_REAL_EPISODES_AND_NEURAL_STUDIO
+          path: dist/v504/AI_ANIME_FACTORY_V504_TWO_EPISODES_FIVE_VOICE_ENGINE.zip
+          retention-days: 30
