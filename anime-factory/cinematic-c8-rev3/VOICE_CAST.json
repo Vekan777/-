@@ -1,0 +1,1 @@
+{"schema":"anime-c8-voice-cast-v1","default":"ru_RU-denis-medium.onnx","roles":{"Аран":"ru_RU-denis-medium.onnx","герой":"ru_RU-denis-medium.onnx","hero":"ru_RU-denis-medium.onnx","Страж":"ru_RU-dmitri-medium.onnx","противник":"ru_RU-dmitri-medium.onnx","враг":"ru_RU-dmitri-medium.onnx","enemy":"ru_RU-dmitri-medium.onnx"}}
