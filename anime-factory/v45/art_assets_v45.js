@@ -4,10 +4,15 @@
  * Asset PNG bytes are embedded in portable project JSON. No remote APIs.
  */
 const v45Parts=['legs','cape','torso','arms','face','hair','weapon'];
-let v45Selected=0;
+let v45Selected=0,v45SceneOverride='';
 const v45BgCache=new Map();
 function v45Character(){return P?.characters?.[v45Selected]||null;}
-function v45Scene(){return P?.episodes?.[epIndex]?.scenes?.[scIndex]||null;}
+function v45Scene(){
+ const parts=v45SceneOverride.split(':').map(Number);
+ if(parts.length===2&&P?.episodes?.[parts[0]]?.scenes?.[parts[1]])
+  return P.episodes[parts[0]].scenes[parts[1]];
+ return P?.episodes?.[epIndex]?.scenes?.[scIndex]||null;
+}
 function v45Rig(c){
  if(!c.artV45||typeof c.artV45!=='object'||Array.isArray(c.artV45))
   c.artV45={pivots:{}};
@@ -70,7 +75,14 @@ function v45Show(){
  el.innerHTML=P.characters.map((c,i)=>
   '<option value="'+i+'">'+escapeHTML(c.name)+'</option>').join('');
  v45Selected=Number.isInteger(old)&&old>=0&&old<P.characters.length?old:0;
- el.value=String(v45Selected);v45Controls();
+ el.value=String(v45Selected);
+ const scenes=$('v45-scene'),oldScene=v45SceneOverride;
+ scenes.innerHTML=P.episodes.flatMap((e,i)=>e.scenes.map((sc,j)=>
+  '<option value="'+i+':'+j+'">Серия '+e.number+' · '+escapeHTML(sc.title)+'</option>')).join('');
+ v45SceneOverride=[...scenes.options].some(o=>o.value===oldScene)?oldScene:
+  epIndex+':'+scIndex;
+ scenes.value=v45SceneOverride;
+ v45Controls();
 }
 function v45Controls(){
  v45Selected=Number($('v45-character').value)||0;
@@ -215,6 +227,7 @@ function v45Audit(){
 }
 $('v45-character').onchange=v45Controls;
 $('v45-layer').onchange=v45Controls;
+$('v45-scene').onchange=()=>{v45SceneOverride=$('v45-scene').value;v45Controls();};
 $('v45-save').onclick=v45SaveLayer;
 $('v45-file').onchange=v45ImportLayer;
 $('v45-bg-file').onchange=v45ImportBackground;
