@@ -62,17 +62,20 @@ def main():
    # Copy the SAME original/licensed audio to episode 2 within the isolated QA project.
    # All canonical plot facts and combat outcomes stay untouched.
    page.evaluate("""() => {
-      const first=P.episodes[0].scenes[0],second=P.episodes[1].scenes[0];
+      const key='AI_ANIME_FACTORY_V48',p=JSON.parse(localStorage.getItem(key));
+      const first=p.episodes[0].scenes[0],second=p.episodes[1].scenes[0];
       second.audioV36={...second.audioV36,
        voice:JSON.parse(JSON.stringify(first.audioV36.voice))};
-      for(const ep of P.episodes.slice(0,2)){
+      for(const ep of p.episodes.slice(0,2)){
        const s=ep.scenes[0];
-       v37Of(s).cues=[{start:.15,end:1.8,
+       s.subtitlesV37={cues:[{start:.15,end:1.8,
         text:'Сцена с настоящим звуком и анимацией',
-        speaker:P.characters[0].name}];
+        speaker:p.characters[0].name}]};
       }
-      save();
+      localStorage.setItem(key,JSON.stringify(p));
     }""")
+   page.reload(wait_until="load")
+   page.wait_for_function("() => document.querySelector('#v48-episode')?.options.length>=2",timeout=30000)
    page.locator('[data-page="episode-v48"]').click()
    page.locator("#v48-episode").select_option("0")
    with page.expect_download(timeout=30000) as dl:
