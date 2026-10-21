@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse,base64,copy,hashlib,json,math,struct,subprocess,tempfile,wave
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-STORY=Path(__file__).with_name('STORY_EP03_EP06_V502.json')
+STORY=Path(__file__).resolve().parents[1]/'anime-factory/v50_2/STORY_EP03_EP06_V502.json'
 ROLE_VOICES={'hero':'ru+m3','miyu':'ru+f3','ren':'ru+m2','saira':'ru+f2','archon':'ru+m1'}
 ALLOWED_KINDS=['opening','friendship','fight','romance','betrayal','ending']
 
