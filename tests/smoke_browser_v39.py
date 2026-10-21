@@ -52,6 +52,9 @@ def main():
    page.wait_for_function("() => document.querySelector('#v39-episode')?.options.length>0",timeout=45000)
    page.locator('[data-page="performance-v39"]').click()
    page.locator("#v39-scene").select_option("0")
+   # Normalize intentionally shortened test-only scene durations with the
+   # existing V19–V38 save pipeline BEFORE capturing the legacy baseline.
+   page.locator("#v39-save").click()
    # Establish normalized legacy fields before touching only V39 controls.
    canonical=page.evaluate("""() => {
      const value=JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V39'));
