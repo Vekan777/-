@@ -1,0 +1,168 @@
+name: V50.2 Episodes 3–6 Script, RU Speech and 2D Animation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v50_2/STORY_EP03_EP06_V502.json"
+      - "anime-factory/v50_2/season_stage_v502.js"
+      - "anime-factory/v50_2/build_season_v502.py"
+      - "anime-factory/v50_2/motion_rig_v502.js"
+      - "scripts/expand_season_v502.py"
+      - "scripts/render_six_pilots_v502.py"
+      - "tests/test_season_v502.py"
+      - ".github/workflows/anime-v502-season-ep03-ep06.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  screenplay-art-and-russian-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate Canon, Russian Story Dialogues, JS and Python syntax
+        run: |
+          python scripts/expand_season_v502.py --project /dev/null --out /tmp/x --validate-only
+          python -m py_compile scripts/expand_season_v502.py anime-factory/v50_2/build_season_v502.py tests/test_season_v502.py scripts/render_six_pilots_v502.py
+          node --check anime-factory/v50_2/season_stage_v502.js
+          node --check anime-factory/v50_2/motion_rig_v502.js
+          node tests/test_deep_qa_v50.js
+      - name: Install Chromium FFmpeg and temporary RU eSpeak voices
+        run: |
+          python -m pip install playwright==1.56.0 pillow numpy
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+      - name: Build original full editor and preserve V50 base source
+        run: |
+          python anime-factory/v50_2/build_complete_v502.py \
+            --out dist/AI_Anime_Factory_V50_2_SOURCE.html
+      - name: Recreate original RU episode 1–2 project from legacy canon
+        run: |
+          python scripts/produce_2d_pilot_v501.py \
+            --html dist/AI_Anime_Factory_V50_2_SOURCE.html \
+            --out dist/V502 --tts
+          mv dist/V502/PROJECT_PILOT_V50.json dist/V502/PROJECT_V501.json
+          python scripts/postprocess_v502.py \
+            --project dist/V502/PROJECT_V501.json \
+            --output dist/V502/PROJECT_V502.json
+      - name: Add 24 new staged scenes and 48 actual Russian spoken lines
+        run: |
+          python scripts/expand_season_v502.py \
+            --project dist/V502/PROJECT_V502.json \
+            --story anime-factory/v50_2/STORY_EP03_EP06_V502.json \
+            --out dist/V502/PROJECT_SIX_EPISODES.json --tts --sound
+      - name: Build standalone Six-episode 2D Editor
+        run: |
+          python anime-factory/v50_2/build_season_v502.py \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --out dist/AI_Anime_Factory_V50_2_SIX_EPISODES.html
+      - name: Independent season story QA + 24 actual Chromium frames
+        run: |
+          python tests/test_season_v502.py \
+            --source dist/V502/PROJECT_V502.json \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --html dist/AI_Anime_Factory_V50_2_SIX_EPISODES.html \
+            --out dist/V502/SEASON_QA
+      - name: Generate 24-scene storyboard contact sheet
+        run: |
+          python - <<'PY'
+          from PIL import Image,ImageDraw
+          from pathlib import Path
+          frames=sorted(Path("dist/V502/SEASON_QA").glob("EP*_SCENE*.png"))
+          assert len(frames)==24,len(frames)
+          cols=4;w,h=380,244
+          canvas=Image.new("RGB",(cols*w,6*h),"#101727");d=ImageDraw.Draw(canvas)
+          for i,p in enumerate(frames):
+              image=Image.open(p).convert("RGB");image.thumbnail((w-8,h-29))
+              x=(i%cols)*w+4;y=(i//cols)*h+3
+              canvas.paste(image,(x,y));d.text((x,y+h-27),p.stem,fill="white")
+          canvas.save("dist/V502/SEASON_QA/EP03_EP06_24_FRAMES.jpg",quality=90)
+          PY
+      - name: Record 4 real 2D MP4 Russian preview episodes 3–6 (not full anime)
+        run: |
+          python scripts/render_six_pilots_v502.py \
+            --html dist/AI_Anime_Factory_V50_2_SIX_EPISODES.html \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --episodes 3,4,5,6 --width 640 --fps 6 --out dist/V502/VIDEO
+      - name: Verify each MP4 is audible H264 AAC, no clips are a dummy
+        run: |
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          for n in (3,4,5,6):
+            path=Path(f"dist/V502/VIDEO/episode_{n:02d}.mp4")
+            assert path.stat().st_size>100000
+            p=subprocess.run(["ffprobe","-v","error","-show_entries",
+              "stream=codec_name,codec_type,width,height,nb_frames:format=duration",
+              "-of","json",str(path)],capture_output=True,text=True,check=True)
+            data=json.loads(p.stdout)
+            assert {"h264","aac"} <= {s.get("codec_name") for s in data["streams"]}
+            v=next(s for s in data["streams"] if s.get("codec_type")=="video")
+            assert v["width"]==640 and v["height"]==360
+            assert float(data["format"]["duration"])>55
+            assert int(v["nb_frames"])>300
+            assert Path(f"dist/V502/VIDEO/episode_{n:02d}.srt").stat().st_size>200
+            print("VERIFIED TECHNICAL DRAFT",n,v["nb_frames"],data["format"]["duration"])
+          PY
+      - name: Create Windows project package with all six scripts and four videos
+        run: |
+          python scripts/package_v502_unified_windows.py \
+            --html dist/AI_Anime_Factory_V50_2_SIX_EPISODES.html \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --video-dir dist/V502/VIDEO \
+            --out dist/AI_ANIME_FACTORY_V502_SIX_EPISODES_WINDOWS.zip
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          zipfile_name=Path("dist/AI_ANIME_FACTORY_V502_SIX_EPISODES_WINDOWS.zip")
+          with zipfile.ZipFile(zipfile_name,"a",compression=zipfile.ZIP_DEFLATED,compresslevel=7) as z:
+            for src,dst in [
+              ("scripts/expand_season_v502.py","SOURCE/expand_season_v502.py"),
+              ("scripts/render_six_pilots_v502.py","render_six_pilots_v502.py"),
+              ("anime-factory/v50_2/STORY_EP03_EP06_V502.json","STORY_EP03_EP06_V502.json"),
+              ("anime-factory/v50_2/SEASON_EP03_EP06_README_RU.md","README_6_EPISODES_RU.md"),
+              ("anime-factory/v50_2/season_stage_v502.js","SOURCE/season_stage_v502.js"),
+              ("anime-factory/v50_2/build_season_v502.py","SOURCE/build_season_v502.py"),
+              ("tests/test_season_v502.py","SOURCE/test_season_v502.py"),
+              ("dist/V502/SEASON_QA/V502_EP03_EP06_BROWSER_QA.json","QA/SEASON_BROWSER_QA.json"),
+            ]:z.write(src,dst)
+            z.writestr("RENDER_6_RU_WINDOWS.bat",
+              '@echo off\r\ncd /d "%~dp0"\r\n'
+              'if exist "tools\\ffmpeg\\bin\\ffmpeg.exe" set "PATH=%CD%\\tools\\ffmpeg\\bin;%PATH%"\r\n'
+              'py -3 render_six_pilots_v502.py --html AI_Anime_Factory_V50_2_UNIFIED.html --project PROJECT_V502_UNIFIED.json --episodes 1,2,3,4,5,6 --width 640 --fps 6 --out NEW_RENDER\r\npause\r\n')
+          with zipfile.ZipFile(zipfile_name) as z:
+            assert z.testzip() is None
+            assert all(f"VIDEOS/episode_{i:02d}.mp4" in z.namelist() for i in (3,4,5,6))
+          print("SIX EPISODE WINDOWS ZIP",zipfile_name.stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V502_SEASON_EP03_EP06_STORY_PROJECT_24_FRAMES
+          path: |
+            dist/V502/PROJECT_SIX_EPISODES.json
+            dist/V502/V502_SEASON_3_6_SCRIPT_QA.json
+            dist/V502/SEASON_QA/
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: V502_FOUR_REAL_RUSSIAN_EPISODES_03_TO_06
+          path: dist/V502/VIDEO/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V502_SIX_EPISODES_WINDOWS_VERIFIED
+          path: dist/AI_ANIME_FACTORY_V502_SIX_EPISODES_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
