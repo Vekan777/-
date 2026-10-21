@@ -122,7 +122,7 @@ def main():
    page.locator('[data-page="action-v44"]').click()
    page.locator("#v44-save").click() # normalize synthetic duration before old baseline
    old=page.evaluate("""() => JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V44'))""")
-   page.locator("#v44-zoom").fill("72")
+   page.locator("#v44-reach").fill("72")
    page.locator("#v44-save").click()
    fresh=page.evaluate("""() => JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V44'))""")
    prior=[{k:v for k,v in s.items() if k!="keyposesV44"} for s in old["episodes"][0]["scenes"]]
