@@ -3,8 +3,9 @@
 """Real V50.2 FULL-SOURCE Chromium checks: 13 JPEG, 6 episodes, source canon,
 12 scenes, 10 motion beats, illustrated/fallback toggle. Technical QA only.
 """
-import argparse,base64,hashlib,json
+import argparse,base64,hashlib,io,json
 from pathlib import Path
+from PIL import Image,ImageStat
 from playwright.sync_api import sync_playwright
 
 def main():
@@ -74,6 +75,12 @@ def main():
                 src=page.evaluate(
                     "([i,t])=>window.v502Motion.sceneFrame(i,t,640)",[0,t])
                 binary=base64.b64decode(src.split(",",1)[1])
+                shot_image=Image.open(io.BytesIO(binary)).convert("RGB")
+                center=shot_image.crop((180,90,470,265))
+                brightness=sum(ImageStat.Stat(center).mean)/3
+                # A fully opaque fade previously produced empty shot_03
+                # (old center mean 10). Fail on a blank transition.
+                assert brightness>25,(n,f,round(brightness,1),"black frame on cut")
                 beats.append(hashlib.sha256(binary).hexdigest())
                 (dest/f"fight_{n:02d}.png").write_bytes(binary)
             assert len(set(beats))>=9,"Fight animation not moving enough"
