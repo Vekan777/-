@@ -42,8 +42,8 @@ def main():
   first=page.evaluate("([e,t])=>window.v502ActingQA.frame(e,t,640)",[0,t1])
   second=page.evaluate("([e,t])=>window.v502ActingQA.frame(e,t,640)",[0,t2])
   assert first!=second,"Speaker coverage didn't change"
-  assert page.evaluate("([t])=>window.v502ActingQA.speaker(0,0,t)",t1)=="Акира"
-  assert page.evaluate("([t])=>window.v502ActingQA.speaker(0,0,t)",t2)=="Сайра"
+  assert page.evaluate("(t)=>window.v502ActingQA.speaker(0,0,t)",t1)=="Акира"
+  assert page.evaluate("(t)=>window.v502ActingQA.speaker(0,0,t)",t2)=="Сайра"
   with_overlay=page.evaluate("([e,t])=>window.v502ActingQA.frame(e,t,640)",[0,t1])
   page.evaluate("()=>window.v502ActingQA.setEnabled(false)")
   without=page.evaluate("([e,t])=>window.v502ActingQA.frame(e,t,640)",[0,t1])
