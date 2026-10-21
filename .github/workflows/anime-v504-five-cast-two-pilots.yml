@@ -1,0 +1,120 @@
+name: AI Anime Factory V50.4 Five Russian Voices Two Pilots
+on:
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/anime-v504-five-cast-two-pilots.yml", "anime-factory/v50_4/**", "scripts/dub_v504_five_voices.py", "tests/test_v504_two_episodes.py"]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  dual-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - name: Validate source
+        run: |
+          python -m py_compile scripts/dub_v504_five_voices.py anime-factory/v50_4/build_v504.py tests/test_v504_two_episodes.py
+          node --check anime-factory/v50_4/facial_layers_v504.js
+          node tests/test_deep_qa_v50.js
+      - name: Install local offline tools for neural synthesis and film rendering
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install numpy pillow playwright==1.56.0
+          python -m playwright install --with-deps chromium
+          sudo apt-get update && sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+      - name: Fetch original Piper plus two Russian verified voices
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v504/voices dist/v504
+          curl -fLsS --retry 5 --retry-delay 3 --max-time 240 -o /tmp/v504/piper.tgz 'https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz'
+          tar -xzf /tmp/v504/piper.tgz -C /tmp/v504
+          for voice in denis dmitri; do
+            for ext in onnx onnx.json; do
+              curl -fLsS --retry 5 --retry-all-errors --retry-delay 4 --max-time 300 -o "/tmp/v504/voices/ru_RU-$voice-medium.$ext" "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/$voice/medium/ru_RU-$voice-medium.$ext?download=true"
+            done
+          done
+          python - <<'PY'
+          import pathlib,hashlib
+          root=pathlib.Path('/tmp/v504/voices')
+          keys={'denis':'15fab56e11a097858ee115545d0f697fc2a316c41a291a5362349fb870411b0a','dmitri':'f073356ebc4bd0f80c5af58df2953a5988bd5bdab1eb38635ce960b071fbefcb'}
+          for n,h in keys.items():
+            f=root/f'ru_RU-{n}-medium.onnx'
+            assert hashlib.sha256(f.read_bytes()).hexdigest()==h
+          PY
+      - name: Fetch female+villain Silero preview voices - NONCOMMERCIAL only
+        run: |
+          curl -fLsS --retry 5 --retry-delay 3 --max-time 480 -o /tmp/v504/silero.pt 'https://models.silero.ai/models/tts/ru/v5_5_ru.pt'
+          test $(stat -c%s /tmp/v504/silero.pt) -gt 20000000
+      - name: Generate all six untouched scripted episodes with original Russian sound
+        run: |
+          python anime-factory/v50_2/build_complete_v502.py --out dist/v504/base.html
+          python scripts/produce_2d_pilot_v501.py --html dist/v504/base.html --out dist/v504/pilot --tts
+          python scripts/postprocess_v502.py --project dist/v504/pilot/PROJECT_PILOT_V50.json --output dist/v504/TWO.json
+          python scripts/expand_season_v502.py --project dist/v504/TWO.json --out dist/v504/SIX_ORIGINAL.json --tts --sound
+      - name: Five distinct real neural voices, first two episodes
+        run: |
+          export LD_LIBRARY_PATH=/tmp/v504/piper
+          python scripts/dub_v504_five_voices.py --project dist/v504/SIX_ORIGINAL.json --out dist/v504/FIVE_CAST.json --piper /tmp/v504/piper/piper --models-dir /tmp/v504/voices --silero /tmp/v504/silero.pt --samples dist/v504/WAV
+          python tests/test_v504_two_episodes.py --before dist/v504/SIX_ORIGINAL.json --after dist/v504/FIVE_CAST.json --samples dist/v504/WAV
+      - name: Build actual offline facial layered editor and original Russian canon
+        run: |
+          python anime-factory/v50_4/build_v504.py --project dist/v504/FIVE_CAST.json --out dist/v504/AI_ANIME_FACTORY_V504.html --project-out dist/v504/PROJECT_V504.json
+      - name: Render actual two full 960x540 Russian pilot videos with voices and music
+        run: |
+          python scripts/render_six_pilots_v502.py --html dist/v504/AI_ANIME_FACTORY_V504.html --project dist/v504/PROJECT_V504.json --out dist/v504/VIDEO --episodes 1,2 --width 960 --fps 12
+      - name: Validate MP4 codecs, video length, subtitles, audible neural sound
+        run: |
+          python - <<'PY'
+          import pathlib,json,subprocess,re
+          root=pathlib.Path('dist/v504/VIDEO')
+          for n in (1,2):
+            f=root/f'episode_{n:02d}.mp4'
+            meta=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','stream=codec_name,codec_type,width,height,nb_frames:format=duration','-of','json',str(f)]))
+            assert {'h264','aac'}.issubset({s['codec_name'] for s in meta['streams']})
+            v=next(s for s in meta['streams'] if s['codec_type']=='video')
+            assert int(v['width'])==960 and int(v['height'])==540 and int(v['nb_frames'])>650
+            assert float(meta['format']['duration'])>60
+            assert 'Акира' in (root/f'episode_{n:02d}.srt').read_text(encoding='utf8')
+            a=subprocess.run(['ffmpeg','-nostats','-i',str(f),'-vn','-af','volumedetect','-f','null','-'],capture_output=True,text=True)
+            m=re.search(r'max_volume:\s*([-.\d]+) dB',a.stderr)
+            assert m and float(m.group(1))>-40
+            print('PASS TWO 960p PILOT',n,meta['format']['duration'],m.group(1))
+          PY
+      - name: Pack complete verified Windows editor, two videos, Russian speech samples and source
+        run: |
+          python - <<'PY'
+          import zipfile,pathlib,hashlib
+          root=pathlib.Path('dist/v504')
+          output=root/'AI_ANIME_FACTORY_V504_TWO_RUSSIAN_PILOTS_WINDOWS.zip'
+          files=[(root/'AI_ANIME_FACTORY_V504.html','AI_ANIME_FACTORY_V504.html'),(root/'PROJECT_V504.json','PROJECT_V504.json'),(root/'V504_VOICE_QA.json','QA/V504_VOICE_QA.json')]
+          files += [(p,'VIDEOS/'+p.name) for p in sorted((root/'VIDEO').glob('*.mp4'))]
+          files += [(p,'VIDEOS/'+p.name) for p in sorted((root/'VIDEO').glob('*.srt'))]
+          files += [(p,'WAV/'+p.name) for p in sorted((root/'WAV').glob('*.wav'))]
+          files += [(p,'SOURCE/'+p.name) for p in [pathlib.Path('scripts/dub_v504_five_voices.py'),pathlib.Path('anime-factory/v50_4/facial_layers_v504.js'),pathlib.Path('anime-factory/v50_4/build_v504.py')]]
+          with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED,compresslevel=7) as z:
+            for f,name in files:z.write(f,name)
+            z.writestr('RUN_WINDOWS.bat','@echo off\r\nstart "" "%~dp0AI_ANIME_FACTORY_V504.html"\r\n')
+            z.writestr('README_RU.txt','V50.4 NONCOMMERCIAL TWO PILOT ANIMATICS. Open RUN_WINDOWS.bat.\\nSilero model CC BY-NC-SA 4.0; NO commercial use without permission.\\nMiyu=kseniya, Saira=xenia, Archon=aidar (sample), Akira=Denis, Ren=Dmitri.\\nFacial motion approximated by text timing; not actual exact phoneme alignment.\\nTwo short pilots, NOT a professional full-season anime.\\n')
+          with zipfile.ZipFile(output) as z: assert z.testzip() is None
+          print('VERIFIED WINDOWS V504',output,output.stat().st_size,hashlib.sha256(output.read_bytes()).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V504_FIVE_CAST_WAV_AND_TEST_RESULTS
+          path: |
+            dist/v504/WAV/
+            dist/v504/V504_VOICE_QA.json
+            dist/v504/VIDEO/*QA.json
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: V504_WINDOWS_TWO_RUSSIAN_EPISODES
+          path: dist/v504/AI_ANIME_FACTORY_V504_TWO_RUSSIAN_PILOTS_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
