@@ -225,7 +225,7 @@ function v501Actor(g,id,x,y,scale,dir,pose,sec,local){
    v501Line(g,[[12,-370],[38,-365]],p.hair,4);
    v501Line(g,[[2,-343],[-2,-324],[8,-323]],'#b97c7d',1.5);
    const speaker=local?.speaker===id;
-   const energy=speaker?Math.sin(sec*23)*.5+.5:0;
+   const energy=speaker?(local?.energy ?? 0):0;
    g.fillStyle='#74383c';g.beginPath();
    g.ellipse(4,-308,9,1.5+(speaker?4*energy:0),0,0,7);g.fill();
    if(id==='hero')v501Line(g,[[36,-324],[49,-332]],'#ad8490',3);
@@ -294,7 +294,15 @@ function v501SceneDraw(g,ei,scene,localTime){
  const lines=scene.lines||[],active=lines.find(l=>localTime>=l.start&&localTime<l.start+l.duration);
  const name=active?.speaker||'';
  const role=P.characters.find(c=>c.name===name)?.id||'';
- const v501Local={speaker:role};
+ const config=scene.audioV36?.voice||{},offset=Number(config.offset)||0;
+ const segment=(config.segmentsV501||[]).find(q=>
+   localTime>=offset+q.start && localTime<offset+q.end);
+ const alias={hero:'hero',miyu:'lover',ren:'friend',saira:'rival',archon:'enemy'};
+ const speaker=segment?(alias[segment.role]||''):role;
+ const wave=config.waveV47||[],sampleRate=Number(config.sampleRateV47)||50;
+ const ii=Math.max(0,Math.floor((localTime-offset)*sampleRate));
+ const energy=Math.min(1,Math.max(0,Number(wave[ii])||0));
+ const v501Local={speaker,energy};
  const motion=si===2?v501Battle(f):null;
  // Lens direction varied by scene; no same 2-shot in every scene.
  g.save();
