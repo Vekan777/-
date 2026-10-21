@@ -6,7 +6,7 @@ import argparse,copy,importlib.util,json
 from pathlib import Path
 
 def load_builder():
-    path=Path(__file__).with_name('expand_season_v502.py')
+    path=Path(__file__).resolve().parents[1]/'scripts/expand_season_v502.py'
     spec=importlib.util.spec_from_file_location('v502_season',path)
     m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
     return m
