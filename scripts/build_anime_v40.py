@@ -57,7 +57,7 @@ def assemble(dest):
   src=ROOT/rel
   if not src.is_file():raise FileNotFoundError("Missing "+str(src))
   entries["source/V40_"+src.name]=src.read_bytes()
- doc={"schema":"AnimeFactoryV40Release/1","version":39,
+ doc={"schema":"AnimeFactoryV40Release/1","version":40,
   "parentV39Sha256":sha(parent_bytes),
   "originalV19Sha256":sha(V19.read_bytes()),
   "preservation":"V19 original, complete V20–V39 source and full V39 parent ZIP",
@@ -80,7 +80,7 @@ def assemble(dest):
   if sha(z.read("backup/"+old.NAME))!=saved["parentV39Sha256"]:
    raise RuntimeError("Parent V39 ZIP modified")
   for path in ("source/assembly_v35.js","source/audio_v36.js",
-   "source/V37_subtitles_v37.js","source/V39_cinematic_v39.js",
+   "source/V37_subtitles_v37.js","source/V38_cinematic_v38.js","source/V39_performance_v39.js",
    "source/V40_character_art_v40.js","CONVERT_MP4_WINDOWS.bat"):
    if path not in z.namelist():raise RuntimeError("Historical source missing "+path)
  print("V40 ZIP VERIFIED",dest,"bytes",dest.stat().st_size,
