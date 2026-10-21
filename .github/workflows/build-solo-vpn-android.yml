@@ -45,6 +45,8 @@ jobs:
           base64 --decode solo-vpn/android-project.tgz.b64 > /tmp/solo-vpn-source.tgz
           echo '67a896d3b1c6d852bd2a40ca95e4199989fb72d17707c7c957e4eaa72c2dd272  /tmp/solo-vpn-source.tgz' | sha256sum -c -
           tar -xzf /tmp/solo-vpn-source.tgz -C solo-vpn/build
+          base64 --decode solo-vpn/solo-avatar-256.png.b64 > solo-vpn/build/android/app/src/main/res/drawable/solo_avatar.png
+          echo '8a6fcb89f783f8c736ef49396f41ea86c1b131c863bcdb9cc4a87bc9459c610e  solo-vpn/build/android/app/src/main/res/drawable/solo_avatar.png' | sha256sum -c -
 
       - name: Build original WireGuard Android client
         working-directory: solo-vpn/build/android
