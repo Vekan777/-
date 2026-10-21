@@ -4,7 +4,7 @@
 
 ## Available sources
 
-- `android-project.tgz.b64` — Android V8 WireGuard source bundle (Gradle 8.11.1, Android Gradle Plugin 8.7.3, SDK 35). A **small 48×48 variant** of the selected anime avatar is used only in this cloud build to keep upload size modest; the full-resolution image is retained in the local V8 archive.
+- `android-project.tgz.b64` — Android V8 WireGuard source bundle (Gradle 8.11.1, Android Gradle Plugin 8.7.3, SDK 35). The source bundle contains a fallback 48×48 icon; CI replaces it with the **256×256 shadow-hunter avatar** from `solo-avatar-256.png.b64` before building. The original 512px avatar remains in the user's local V8 archive.
 - `web-api-project.tgz.b64` — website, FastAPI service, Linux deployment examples, docs and tests. No real API/payment/server secrets included.
 - `.github/workflows/build-solo-vpn-android.yml` — Android debug APK workflow. Open the GitHub Actions tab to download the successful build artifact.
 
