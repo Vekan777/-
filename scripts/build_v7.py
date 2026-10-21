@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V48):
+AI ANIME FACTORY (текущий редактор V49):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -97,6 +97,7 @@ AI ANIME FACTORY (текущий редактор V48):
    anime-factory\\v46\\AI_Anime_Factory_V46_ANIMATION_ENGINE.html
    anime-factory\\v47\\AI_Anime_Factory_V47_PORTABLE_VOICE.html
    anime-factory\\v48\\AI_Anime_Factory_V48_EPISODE_ENGINE.html
+   anime-factory\\v49\\AI_Anime_Factory_V49_UNIFIED_STUDIO.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -237,6 +238,12 @@ def prepare(root, source_dist):
                  "anime-factory/v48/episode_engine_v48.js",
                  "anime-factory/v48/build_episode_v48.py",
                  "anime-factory/v48/README_RU.md",
+                 "anime-factory/v49/unified_studio_v49.js",
+                 "anime-factory/v49/build_unified_v49.py",
+                 "anime-factory/v49/README_RU.md",
+                 "scripts/build_anime_v49.py",
+                 "tests/test_anime_v49.py",
+                 "tests/smoke_browser_v49.py",
                  "scripts/build_anime_v48.py",
                  "scripts/render_anime_v48.py",
                  "tests/test_anime_v48.py",
@@ -527,6 +534,14 @@ def prepare(root, source_dist):
         episode48_builder.build().encode("utf-8")
     )
 
+    unified49_path=root/"anime-factory"/"v49"/"build_unified_v49.py"
+    unified49_spec=importlib.util.spec_from_file_location("anime_v49_unified",unified49_path)
+    unified49_builder=importlib.util.module_from_spec(unified49_spec)
+    unified49_spec.loader.exec_module(unified49_builder)
+    data["anime-factory/v49/AI_Anime_Factory_V49_UNIFIED_STUDIO.html"]=(
+        unified49_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -624,6 +639,11 @@ def prepare(root, source_dist):
         with zipfile.ZipFile(optional_v48) as z:
             if z.testzip():raise ValueError("V48 CRC32 failure")
         data["legacy/"+optional_v48.name]=optional_v48.read_bytes()
+    optional_v49=source_dist/"AI_ANIME_FACTORY_V49_UNIFIED_STUDIO_WINDOWS.zip"
+    if optional_v49.is_file():
+        with zipfile.ZipFile(optional_v49) as z:
+            if z.testzip():raise ValueError("V49 ZIP CRC failure")
+        data["legacy/"+optional_v49.name]=optional_v49.read_bytes()
 
     data["README_RU.txt"] = README_RU.encode("utf-8")
     data["RUN_V7_WINDOWS.bat"] = BAT_GUI.encode("utf-8")
@@ -673,7 +693,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V48 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V49 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())

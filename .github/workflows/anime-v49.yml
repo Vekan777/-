@@ -1,0 +1,143 @@
+name: AI Anime Factory V49 Unified 2D Production Studio Production
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v49/**"
+      - "anime-factory/v48/episode_engine_v48.js"
+      - "scripts/build_anime_v49.py"
+      - "scripts/render_anime_v48.py"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v49.py"
+      - "tests/smoke_browser_v49.py"
+      - ".github/workflows/anime-v49.yml"
+  push:
+    branches: [main]
+    paths:
+      - "anime-factory/v49/**"
+      - "anime-factory/v48/episode_engine_v48.js"
+      - "scripts/build_anime_v49.py"
+      - "scripts/render_anime_v48.py"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v49.py"
+      - "tests/smoke_browser_v49.py"
+      - ".github/workflows/anime-v49.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v49-structural:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile all new V49 scripts and V7
+        run: python -m py_compile anime-factory/v48/build_episode_v48.py anime-factory/v49/build_unified_v49.py scripts/build_anime_v48.py scripts/build_anime_v49.py scripts/render_anime_v48.py scripts/build_v7.py gui_v7.py tests/test_anime_v49.py tests/smoke_browser_v49.py
+      - name: Retain shared V45 Production Engine Node regression
+        run: node tests/test_engine_v45.js
+      - name: Non-destructive project source check
+        run: python anime-factory/v49/build_unified_v49.py --selftest
+      - name: Real V49 JavaScript Node parsing and Python regressions
+        run: python -m unittest discover -s tests -p "test_anime_v49.py" -v
+      - name: Deep V19 original, V43 source, verified ZIP CRC32/SHA256, ZIP CRC32/SHA256
+        run: python scripts/build_anime_v49.py --selftest
+
+  v49-chromium:
+    needs: v49-structural
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install real Playwright Chromium
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Install FFprobe to verify real restored-audio WebM
+        run: |
+          if ! command -v ffmpeg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version
+          ffprobe -version
+      - name: Create real complete V19–V49 HTML
+        run: python anime-factory/v49/build_unified_v49.py --output dist/AI_Anime_Factory_V49_UNIFIED_STUDIO.html
+      - name: Chromium unified six-step actual 2D workflow, manual review, legacy V48 project roundtrip, character/audio WebM
+        run: python tests/smoke_browser_v49.py --html dist/AI_Anime_Factory_V49_UNIFIED_STUDIO.html --out dist/V49_UNIFIED_BROWSER
+      - name: Build verified standalone Windows ZIP
+        run: python scripts/build_anime_v49.py --out dist/AI_ANIME_FACTORY_V49_UNIFIED_STUDIO_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V49_WINDOWS_VERIFIED
+          path: dist/AI_ANIME_FACTORY_V49_UNIFIED_STUDIO_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V49_REAL_UNIFIED_PRODUCTION_SAMPLES
+          path: dist/V49_UNIFIED_BROWSER/
+          retention-days: 30
+          if-no-files-found: error
+
+  publish-v49-download:
+    needs: v49-chromium
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build permanent standalone V49 ZIP
+        run: python scripts/build_anime_v49.py --out downloads/AI_ANIME_FACTORY_V49_UNIFIED_STUDIO_WINDOWS.zip
+      - name: Publish GitHub raw stable ZIP link like V35 without touching older archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V49_UNIFIED_STUDIO_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V49 already released"
+          else
+            git commit -m "Release verified V49 Unified 2D Production Studio Windows ZIP"
+            for attempt in 1 2 3 4 5 6 7 8; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then exit 0; fi
+              sleep 3
+            done
+            echo "Unable to publish V49 to downloads/" >&2
+            exit 1
+          fi
+      - name: Publish immutable GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view anime-factory-v49 >/dev/null 2>&1; then
+            echo "V49 tag already exists; not overwriting"
+          else
+            gh release create anime-factory-v49 downloads/AI_ANIME_FACTORY_V49_UNIFIED_STUDIO_WINDOWS.zip --title "AI Anime Factory V49 Unified 2D Production Studio & Performance" --notes "V49 UNIFIED: actual unified 2D six-stage interface for V20 story, V45 cutout art, V46 animation, V47 portable voices, V37 subtitles, V48 real episode delivery. Technical readiness by episode with separately tracked author-reviewed approvals (never auto-certified). Portable complete JSON import/export, actual V48 legacy JSON migration, real WebM audio re-render in Chromium QA. Full V48 parent ZIP, all V19–V48 source, SHA256/CRC32, Windows BAT and Russian instructions. V50 final deep QA NOT YET FINISHED, 3D later."
+          fi
