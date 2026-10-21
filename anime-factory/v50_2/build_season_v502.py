@@ -6,7 +6,7 @@ Only additive JS on top of reproducible V50.2. Old projects preserve prior flow.
 from __future__ import annotations
 import argparse,hashlib,importlib.util,json
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[2]
 BASE=ROOT/'anime-factory/v50_2/build_complete_v502.py'
 ART=ROOT/'anime-factory/v50_2/season_stage_v502.js'
 MARKER='/* END V50.2 REPRODUCIBLE ART AND MOTION */'
