@@ -36,9 +36,18 @@ def main():
     data=json.loads(project.read_text(encoding="utf-8"))
     assert data["format"]=="AIAnimeFactoryProject"
     assert len(data.get("episodes",[]))>=6
-    assert data["v502Director"]["enabled"] and data["v502MotionRig"]["enabled"]
-    assert data["v502Art"]["enabled"] and data["v502CleanCuts"]["enabled"]
+    assert data["v502Director"]["enabled"]
     assert not data["productionV50"]["qaAccepted"]
+    # The upstream postprocessor deliberately DOES NOT write new toggles to
+    # the canonical JSON. Produce a copy for this ZIP, matching the HTML.
+    import importlib.util
+    builder=ROOT/"anime-factory/v50_2/build_complete_v502.py"
+    spec=importlib.util.spec_from_file_location("v502_unified",builder)
+    mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+    normalized=mod.checked_project(project)
+    assert all(normalized[k]["enabled"] for k in
+               ("v502Director","v502Art","v502MotionRig","v502CleanCuts"))
+    normalized_json=json.dumps(normalized,ensure_ascii=False,indent=2).encode("utf-8")
     out=Path(x.out).resolve()
     if html==out or project==out:raise RuntimeError("No file overwrite")
     out.parent.mkdir(parents=True,exist_ok=True)
@@ -58,7 +67,9 @@ def main():
         def add_disk(path,destination):
             z.write(path,destination)
             manifest["files"][destination]=sha(path)
-        add_disk(html,STUDIO);add_disk(project,PROJECT)
+        add_disk(html,STUDIO)
+        z.writestr(PROJECT,normalized_json)
+        manifest["files"][PROJECT]=hashlib.sha256(normalized_json).hexdigest()
         add_disk(DOC,"README_RU.md")
         for name in SOURCE:
             add_disk(ROOT/name,"SOURCE/"+Path(name).name)
