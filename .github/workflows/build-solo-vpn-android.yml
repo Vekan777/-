@@ -4,7 +4,8 @@ on:
   push:
     branches: [solo-vpn-v8-build]
     paths:
-      - 'solo-vpn/**'
+      - 'solo-vpn/android-project.tgz.b64'
+      - 'solo-vpn/solo-avatar-256.png.b64'
       - '.github/workflows/build-solo-vpn-android.yml'
   workflow_dispatch:
 
