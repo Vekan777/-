@@ -98,10 +98,26 @@ def main():
     raise AssertionError("Canonical episode story was rewritten")
    if current["characters"][0]["qualityV23"]!=base["characters"][0]["qualityV23"]:
     raise AssertionError("Canonical character model was rewritten")
-   for key in ("storyboardV34","assemblyV35","audioV36","subtitlesV37",
-               "cameraV38","choreographyV25","motionV24","duration","kind"):
-    if current["episodes"][0]["scenes"][0].get(key)!=canonical.get(key):
-     raise AssertionError("V39 rewrote a previous scene field: "+key)
+   # Historical modules lazily populate default fields while rendering.
+   # Added *default* keys are allowed; every pre-existing scalar/list must
+   # remain exactly unchanged (including plot, combat outcome and animation).
+   def original_preserved(old,new,path):
+    if isinstance(old,dict):
+     if not isinstance(new,dict):raise AssertionError("Historical dict replaced: "+path)
+     for k,v in old.items():
+      if k not in new:raise AssertionError("Historical field lost: "+path+"."+k)
+      original_preserved(v,new[k],path+"."+k)
+    elif isinstance(old,list):
+     if not isinstance(new,list) or len(old)!=len(new):
+      raise AssertionError("Historical array replaced: "+path)
+     for i,(x,y) in enumerate(zip(old,new)):
+      original_preserved(x,y,path+"["+str(i)+"]")
+    elif old!=new:
+     raise AssertionError("Historical value changed: "+path)
+   old_scene={k:v for k,v in canonical.items() if k!="performanceV39"}
+   new_scene={k:v for k,v in current["episodes"][0]["scenes"][0].items()
+              if k!="performanceV39"}
+   original_preserved(old_scene,new_scene,"scene")
    if current["episodes"][0]["scenes"][0]["performanceV39"]["enabled"] is not True:
     raise AssertionError("V39 motion not saved")
    # V37 subtitles and V38 camera remain active in existing studio.
