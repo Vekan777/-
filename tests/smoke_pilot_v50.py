@@ -74,7 +74,11 @@ def main():
                 for j,pos in enumerate((60,210,385,560,735,910)):
                     page.locator("#v48-position").fill(str(pos))
                     image=out/f"ep{i+1:02d}_frame{j+1:02d}.png"
-                    page.locator("#v48-preview").screenshot(path=str(image))
+                    # Capture the real Canvas pixels, NOT a browser element screenshot:
+                    # sticky studio toolbar could otherwise overlap the frame.
+                    import base64
+                    data=page.locator("#v48-preview").evaluate("(canvas) => canvas.toDataURL(\'image/png\')")
+                    image.write_bytes(base64.b64decode(data.split(",",1)[1]))
                     if not image.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"):
                         raise AssertionError("Not a genuine PNG review frame")
                     count+=1
