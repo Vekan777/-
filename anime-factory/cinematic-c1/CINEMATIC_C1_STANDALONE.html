@@ -1,0 +1,319 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Anime Factory — CINEMATIC C1</title>
+<style>
+:root{color-scheme:dark;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;--ink:#e6eaf8;--muted:#aab5cf;--panel:#151d31;--blue:#7addf9;--edge:#33415d}
+*{box-sizing:border-box}body{margin:0;background:#0a0f1c;color:var(--ink)}header{display:flex;align-items:center;justify-content:space-between;gap:1.4rem;background:linear-gradient(96deg,#151e3b,#151126);border-bottom:1px solid var(--edge);padding:15px 3.5vw;flex-wrap:wrap}
+h1{font-size:22px;margin:0;letter-spacing:.03em}.tag{display:inline-block;background:#253c56;color:#bfeafe;border-radius:4px;padding:2px 7px;font-size:11px}p{margin:.4rem 0}.muted{color:var(--muted)}main{max-width:1550px;margin:20px auto;padding:0 16px;display:grid;grid-template-columns:minmax(420px,1.65fr) minmax(305px,.8fr);gap:15px}section{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px;margin-bottom:14px}h2{font-size:16px;margin:1px 0 11px}button,select,input[type=number],input[type=text]{background:#283653;color:#f4f7ff;border:1px solid #495b83;border-radius:7px;padding:8px 11px;font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}button:hover:not(:disabled){background:#3b5178}.primary{background:#245b91;border-color:#438bd0}.danger{border-color:#9b5060}.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}canvas{display:block;width:100%;aspect-ratio:16/9;border:1px solid #3a4867;background:#141b34;border-radius:7px}.canvas-wrap{position:relative}.stamp{position:absolute;right:12px;top:12px;pointer-events:none;color:#fff;background:#0b1023ba;border:1px solid #ffffff3d;border-radius:6px;padding:3px 8px;font-size:11px}.slider{width:100%;accent-color:var(--blue)}.events{display:flex;flex-direction:column;gap:5px;max-height:330px;overflow-y:auto}.event{width:100%;text-align:left;font-size:12px;background:#1d2b44;border-left:3px solid #6b9fbd;display:flex;justify-content:space-between;gap:6px}.event.active{border-left-color:#e7aaff;background:#334663}.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin:8px 0}.field label{display:block;font-size:12px;color:#c4d0e2;margin-bottom:4px}.field input[type=file]{width:100%;font-size:12px;max-width:100%}.help{font-size:12px;color:var(--muted)}.status{padding:8px 10px;border-radius:7px;background:#203247;white-space:pre-wrap;font-size:12px}.issue{border-left:3px solid #e0b06b;margin:5px 0;padding:4px 8px;background:#2c2c35;font-size:12px}.issue.err{border-left-color:#e07a7a}.value{color:#bdeafe}.timeline{height:38px;background:#101b30;position:relative;overflow:hidden;border-radius:6px;margin-top:5px}.shot{position:absolute;top:4px;bottom:4px;border-right:2px solid #94a0d9;background:#2f4666;color:#ecf7ff;padding:4px;font-size:10px;white-space:nowrap;overflow:hidden}.marker{position:absolute;top:0;bottom:0;width:2px;background:#8feafa;pointer-events:none}.badge2{color:#ffd79e}textarea{background:#0e182d;border:1px solid #475f85;border-radius:8px;color:white;font:12px/1.45 monospace;width:100%;min-height:135px;padding:10px;resize:vertical}.full{grid-column:1/-1}a{color:#a5deff}@media(max-width:870px){main{display:block}.cols{grid-template-columns:1fr}header{padding:12px 16px}}
+</style></head><body>
+<header><div><h1>AI ANIME FACTORY <span class="tag">CINEMATIC C1 / BATTLE DIRECTOR</span></h1><p class="muted">Оригинальная боевая сцена • режиссура • 2D-арт • русские реплики • запись WebM</p></div><div class="toolbar"><button id="load-demo">Новая демонстрация</button><button id="export-json">Сохранить весь проект JSON</button><button id="import-json-btn">Загрузить JSON</button><input hidden type="file" id="import-json" accept=".json,application/json"></div></header>
+<main>
+<div>
+<section><div class="toolbar"><h2 style="flex:1">Режиссёрский монитор</h2><select id="quality" aria-label="Качество предпросмотра"><option value="640,360,12">Эконом: 640×360, 12 к/с</option><option value="1280,720,24" selected>HD: 1280×720, 24 к/с</option></select></div>
+<div class="canvas-wrap"><canvas id="screen" width="1280" height="720"></canvas><div class="stamp">ПРЕВИЗУАЛИЗАЦИЯ — НЕ ГОТОВАЯ РИСОВКА</div></div>
+<input type="range" class="slider" id="seek" min="0" max="14" step=".01" value="0" aria-label="Позиция воспроизведения"><div class="toolbar"><button class="primary" id="play">▶ Воспроизвести</button><button id="rewind">↺ С начала</button><span class="value" id="clock">00:00.00 / 00:14.00</span><span class="muted" id="shot-name">План</span></div><div class="timeline" id="timeline"></div>
+<p class="help">Силуэты — только технические заменители, чтобы проверить расстояния и монтаж. Для художественного качества загрузите свои отдельные изображения и фон.</p></section>
+<section><h2>Импорт профессионального арта и русской озвучки</h2><div class="cols">
+<div><div class="field"><label>Фон сцены, PNG / JPG / WebP</label><input id="image-background" type="file" accept="image/png,image/jpeg,image/webp"></div><div class="field"><label>Нова — оригинальный персонаж, PNG с прозрачностью</label><input id="image-nova" type="file" accept="image/png,image/webp"></div><div class="field"><label>Страж — оригинальный противник, PNG с прозрачностью</label><input id="image-warden" type="file" accept="image/png,image/webp"></div><div class="field"><label>Передний план / дым, PNG с прозрачностью</label><input id="image-foreground" type="file" accept="image/png,image/webp"></div></div>
+<div><div class="field"><label>Реплика b02 (Нова), русский WAV / MP3 / OGG</label><input id="audio-b02" type="file" accept="audio/wav,audio/mpeg,audio/ogg,audio/mp3"></div><div class="field"><label>Реплика b08 (Страж), русский WAV / MP3 / OGG</label><input id="audio-b08" type="file" accept="audio/wav,audio/mpeg,audio/ogg,audio/mp3"></div><div class="field"><label>Реплика b12 (Нова), русский WAV / MP3 / OGG</label><input id="audio-b12" type="file" accept="audio/wav,audio/mpeg,audio/ogg,audio/mp3"></div><div class="field"><label><input type="checkbox" id="rights"> Я подтверждаю права на импортированный арт и звук</label></div><button id="tts-preview">Произнести реплики на русском (если есть голос ОС)</button><p class="help">Системный голос — только для прослушивания, <strong>не записывается</strong> в WebM. Для записи используйте загруженные аудиофайлы.</p></div></div></section>
+<section><h2>Экспорт материалов производства</h2><div class="toolbar"><button id="record" class="primary">● Записать сцену WebM</button><button id="export-srt">Экспорт русских субтитров SRT</button><button id="export-plan">Режиссёрский план JSON</button><button id="export-frame">PNG кадр</button></div><div class="status" id="record-status" role="status">Видео 14 сек. Запись идёт в реальном времени; для MP4 используйте FFmpeg/CONVERT_TO_MP4_WINDOWS.bat из архива.</div></section>
+<section><h2>Изменение хореографии (без программирования)</h2><div class="cols"><div class="field"><label>Событие боя</label><select style="width:100%" id="beat-select"></select></div><div class="field"><label>Время события (сек)</label><input id="beat-time" type="number" min="0" max="14" step="0.01" style="width:100%"></div></div>
+<div class="cols"><div class="field"><label>Тип события</label><input type="text" id="beat-action" style="width:100%"></div><div class="field"><label>Дистанция удара (для контакта)</label><input type="number" step=".01" min=".01" max="1" id="beat-reach" style="width:100%"></div></div>
+<div class="field"><label>Режиссёрское намерение или русский текст реплики</label><input type="text" id="beat-text" style="width:100%"></div>
+<button id="save-beat">Применить правки и проверить</button><p class="help">Ключевые кадры персонажей, положения камеры и длительность планов доступны в полной структуре проекта JSON. Экспорт не удаляет предыдущие файлы.</p></section>
+</div>
+<div>
+<section><h2>Ритм боя и причинность</h2><div class="events" id="events"></div></section>
+<section><h2>Углублённая проверка сцены</h2><div id="qa-summary"></div><div id="qa-details"></div><button id="qa-run">Проверить снова</button></section>
+<section><h2>Производственная последовательность</h2><p class="help">1. Драматическая цель → 2. Разбивка ударов → 3. Расстояния и телеграфирование → 4. Планы и монтажная ось → 5. Арт и отдельные ракурсы → 6. Анимация → 7. Эффекты и звук → 8. QA → 9. WebM/MP4.</p><p class="help">Шаги 1–4 автоматизированы частично. Профессиональное рисование, модельная/фонемная синхронизация речи и 3D-моделирование в C1 ещё не автоматизированы.</p></section>
+<section><h2>Резервное копирование</h2><p class="help">Кнопка «Сохранить весь проект JSON» включает внесённые изменения и вложенные изображения/аудио (data URL); крупные файлы могут сделать резерв тяжёлым. Видеоролик — отдельный файл. Сохраняйте копии на диск.</p></section>
+</div>
+</main>
+<script>
+/* AI Anime Factory Cinematic C1 — original combat previsualization, MIT license.
+   No third-party anime imagery, dialogue, or protected characters included. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.CinematicCore = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const smooth = x => { const t = clamp(x, 0, 1); return t*t*(3-2*t); };
+  const keys = (arr, t) => {
+    if (!Array.isArray(arr) || !arr.length) throw new Error('Нет ключевых кадров');
+    if (t <= arr[0].t) return Object.assign({}, arr[0]);
+    for (let i = 0; i < arr.length - 1; ++i) {
+      const a = arr[i], b = arr[i+1];
+      if (t <= b.t) {
+        let q = clamp((t-a.t)/(b.t-a.t),0,1);
+        q = b.ease === 'linear' ? q : b.ease === 'snap' ? +(q >= 1) : smooth(q);
+        const out = Object.assign({}, q < .5 ? a : b);
+        ['x','y','rotation','scale'].forEach(prop => {
+          if (Number.isFinite(a[prop]) && Number.isFinite(b[prop])) out[prop] = a[prop] + (b[prop]-a[prop])*q;
+        });
+        out.t = t;
+        return out;
+      }
+    }
+    return Object.assign({}, arr[arr.length-1]);
+  };
+  function makeDemo() {
+    return {
+      schema: 'ai-anime-cinematic-c1', title: 'ПЕПЕЛЬНЫЙ ДОЗОР — оригинальная боевая сцена', fps: 24, duration: 14,
+      description: 'Оригинальная постановочная демонстрация: угроза → атака → защита → контратака → последствия.',
+      actors: [{id:'nova',name:'Нова',color:'#79d9f9',w:205,h:440},{id:'warden',name:'Страж',color:'#df9bff',w:252,h:465}],
+      tracks: {
+        nova: [
+          {t:0,x:.30,y:0,pose:'idle',facing:1},{t:2.70,x:.30,y:0,pose:'ready',facing:1},
+          {t:3.50,x:.30,y:0,pose:'block',facing:1},{t:3.85,x:.27,y:0,pose:'block',facing:1,ease:'linear'},
+          {t:4.35,x:.23,y:0,pose:'dodge',facing:1,ease:'linear'}, {t:4.95,x:.29,y:0,pose:'ready',facing:1},
+          {t:5.60,x:.46,y:-.02,pose:'dash',facing:1,ease:'linear'}, {t:5.90,x:.52,y:0,pose:'slash',facing:1,ease:'linear'},
+          {t:6.45,x:.49,y:0,pose:'recover',facing:1}, {t:7.70,x:.42,y:0,pose:'ready',facing:1},
+          {t:9.20,x:.40,y:0,pose:'ready',facing:1},{t:9.85,x:.46,y:-.015,pose:'slash',facing:1,ease:'linear'},
+          {t:10.65,x:.42,y:0,pose:'recover',facing:1},{t:11.6,x:.36,y:0,pose:'ready',facing:1},
+          {t:14,x:.36,y:0,pose:'idle',facing:1}
+        ],
+        warden: [
+          {t:0,x:.72,y:0,pose:'idle',facing:-1},{t:2.65,x:.71,y:0,pose:'windup',facing:-1},
+          {t:3.35,x:.52,y:0,pose:'dash',facing:-1,ease:'linear'},{t:3.75,x:.43,y:0,pose:'slash',facing:-1,ease:'linear'},
+          {t:4.20,x:.44,y:0,pose:'recover',facing:-1},{t:5.45,x:.69,y:0,pose:'ready',facing:-1},
+          {t:5.90,x:.68,y:0,pose:'hit',facing:-1},{t:6.45,x:.75,y:0,pose:'hit',facing:-1,ease:'linear'},
+          {t:7.35,x:.79,y:0,pose:'recover',facing:-1},{t:8.10,x:.72,y:0,pose:'windup',facing:-1},
+          {t:9.35,x:.58,y:0,pose:'dash',facing:-1,ease:'linear'}, {t:9.85,x:.55,y:0,pose:'slash',facing:-1},
+          {t:10.35,x:.59,y:0,pose:'hit',facing:-1},{t:11.5,x:.73,y:0,pose:'recover',facing:-1},
+          {t:14,x:.73,y:0,pose:'idle',facing:-1}
+        ]
+      },
+      shots: [
+        {start:0,end:1.4,kind:'establishing',zoom:1,cx:.50,cy:.52,axis:1},
+        {start:1.4,end:2.7,kind:'medium-dialogue',zoom:1.29,cx:.36,cy:.48,axis:1},
+        {start:2.7,end:4.25,kind:'enemy-attack',zoom:1.10,cx:.50,cy:.53,axis:1},
+        {start:4.25,end:5.35,kind:'breath-after-dodge',zoom:1.30,cx:.34,cy:.49,axis:1},
+        {start:5.35,end:6.65,kind:'counterattack',zoom:1.22,cx:.55,cy:.50,axis:1},
+        {start:6.65,end:8.1,kind:'reaction',zoom:1.24,cx:.66,cy:.48,axis:1},
+        {start:8.1,end:9.55,kind:'threat',zoom:1.12,cx:.55,cy:.52,axis:1},
+        {start:9.55,end:10.55,kind:'clash',zoom:1.43,cx:.51,cy:.48,axis:1},
+        {start:10.55,end:12.05,kind:'aftermath',zoom:1.1,cx:.53,cy:.54,axis:1},
+        {start:12.05,end:14,kind:'resolution',zoom:1.18,cx:.39,cy:.48,axis:1}
+      ],
+      beats: [
+        {id:'b01',t:0.15,action:'standoff',actor:'nova',target:'warden',intent:'Показать конфликт и расстояние'},
+        {id:'b02',t:1.6,action:'dialogue',actor:'nova',text:'Назад. Это место закрыто.',intent:'Ставка до атаки'},
+        {id:'b03',t:2.74,action:'telegraph',actor:'warden',target:'nova',intent:'Заметная подготовка удара'},
+        {id:'b04',t:3.75,action:'block',actor:'warden',target:'nova',reach:.20,contact:'blocked',intent:'Удар в пределах дистанции, защита поставлена'},
+        {id:'b05',t:4.30,action:'dodge',actor:'nova',target:'warden',intent:'Переход на выгодную дистанцию'},
+        {id:'b06',t:5.90,action:'slash',actor:'nova',target:'warden',reach:.21,contact:'hit',reaction:'warden',intent:'Ответ после уклонения'},
+        {id:'b07',t:6.55,action:'recoil',actor:'warden',target:'nova',intent:'Враг вынужденно отходит'},
+        {id:'b08',t:7.3,action:'dialogue',actor:'warden',text:'Я не отступлю!',intent:'Угроза повышается'},
+        {id:'b09',t:8.15,action:'telegraph',actor:'warden',target:'nova',intent:'Враг собирает силы'},
+        {id:'b10',t:9.85,action:'clash',actor:'nova',target:'warden',reach:.17,contact:'blocked',intent:'Оружие встречается с оружием'},
+        {id:'b11',t:10.28,action:'recoil',actor:'warden',target:'nova',intent:'Читаемое последствие'},
+        {id:'b12',t:12.1,action:'dialogue',actor:'nova',text:'Тогда придётся закончить бой.',intent:'Эмоциональная развязка'}
+      ],
+      media: {images:{background:null,foreground:null,nova:null,warden:null},audio:{nova:null,warden:null}},
+      rights: {originalStory:true,importedAssetsVerified:false}
+    };
+  }
+  function shotAt(p,t){ return p.shots.find(s=>t>=s.start && t<s.end) || p.shots[p.shots.length-1]; }
+  function stateAt(p,time) {
+    const t=clamp(time,0,p.duration);
+    const actors={}; p.actors.forEach(a=>{actors[a.id]=keys(p.tracks[a.id],t);});
+    const shot=shotAt(p, Math.min(t,p.duration-0.00001));
+    const hits=p.beats.filter(b=>b.contact && Math.abs(t-b.t)<.19).map(b=>({id:b.id,dt:t-b.t,contact:b.contact,actor:b.actor,target:b.target}));
+    const dialogue=p.beats.filter(b=>b.action==='dialogue' && t>=b.t && t<b.t+1.55).slice(-1)[0] || null;
+    return {t,actors,shot,hits,dialogue};
+  }
+  function audit(p) {
+    const issues=[];
+    const err=(type,msg,ref)=>issues.push({severity:type,message:msg,ref});
+    if(p.schema!=='ai-anime-cinematic-c1')err('error','Несовместимая схема','schema');
+    if(!Number.isFinite(p.duration)||p.duration<=0||p.duration>180)err('error','Длительность 0–180 сек','duration');
+    if(![12,24,30].includes(p.fps))err('warning','Рекомендуется 12/24/30 FPS','fps');
+    const ids=new Set();
+    for(const a of p.actors||[]){if(ids.has(a.id))err('error','Повтор ID персонажа',a.id);ids.add(a.id);
+      const ts=p.tracks&&p.tracks[a.id];if(!ts||ts.length<2)err('error','Нет дорожки движения',a.id);
+      else for(let i=1;i<ts.length;i++)if(ts[i].t<=ts[i-1].t)err('error','Некорректный порядок ключей',a.id);
+      if(!p.media||!p.media.images||!p.media.images[a.id])err('warning','Нет настоящего арта персонажа',a.id);
+    }
+    const shots=p.shots||[];
+    if(!shots.length || Math.abs(shots[0].start)>1e-6 || Math.abs(shots[shots.length-1].end-p.duration)>1e-5)err('error','Съёмка не закрывает всю сцену','shots');
+    for(let i=0;i<shots.length;i++){
+      if(shots[i].end<=shots[i].start)err('error','Нулевой план',i);
+      if(i>0 && Math.abs(shots[i].start-shots[i-1].end)>1e-5)err('error','Разрыв/перекрытие плана',i);
+      if(i>0 && shots[i].axis!==shots[i-1].axis)err('warning','Возможно нарушена ось действия (180°)',i);
+    }
+    const beatIDs=new Set();let prev=-1;
+    for(const b of p.beats||[]){
+      if(beatIDs.has(b.id))err('error','Повтор события',b.id);beatIDs.add(b.id);
+      if(!Number.isFinite(b.t)||b.t<0||b.t>p.duration||b.t<prev)err('error','Неверный таймкод действия',b.id);
+      prev=b.t;
+      if(!ids.has(b.actor)||(b.target&&!ids.has(b.target)))err('error','Неизвестный персонаж',b.id);
+      if(b.contact){
+        if(!Number.isFinite(b.reach)||b.reach<=0)err('error','У контакта нет заданной дистанции',b.id);
+        else if(p.tracks&&p.tracks[b.actor]&&p.tracks[b.target]){
+          const gap=Math.abs(keys(p.tracks[b.actor],b.t).x-keys(p.tracks[b.target],b.t).x);
+          if(gap>b.reach+0.001)err('error',`Невозможное попадание: дистанция ${gap.toFixed(3)} > ${b.reach}`,b.id);
+        }
+        if(b.contact==='hit' && !b.reaction)err('error','Попадание без указанной реакции',b.id);
+        if(b.contact!=='hit' && b.contact!=='blocked')err('error','Неверный тип контакта',b.id);
+      }
+      if(b.action==='dialogue'&&!b.text)err('error','Реплика пустая',b.id);
+    }
+    if(!p.media||!p.media.images||!p.media.images.background)err('warning','Нет настоящего художественного фона','background');
+    if(!p.rights||!p.rights.importedAssetsVerified)err('warning','Не подтверждены права на загружаемые материалы','rights');
+    (p.beats||[]).filter(b=>b.action==='dialogue').forEach(b=>{if(!p.media||!p.media.audio||!p.media.audio[b.id])err('warning','Не загружена запись русской реплики',b.id);});
+    return {ok:!issues.some(i=>i.severity==='error'),issues,errors:issues.filter(i=>i.severity==='error').length,warnings:issues.filter(i=>i.severity==='warning').length};
+  }
+  function exportPlan(p){return p.beats.map(b=>({timecode:`${Math.floor(b.t/60).toString().padStart(2,'0')}:${(b.t%60).toFixed(2).padStart(5,'0')}`,id:b.id,action:b.action,actor:b.actor,target:b.target||null,meaning:b.intent||'',shot:shotAt(p,b.t).kind,dialogue:b.text||'',contact:b.contact||null}));}
+  function subtitleSrt(p){ const d=p.beats.filter(b=>b.action==='dialogue'&&b.text); const fmt=t=>{const ms=Math.round(t*1000);return `${String(Math.floor(ms/3600000)).padStart(2,'0')}:${String(Math.floor(ms/60000)%60).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')},${String(ms%1000).padStart(3,'0')}`;};return d.map((b,i)=>`${i+1}\n${fmt(b.t)} --> ${fmt(Math.min(p.duration,b.t+1.55))}\n${p.actors.find(a=>a.id===b.actor)?.name||b.actor}: ${b.text}\n`).join('\n'); }
+  return {makeDemo,clamp,smooth,keys,shotAt,stateAt,audit,exportPlan,subtitleSrt};
+});
+
+</script><script>
+'use strict';
+const C=window.CinematicCore,$=s=>document.querySelector(s),canvas=$('#screen'),ctx=canvas.getContext('2d');
+let p=C.makeDemo(),t=0,playing=false,recording=false,startTS=0,fromT=0,raf=null,lastTTS=-1;
+let images={},sounds={},audioCtx=null;
+const now=()=>performance.now()/1000;
+const timeStr=n=>`${String(Math.floor(n/60)).padStart(2,'0')}:${(n%60).toFixed(2).padStart(5,'0')}`;
+function download(name,type,content){const blob=content instanceof Blob?content:new Blob([content],{type});const a=document.createElement('a');let u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),15000);}
+function imageFromData(url){return new Promise((resolve,reject)=>{if(!url){resolve(null);return}const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Повреждённое изображение'));img.src=url;});}
+async function refreshMedia(){images={};sounds={};for(const [key,val] of Object.entries(p.media.images||{}))try{images[key]=await imageFromData(val);}catch(e){console.warn(key,e)};for(const [key,val] of Object.entries(p.media.audio||{}))if(val)sounds[key]=val;}
+function background(W,H,t){
+  let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#060c1e');g.addColorStop(.53,'#17223b');g.addColorStop(1,'#3d3345');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  for(let i=0;i<9;i++){const x=(i*241)%W,w=W*(.05+(i%4)*.009);ctx.fillStyle=`rgba(9,13,31,${.25+i*.043})`;ctx.beginPath();ctx.moveTo(x,H*.71);ctx.lineTo(x-w*.34,H*.34);ctx.lineTo(x+w*.12,H*(.25+.03*(i%3)));ctx.lineTo(x+w,H*.74);ctx.fill();}
+  const grd=ctx.createRadialGradient(W*.72,H*.27,1,W*.72,H*.27,W*.28);grd.addColorStop(0,'#87c0ff55');grd.addColorStop(1,'transparent');ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#242436';ctx.fillRect(0,H*.82,W,H*.18);
+  for(let j=0;j<28;j++){const x=((j*119+17)%1000)/1000*W; const y=(.1+((j*57)%75)/100)*H;ctx.fillStyle=j%3?'#a8b5d41b':'#b4e1ff34';ctx.beginPath();ctx.arc(x+Math.sin(t*.32+j)*W*.005,y+Math.sin(t*.8+j)*H*.012,1+(j%3),0,Math.PI*2);ctx.fill();}
+}
+function paintFigure(id,model,cam,W,H,t){
+ const x=model.x*W,y=H*(.84+model.y),u=W/1280;
+ ctx.save();ctx.translate(x,y);ctx.scale(model.facing||1,1);
+ const isHero=id==='nova',accent=isHero?'#72e8ff':'#e0a0ff';
+ ctx.fillStyle='#02091595';ctx.beginPath();ctx.ellipse(0,0,(isHero?85:105)*u,18*u,0,0,Math.PI*2);ctx.fill();
+ const img=images[id];if(img){let h=(p.actors.find(a=>a.id===id)?.h||420)*u,w=h*img.width/img.height;const angle=model.pose==='hit'?-.1:model.pose==='dash'?.09:0;ctx.translate(0,-12*u);ctx.rotate(angle);ctx.drawImage(img,-w*.5,-h,w,h);ctx.restore();return;}
+ // Painted graphic-novel stand-ins with DIFFERENT silhouettes; still intentionally labeled as placeholders.
+ const q=u,pose=model.pose||'idle',dash=pose==='dash',slash=pose==='slash',block=pose==='block',hit=pose==='hit';
+ ctx.translate(0,(-3+Math.sin(t*2+(isHero?0:2))*3)*q);
+ const leaned=dash?22:hit?-17:slash?13:0;ctx.rotate((leaned*Math.PI/180));
+ ctx.scale(q,q);
+ const poly=(arr,fill,stroke,width=2)=>{ctx.beginPath();ctx.moveTo(arr[0],arr[1]);for(let j=2;j<arr.length;j+=2)ctx.lineTo(arr[j],arr[j+1]);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}};
+ const seg=(arr,stroke,width=5)=>{ctx.beginPath();ctx.moveTo(arr[0],arr[1]);for(let j=2;j<arr.length;j+=2)ctx.lineTo(arr[j],arr[j+1]);ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();};
+ if(isHero){
+   // Nóva: slender, asymmetrical cloak, long icy hair, small double blades.
+   ctx.shadowColor='#61deff';ctx.shadowBlur=15;
+   poly([-43,-208,-70,-150,-123,-84,-65,-102,-38,-86,49,-101,79,-155,44,-207],'#182a4b','#3e7196',2);
+   ctx.shadowBlur=0;
+   poly([-35,-107,-9,-110,0,-36,-25,2,-51,-2],'#172840','#3b5a73',2);
+   poly([14,-113,37,-102,46,-11,13,5,-2,-10],'#223450','#6bbcd1',2);
+   poly([-48,-15,-20,-18,-17,5,-52,10],'#121a31','#74cde3',2);
+   poly([14,-9,46,-8,58,13,24,12],'#121a31','#74cde3',2);
+   poly([-33,-233,23,-235,45,-126,7,-111,-29,-121,-53,-161],'#253a5b','#5793b5',3);
+   poly([-17,-227,0,-212,-6,-128,-21,-127],'#a7d9e7',null,0);
+   poly([-23,-209,38,-207,27,-187,-28,-183],'#314e72','#9bcce6',2);
+   // Right arm with actual attack extension tied to phase.
+   const handX=slash?113:block?5:76,handY=slash?-238:block?-234:-144;
+   seg([-42,-215,-66,-171,-83,-147],'#233a57',20);seg([-42,-215,-66,-171,-83,-147],'#8bcadc',2);
+   seg([36,-215,52,-185,handX,handY],'#2c5274',19);seg([36,-215,52,-185,handX,handY],'#84d9e9',2);
+   poly([-27,-294,5,-306,29,-281,25,-235,-4,-225,-29,-247],'#ded7db','#7094ad',2);
+   poly([-38,-286,-7,-337,4,-315,22,-345,40,-284,20,-291,-7,-287,-22,-266],'#162642','#5b9dc8',3);
+   // distinct flowing braid
+   seg([-16,-278,-44,-255,-54,-213,-45,-186],'#a9e9ff',9);seg([-17,-278,-44,-255,-54,-213,-45,-186],'#336a97',3);
+   poly([7,-266,20,-266,25,-260,13,-258],'#75efff',null,0);
+   // two narrow daggers with visible hilts, length and thumb guarding.
+   seg([handX,handY,handX+22,handY-8],'#22324f',11);seg([handX+20,handY-9,handX+(slash?104:55),handY-(slash?85:74)],'#e7fbff',7);seg([handX+20,handY-9,handX+(slash?104:55),handY-(slash?85:74)],'#69d4ff',2);
+   seg([-83,-147,-101,-127],'#26314a',8);seg([-101,-127,-151,-177],'#cfedfd',6);
+ } else {
+   // The Warden: broad armored body, huge shoulders, angular helmet and glaive.
+   ctx.shadowColor='#c48cff';ctx.shadowBlur=25;
+   poly([-36,-227,-104,-212,-134,-119,-101,-39,-42,-75,54,-88,119,-54,145,-164,85,-228],'#241831','#845caa',3);
+   ctx.shadowBlur=0;
+   poly([-42,-111,-2,-112,-3,-19,-41,11,-65,-4],'#3e334f','#a78cc3',2);
+   poly([8,-116,51,-108,62,-4,32,11,0,-19],'#4a3958','#b598c7',3);
+   poly([-64,0,-33,-10,-25,14,-69,19],'#261d36','#956eaf',2);
+   poly([33,-10,66,-5,77,19,30,20],'#261d36','#956eaf',2);
+   poly([-54,-241,-71,-256,-111,-238,-117,-182,-71,-168,-55,-188],'#514261','#b393c9',3);
+   poly([50,-235,78,-260,116,-233,104,-166,67,-174,48,-199],'#514261','#b393c9',3);
+   poly([-65,-234,53,-238,77,-111,33,-102,-7,-144,-48,-111,-82,-149],'#3b2d4b','#b698cc',4);
+   poly([-27,-218,-7,-197,17,-220,22,-169,-3,-146,-29,-174],'#77558c','#deb8ff',3);
+   seg([-28,-143,30,-146],'#6e577c',10);
+   const handX=slash?124:block?5:100,handY=slash?-252:block?-237:-177;
+   seg([-72,-217,-96,-171,-80,-131],'#523e64',28);seg([-72,-217,-96,-171,-80,-131],'#ad8cb9',3);
+   seg([78,-221,110,-205,handX,handY],'#523f68',28);seg([78,-221,110,-205,handX,handY],'#b69dc8',3);
+   // angular helmet, NOT same face as Nóva
+   poly([-47,-297,-32,-328,0,-339,41,-319,50,-289,31,-237,-31,-239],'#392c51','#bc9fdc',4);
+   poly([-57,-303,-85,-323,-40,-318,-22,-286],'#4c3566','#a98acb',2);
+   poly([45,-318,88,-334,54,-284,22,-286],'#4c3566','#a98acb',2);
+   poly([-24,-281,-2,-274,16,-281,7,-265,-13,-264],'#9b66d7',null,0);
+   ctx.shadowColor='#eac0ff';ctx.shadowBlur=11;
+   seg([-18,-279,-5,-277],'#eecbff',4);seg([11,-277,25,-280],'#eecbff',4);
+   ctx.shadowBlur=0;
+   // one giant glaive: different scale, heavy weapon silhouette
+   seg([handX,handY,handX+29,handY-14],'#302843',18);
+   seg([handX+10,handY+70,handX+111,handY-143],'#c2bbcf',10);
+   poly([handX+107,handY-146,handX+158,handY-203,handX+163,handY-148,handX+133,handY-111],'#bcb1d3','#faf2ff',3);
+ }
+ ctx.restore();
+ ctx.save();ctx.font=`${12*q}px system-ui`;ctx.textAlign='center';ctx.fillStyle='#ffffffb8';ctx.fillText((p.actors.find(a=>a.id===id)||{name:id}).name,x,y-475*q);ctx.restore();
+}
+function impacts(s,W,H){for(const e of s.hits){const dt=Math.abs(e.dt),intensity=Math.pow(1-dt/.19,2);const a=s.actors[e.actor],b=s.actors[e.target];if(!a||!b)continue;const x=(a.x+b.x)*.5*W,y=H*.49;
+ ctx.save();ctx.translate(x,y);ctx.globalAlpha=intensity;for(let i=0;i<24;i++){const angle=i*2.39996+e.dt*2;let rad=(42+i*4.3)*W/1280;ctx.strokeStyle=i%3===0?'#fff':i%3===1?'#9ce8ff':'#c1a0ff';ctx.lineWidth=(i%4+1)*W/1280;ctx.beginPath();ctx.moveTo(Math.cos(angle)*rad*.18,Math.sin(angle)*rad*.18);ctx.lineTo(Math.cos(angle)*rad,Math.sin(angle)*rad);ctx.stroke();}ctx.fillStyle='#fff';ctx.shadowColor='#9be2ff';ctx.shadowBlur=40*W/1280;ctx.beginPath();ctx.arc(0,0,16*W/1280,0,Math.PI*2);ctx.fill();ctx.restore();}}
+function render(v){const s=C.stateAt(p,v),W=canvas.width,H=canvas.height;ctx.save();ctx.clearRect(0,0,W,H);
+ const shot=s.shot;const shake=s.hits.reduce((o,h)=>o+Math.max(0,1-Math.abs(h.dt)/.19)*5,0)*(W/1280);const jx=shake*Math.sin(v*193),jy=shake*Math.cos(v*151);
+ ctx.translate(W/2+jx,H/2+jy);ctx.scale(shot.zoom,shot.zoom);ctx.translate(-shot.cx*W,-shot.cy*H);
+ const bg=images.background;if(bg) {let ar=bg.width/bg.height,ratio=W/H;if(ar>ratio){const wd=H*ar;ctx.drawImage(bg,-(wd-W)/2,0,wd,H);}else{const ht=W/ar;ctx.drawImage(bg,0,-(ht-H)/2,W,ht);}}else background(W,H,v);
+ const charList=p.actors.slice().sort((a,b)=>(C.stateAt(p,v).actors[a.id].y||0)-(C.stateAt(p,v).actors[b.id].y||0));charList.forEach(a=>paintFigure(a.id,s.actors[a.id],shot,W,H,v));impacts(s,W,H);
+ if(images.foreground)ctx.drawImage(images.foreground,0,0,W,H);
+ ctx.restore();
+ // Camera-space effects after the movement, so impact still reads.
+ const hit=s.hits[0];if(hit){const alpha=.23*Math.max(0,1-Math.abs(hit.dt)/.19);ctx.fillStyle=`rgba(211,233,255,${alpha})`;ctx.fillRect(0,0,W,H);}
+ let vign=ctx.createRadialGradient(W/2,H/2,H*.1,W/2,H/2,W*.65);vign.addColorStop(0,'transparent');vign.addColorStop(1,'#000b1cc0');ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#080e1bbb';ctx.fillRect(0,0,W,H*.045);ctx.fillRect(0,H*.955,W,H*.045);
+ if(s.dialogue){ctx.fillStyle='#080e1cdd';ctx.fillRect(W*.13,H*.83,W*.74,H*.095);ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.font=`600 ${Math.max(11,Math.floor(W*.023))}px sans-serif`;const speaker=p.actors.find(a=>a.id===s.dialogue.actor)?.name||s.dialogue.actor;ctx.fillText(`${speaker}: ${s.dialogue.text}`,W/2,H*.895,W*.70);}
+ ctx.fillStyle='#dce5f8cc';ctx.font=`${Math.max(11,W*.012)}px monospace`;ctx.textAlign='left';ctx.fillText(`C1 / ${s.shot.kind} / ${v.toFixed(2)}s`,W*.035,H*.069);
+ $('#clock').textContent=`${timeStr(v)} / ${timeStr(p.duration)}`;$('#shot-name').textContent=shot.kind;$('#seek').value=v;
+ const marker=$('#playhead');if(marker)marker.style.left=`${v/p.duration*100}%`;
+ $('#events').querySelectorAll('[data-time]').forEach(el=>el.classList.toggle('active',Math.abs(Number(el.dataset.time)-v)<.24));
+}
+function buildTimeline(){const box=$('#timeline');box.replaceChildren();for(const shot of p.shots){let el=document.createElement('div');el.className='shot';el.style.left=shot.start/p.duration*100+'%';el.style.width=(shot.end-shot.start)/p.duration*100+'%';el.textContent=shot.kind;el.title=`${shot.start}–${shot.end} / ${shot.kind}`;box.appendChild(el);}const marker=document.createElement('div');marker.className='marker';marker.id='playhead';box.appendChild(marker);}
+function buildBeats(){const box=$('#events'),sel=$('#beat-select');box.replaceChildren();sel.replaceChildren();for(const b of p.beats){const btn=document.createElement('button');btn.className='event';btn.dataset.time=b.t;btn.textContent=`${timeStr(b.t)}  ${b.action} · ${b.actor} ${b.contact||''}`;btn.title=b.intent||b.text||'';btn.addEventListener('click',()=>{stop();t=b.t;render(t);sel.value=b.id;editBeat()});box.appendChild(btn);const opt=document.createElement('option');opt.value=b.id;opt.textContent=`${b.id} — ${b.action}`;sel.appendChild(opt)}editBeat();buildTimeline();}
+function editBeat(){const b=p.beats.find(x=>x.id===$('#beat-select').value);if(!b)return;$('#beat-time').value=b.t;$('#beat-action').value=b.action;$('#beat-reach').value=b.reach||'';$('#beat-text').value=b.action==='dialogue'?b.text||'':b.intent||'';}
+function validate(){const out=C.audit(p);$('#qa-summary').textContent=out.ok?`Контроль движения: ошибок ${out.errors}, предупреждений ${out.warnings}`:`ОШИБКИ: ${out.errors}, предупреждений ${out.warnings}. Исправьте, прежде чем выпускать!`;
+ $('#qa-summary').style.color=out.ok?'#b9f0d2':'#ff9999';const div=$('#qa-details');div.replaceChildren();for(const x of out.issues){const el=document.createElement('div');el.className='issue '+(x.severity==='error'?'err':'');el.textContent=`${x.ref}: ${x.message}`;div.appendChild(el);}if(!out.issues.length)div.textContent='Нет автоматических замечаний. Художественная приёмка всё равно обязательна.';return out;}
+function stop(){playing=false;cancelAnimationFrame(raf);$('#play').textContent='▶ Воспроизвести';}
+function play(){if(playing){stop();return}if(t>=p.duration)t=0;playing=true;fromT=t;startTS=now();$('#play').textContent='❚❚ Пауза';lastTTS=-1;tick();}
+function tick(){if(!playing)return;t=Math.min(p.duration,fromT+(now()-startTS));render(t);if(t>=p.duration){stop();return}raf=requestAnimationFrame(tick);}
+function chooseQuality(){const [w,h,f]=($('#quality').value||'1280,720,24').split(',').map(Number);canvas.width=w;canvas.height=h;p.fps=f;render(t);validate();}
+function fileData(file){if(!file)return Promise.resolve(null);if(file.size>12*1024*1024)throw new Error('Один файл должен быть не больше 12 МБ. Для тяжёлых материалов используйте сжатие или внешнюю монтажную систему.');return new Promise((ok,err)=>{let fr=new FileReader();fr.onload=()=>ok(fr.result);fr.onerror=()=>err(new Error('Ошибка чтения'));fr.readAsDataURL(file);});}
+for(const id of ['background','foreground','nova','warden'])$('#image-'+id).addEventListener('change',async e=>{try{const f=e.target.files[0];if(f){p.media.images[id]=await fileData(f);images[id]=await imageFromData(p.media.images[id]);validate();render(t);}}catch(err){alert(err.message)}});
+for(const id of ['b02','b08','b12'])$('#audio-'+id).addEventListener('change',async e=>{try{const f=e.target.files[0];if(f){p.media.audio[id]=await fileData(f);sounds[id]=p.media.audio[id];validate();}}catch(err){alert(err.message)}});
+$('#rights').addEventListener('change',e=>{p.rights.importedAssetsVerified=!!e.target.checked;validate();});
+$('#qa-run').addEventListener('click',validate);
+$('#beat-select').addEventListener('change',editBeat);
+$('#save-beat').addEventListener('click',()=>{let b=p.beats.find(x=>x.id===$('#beat-select').value);if(!b)return;const previous=JSON.parse(JSON.stringify(p.beats));const newTime=Number($('#beat-time').value);if(!Number.isFinite(newTime)||newTime<0||newTime>p.duration){alert('Время вне сцены');return}b.t=newTime;b.action=$('#beat-action').value.trim();const reach=Number($('#beat-reach').value);if(b.contact&&reach>0)b.reach=reach;if(b.action==='dialogue')b.text=$('#beat-text').value;else b.intent=$('#beat-text').value;p.beats.sort((a,b)=>a.t-b.t);const a=validate();if(!a.ok){if(!confirm('Проверка обнаружила ошибки. Сохранить изменения для дальнейшей правки?'))p.beats=previous;}buildBeats();render(t);});
+$('#seek').addEventListener('input',e=>{stop();t=Number(e.target.value);render(t);});$('#play').addEventListener('click',play);$('#rewind').addEventListener('click',()=>{stop();t=0;render(0)});$('#quality').addEventListener('change',chooseQuality);
+$('#load-demo').addEventListener('click',async()=>{if(!confirm('Начать новую сцену? Перед этим сохраните JSON.'))return;stop();p=C.makeDemo();t=0;await refreshMedia();buildBeats();validate();render(t);$('#rights').checked=false;});
+$('#export-json').addEventListener('click',()=>download('cinematic_C1_project_full.json','application/json;charset=utf-8',JSON.stringify(p,null,2)));
+$('#import-json-btn').addEventListener('click',()=>$('#import-json').click());$('#import-json').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const candidate=JSON.parse(await f.text());if(!candidate||candidate.schema!=='ai-anime-cinematic-c1'||!Array.isArray(candidate.actors)||!Array.isArray(candidate.shots)||!Array.isArray(candidate.beats)||!candidate.tracks||!candidate.media)throw new Error('Поддерживается только корректный проект CINEMATIC C1. Для V50 нужен будущий адаптер.');let a=C.audit(candidate);if(!a.ok)throw new Error('В проекте найдены ошибки: '+a.issues.filter(i=>i.severity==='error').map(i=>i.message).join('; '));stop();p=candidate;t=0;await refreshMedia();$('#rights').checked=!!p.rights?.importedAssetsVerified;buildBeats();validate();render(0);}catch(err){alert('Импорт отклонён: '+err.message)}e.target.value='';});
+$('#export-srt').addEventListener('click',()=>download('cinematic_C1_ru.srt','text/plain;charset=utf-8','\ufeff'+C.subtitleSrt(p)));
+$('#export-plan').addEventListener('click',()=>download('cinematic_C1_director_plan.json','application/json;charset=utf-8',JSON.stringify({title:p.title,plan:C.exportPlan(p),audit:C.audit(p)},null,2)));
+$('#export-frame').addEventListener('click',()=>canvas.toBlob(blob=>{if(blob)download(`cinematic_C1_${t.toFixed(2)}.png`,'image/png',blob)},'image/png'));
+$('#tts-preview').addEventListener('click',()=>{if(!window.speechSynthesis){alert('Системный TTS здесь недоступен');return;}speechSynthesis.cancel();const voices=speechSynthesis.getVoices(),russian=voices.find(v=>v.lang.toLowerCase().startsWith('ru'));if(!russian){alert('В системе или браузере не установлен голос для русского языка. Импортируйте аудио WAV/MP3/OGG.');return;}for(const b of p.beats.filter(x=>x.action==='dialogue')){let u=new SpeechSynthesisUtterance(b.text);u.lang='ru-RU';u.voice=russian;u.rate=b.actor==='warden'?.86:.98;u.pitch=b.actor==='warden'?.8:1.1;speechSynthesis.speak(u);}});
+async function decodeData(ctx,data){const bytes=atob(data.slice(data.indexOf(',')+1));const buf=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)buf[i]=bytes.charCodeAt(i);return ctx.decodeAudioData(buf.buffer);}
+$('#record').addEventListener('click',async()=>{
+ if(recording)return;if(!window.MediaRecorder||!canvas.captureStream){alert('Нужен Chrome/Edge с поддержкой MediaRecorder');return;}const audit=validate();if(!audit.ok){alert('Исправьте ошибки сцены перед экспортом');return;}
+ stop();t=0;render(0);recording=true;$('#record').disabled=true;const output=$('#record-status');output.textContent='Подготовка аудио и видеозаписи...';let actx=null,stream=null,recorder=null;
+ try{
+   const mime=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));if(!mime)throw new Error('Нет поддерживаемого WebM-кодека');
+   stream=canvas.captureStream(p.fps);const audioIDs=p.beats.filter(b=>b.action==='dialogue'&&sounds[b.id]);
+   if(audioIDs.length){actx=new(window.AudioContext||window.webkitAudioContext)();await actx.resume();const dest=actx.createMediaStreamDestination();for(const b of audioIDs){try{let buf=await decodeData(actx,sounds[b.id]);let src=actx.createBufferSource();src.buffer=buf;src.connect(dest);src.start(actx.currentTime+b.t);}catch(err){throw new Error('Аудио '+b.id+' не декодируется: '+err.message);}}
+     for(const tr of dest.stream.getAudioTracks())stream.addTrack(tr);
+   }
+   let chunks=[];recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:4500000});
+   const finished=new Promise((resolve,reject)=>{recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};recorder.onstop=resolve;recorder.onerror=e=>reject(e.error||new Error('Ошибка кодирования WebM'));});
+   recorder.start(1000);const start=now();
+   await new Promise(resolve=>{const loop=()=>{t=Math.min(p.duration,now()-start);render(t);output.textContent=`Запись ${t.toFixed(1)} / ${p.duration} секунд. Не закрывайте вкладку.`;if(t>=p.duration){resolve();return;}requestAnimationFrame(loop)};loop()});
+   recorder.stop();await finished;const video=new Blob(chunks,{type:mime});if(video.size<1000)throw new Error('Записанный видеопоток слишком мал');download('CINEMATIC_C1_SCENE.webm',mime,video);output.textContent=`Файл WebM записан (${(video.size/1048576).toFixed(2)} МБ). Аудио: ${audioIDs.length} загруженных клипов.`;
+ }catch(e){output.textContent='Ошибка: '+e.message;alert('Ошибка видеозаписи: '+e.message);if(recorder&&recorder.state!=='inactive')recorder.stop();}
+ finally{if(stream)stream.getTracks().forEach(tr=>tr.stop());if(actx)await actx.close();recording=false;$('#record').disabled=false;}
+});
+(async()=>{await refreshMedia();buildBeats();validate();render(0);})();
+</script></body></html>
