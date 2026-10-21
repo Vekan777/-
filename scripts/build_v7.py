@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V46):
+AI ANIME FACTORY (текущий редактор V47):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -95,6 +95,7 @@ AI ANIME FACTORY (текущий редактор V46):
    anime-factory\\v44\\AI_Anime_Factory_V44_TRUE_KEYPOSES.html
    anime-factory\\v45\\AI_Anime_Factory_V45_ART_ENGINE.html
    anime-factory\\v46\\AI_Anime_Factory_V46_ANIMATION_ENGINE.html
+   anime-factory\\v47\\AI_Anime_Factory_V47_PORTABLE_VOICE.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -229,6 +230,12 @@ def prepare(root, source_dist):
                  "anime-factory/v46/animation_engine_v46.js",
                  "anime-factory/v46/build_animation_v46.py",
                  "anime-factory/v46/README_RU.md",
+                 "anime-factory/v47/portable_voice_v47.js",
+                 "anime-factory/v47/build_voice_v47.py",
+                 "anime-factory/v47/README_RU.md",
+                 "scripts/build_anime_v47.py",
+                 "tests/test_anime_v47.py",
+                 "tests/smoke_browser_v47.py",
                  "scripts/build_anime_v46.py",
                  "tests/test_anime_v46.py",
                  "tests/smoke_browser_v46.py",
@@ -496,6 +503,14 @@ def prepare(root, source_dist):
         animation46_builder.build().encode("utf-8")
     )
 
+    portable47_path=root/"anime-factory"/"v47"/"build_voice_v47.py"
+    portable47_spec=importlib.util.spec_from_file_location("anime_v47_voice",portable47_path)
+    portable47_builder=importlib.util.module_from_spec(portable47_spec)
+    portable47_spec.loader.exec_module(portable47_builder)
+    data["anime-factory/v47/AI_Anime_Factory_V47_PORTABLE_VOICE.html"]=(
+        portable47_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -583,6 +598,11 @@ def prepare(root, source_dist):
         with zipfile.ZipFile(optional_v46) as z:
             if z.testzip():raise ValueError("V46 ZIP CRC failure")
         data["legacy/"+optional_v46.name]=optional_v46.read_bytes()
+    optional_v47=source_dist/"AI_ANIME_FACTORY_V47_PORTABLE_VOICE_WINDOWS.zip"
+    if optional_v47.is_file():
+        with zipfile.ZipFile(optional_v47) as z:
+            if z.testzip():raise ValueError("V47 ZIP CRC")
+        data["legacy/"+optional_v47.name]=optional_v47.read_bytes()
 
     data["README_RU.txt"] = README_RU.encode("utf-8")
     data["RUN_V7_WINDOWS.bat"] = BAT_GUI.encode("utf-8")
@@ -632,7 +652,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V46 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V47 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())
