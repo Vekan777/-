@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V43):
+AI ANIME FACTORY (текущий редактор V44):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -92,6 +92,7 @@ AI ANIME FACTORY (текущий редактор V43):
    anime-factory\\v41\\AI_Anime_Factory_V41_SILHOUETTE_STUDIO.html
    anime-factory\\v42\\AI_Anime_Factory_V42_STAGE_DEPTH.html
    anime-factory\\v43\\AI_Anime_Factory_V43_ACTION_DIRECTOR.html
+   anime-factory\\v44\\AI_Anime_Factory_V44_TRUE_KEYPOSES.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -217,6 +218,12 @@ def prepare(root, source_dist):
                  "anime-factory/v43/director_v43.js",
                  "anime-factory/v43/build_director_v43.py",
                  "anime-factory/v43/README_RU.md",
+                 "anime-factory/v44/keyposes_v44.js",
+                 "anime-factory/v44/build_keyposes_v44.py",
+                 "anime-factory/v44/README_RU.md",
+                 "scripts/build_anime_v44.py",
+                 "tests/test_anime_v44.py",
+                 "tests/smoke_browser_v44.py",
                  "scripts/build_anime_v43.py",
                  "tests/test_anime_v43.py",
                  "tests/smoke_browser_v43.py",
@@ -449,6 +456,14 @@ def prepare(root, source_dist):
         director43_builder.build().encode("utf-8")
     )
 
+    poses44_path=root/"anime-factory"/"v44"/"build_keyposes_v44.py"
+    poses44_spec=importlib.util.spec_from_file_location("anime_v44_poses",poses44_path)
+    poses44_builder=importlib.util.module_from_spec(poses44_spec)
+    poses44_spec.loader.exec_module(poses44_builder)
+    data["anime-factory/v44/AI_Anime_Factory_V44_TRUE_KEYPOSES.html"]=(
+        poses44_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -521,6 +536,11 @@ def prepare(root, source_dist):
         with zipfile.ZipFile(optional_v43) as z:
             if z.testzip():raise ValueError("V43 CRC32 error")
         data["legacy/"+optional_v43.name]=optional_v43.read_bytes()
+    optional_v44=source_dist/"AI_ANIME_FACTORY_V44_TRUE_KEYPOSES_WINDOWS.zip"
+    if optional_v44.is_file():
+        with zipfile.ZipFile(optional_v44) as z:
+            if z.testzip():raise ValueError("V44 CRC32 failure")
+        data["legacy/"+optional_v44.name]=optional_v44.read_bytes()
 
     data["README_RU.txt"] = README_RU.encode("utf-8")
     data["RUN_V7_WINDOWS.bat"] = BAT_GUI.encode("utf-8")
@@ -570,7 +590,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V43 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V44 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())
