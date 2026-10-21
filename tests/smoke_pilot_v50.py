@@ -50,6 +50,8 @@ def main():
                 if len(current["scenes"])!=6:
                     raise AssertionError("Scene structure lost")
                 for j,s in enumerate(current["scenes"]):
+                    if abs(float(before["scenes"][j]["duration"])-float(s["duration"]))>.001:
+                        raise AssertionError("V50 migrated scene duration silently; subtitle timing unsafe")
                     if len(s.get("subtitlesV37",{}).get("cues",[]))!=2:
                         raise AssertionError("Missing real per-scene subtitles")
                     audio=s.get("audioV36",{}).get("voice",{})
