@@ -384,6 +384,37 @@ v35Frame=function(canvas,ep,seconds){
  if(typeof v48DrawCredits==='function')v48DrawCredits(canvas,ep,seconds);
  return state;
 };
+/* Pilot-specific subtitle overlay: readable Russian text without a giant
+ * opaque black rectangle hiding the character animation. Old V37 untouched
+ * outside these first two pilot episodes.
+ */
+const v501PriorSubtitles=v37Paint;
+v37Paint=function(canvas,episode,seconds){
+ if(!P?.v501Visual?.enabled || !episode?.pilotV50 ||
+    !(P.episodes||[]).slice(0,2).includes(episode))
+   return v501PriorSubtitles(canvas,episode,seconds);
+ const active=v37Active(episode,seconds).slice(0,1);
+ if(!active.length)return active;
+ const g=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+ const scale=w/640,caption=active[0].text;
+ g.save();g.setTransform(1,0,0,1,0,0);
+ g.font='600 '+Math.max(13,Math.round(19*scale))+'px Segoe UI, Arial, sans-serif';
+ const rows=v37Lines(g,caption,w*.82,2);
+ const lineH=27*scale,boxH=(rows.length*lineH)+12*scale;
+ const top=h-18*scale-boxH, left=w*.10,boxW=w*.80;
+ g.fillStyle='rgba(3,10,24,.67)';
+ g.beginPath();
+ if(typeof g.roundRect==='function')g.roundRect(left,top,boxW,boxH,8*scale);
+ else g.rect(left,top,boxW,boxH);
+ g.fill();
+ g.textAlign='center';g.textBaseline='middle';
+ g.fillStyle='#f8f6f5';g.shadowColor='#000';g.shadowBlur=5*scale;
+ for(let i=0;i<rows.length;i++)
+   g.fillText(rows[i],w/2,top+11*scale+(i+.5)*lineH);
+ g.restore();
+ return active;
+};
+
 window.v501Visual=Object.freeze({
  version:'50.1.0',profiles:Object.keys(v501Profiles),
  pilotOnly:true,renderer:'distinct hand-coded cinematic Canvas actors',
