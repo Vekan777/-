@@ -32,7 +32,7 @@ let closeups=0,frames=0;const used={};
 function portrait(ctx,scene,ei,si,t,f,speaker,amount,w,h){
  const choices=portraits[speaker]||portraits['Акира'];
  const alternate=(scene.kind==='romance'||scene.kind==='betrayal'||scene.kind==='ending')?1:0;
- const key=choices[(alternate+(ei%2&&si%3===1?1:0))%choices.length];
+ const key=choices[(alternate+ei+si)%choices.length];
  const img=images[key];if(!img?.complete||!img.naturalWidth)return false;
  const z0=img.width/img.height<1.35?
  Math.min(w*.86/img.width,h*.88/img.height):Math.max(w*.95/img.width,h*.70/img.height);
@@ -59,9 +59,9 @@ function portrait(ctx,scene,ei,si,t,f,speaker,amount,w,h){
    for(const [ex,ey] of eyes){ctx.beginPath();ctx.moveTo(x+(ex-8)*z,y+ey*z);
     ctx.quadraticCurveTo(x+ex*z,y+(ey+2)*z,x+(ex+8)*z,y+(ey-1)*z);ctx.stroke();}}
   const mouth=clamp((amount-.15)*1.6);
-  if(mouth>.07){ctx.globalAlpha=mouth*.65;ctx.fillStyle=speaker==='Мию'?'#883b59':'#4b2034';
-    ctx.beginPath();ctx.ellipse(x+mx*z,y+(my+1.2)*z,Math.max(3,z*7.2),
-      Math.max(1.2,z*(1+mouth*5)),0,0,2*Math.PI);ctx.fill();ctx.globalAlpha=1;}
+  if(mouth>.07){ctx.globalAlpha=mouth*.34;ctx.fillStyle=speaker==='Мию'?'#883b59':'#4b2034';
+    ctx.beginPath();ctx.ellipse(x+mx*z,y+(my+.5)*z,Math.max(2,z*3.7),
+      Math.max(1,z*(.6+mouth*2.2)),0,0,2*Math.PI);ctx.fill();ctx.globalAlpha=1;}
  }
  // Spatially stable captions; actual subtitle text is drawn later by v37Paint.
  const fade=ctx.createLinearGradient(0,h*.75,0,h);fade.addColorStop(0,'#07101c00');
@@ -86,9 +86,25 @@ function contact(ctx,w,h,f){const impact=Math.max(0,Math.min(1,(f-.655)/.035))*
  ctx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr);ctx.stroke();}
  ctx.restore();}
 v35Frame=function(canvas,ep,seconds){
- const r=old(canvas,ep,seconds),ei=P?.episodes?.indexOf(ep)??-1;
- if(!P?.v502Acting?.enabled||ei<0||ei>5||!ep?.pilotV50)return r;
- const state=view(ep,seconds);if(!state)return r;
+ const ei=P?.episodes?.indexOf(ep)??-1;
+ const acting=!!P?.v502Acting?.enabled&&ei>=0&&ei<=5&&!!ep?.pilotV50;
+ const state=acting?view(ep,seconds):null;
+ let r;
+ // Old ART/CLEAN CUTS layers re-showed the SAME still in every battle.
+ // Temporarily bypass those layers for this synchronous frame only.
+ // This reveals the actual joint-animated fighter; all settings restored.
+ if(acting&&state?.scene?.kind==='fight'){
+   const prevArt=P.v502Art?.enabled,prevClean=P.v502CleanCuts?.enabled;
+   try{
+     if(P.v502Art)P.v502Art.enabled=false;
+     if(P.v502CleanCuts)P.v502CleanCuts.enabled=false;
+     r=old(canvas,ep,seconds);
+   }finally{
+     if(P.v502Art)P.v502Art.enabled=prevArt;
+     if(P.v502CleanCuts)P.v502CleanCuts.enabled=prevClean;
+   }
+ }else r=old(canvas,ep,seconds);
+ if(!acting||!state)return r;
  frames++;const {scene,index,local,f}=state,ctx=canvas.getContext('2d');
  if(scene.kind==='fight'){contact(ctx,canvas.width,canvas.height,f);return r;}
  const shot=window.v502Director?.active(ei,index,local)||'wide';
