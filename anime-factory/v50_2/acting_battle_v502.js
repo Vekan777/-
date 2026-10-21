@@ -25,6 +25,11 @@ function view(episode,sec){const st=v35Find(episode,sec);if(!st?.row)return null
 function speakerAt(scene,t){const v=scene.audioV36?.voice||{},offset=Number(v.offset)||0;
  const live=(v.segmentsV501||[]).find(s=>t>=offset+s.start&&t<offset+s.end);
  return live?cast[live.role]||'Акира':scene.lines?.[t<scene.duration*.5?0:1]?.speaker||'Акира';}
+function v504Cue(scene,t,speaker){
+ const role=Object.fromEntries(Object.entries(cast).map(([k,v])=>[v,k]))[speaker];
+ const lip=scene.v504Lip?.cues||[];
+ return lip.find(c=>c.role===role&&t>=c.start&&t<c.end)?.shape||null;
+}
 function energy(scene,t){const v=scene.audioV36?.voice||{},index=Math.floor(
  (t-(Number(v.offset)||0))*(Number(v.sampleRateV47)||50));
  return index<0?0:clamp(Number(v.waveV47?.[index])||0);}
@@ -58,10 +63,20 @@ function portrait(ctx,scene,ei,si,t,f,speaker,amount,w,h){
    ctx.lineWidth=Math.max(1.4,z*1.9*blink);
    for(const [ex,ey] of eyes){ctx.beginPath();ctx.moveTo(x+(ex-8)*z,y+ey*z);
     ctx.quadraticCurveTo(x+ex*z,y+(ey+2)*z,x+(ex+8)*z,y+(ey-1)*z);ctx.stroke();}}
-  const mouth=clamp((amount-.15)*1.6);
-  if(mouth>.07){ctx.globalAlpha=mouth*.34;ctx.fillStyle=speaker==='Мию'?'#883b59':'#4b2034';
-    ctx.beginPath();ctx.ellipse(x+mx*z,y+(my+.5)*z,Math.max(2,z*3.7),
-      Math.max(1,z*(.6+mouth*2.2)),0,0,2*Math.PI);ctx.fill();ctx.globalAlpha=1;}
+  const cue=v504Cue(scene,t,speaker);
+  const poses={A:0,B:.21,C:.48,D:.77,E:.52,F:.34,G:.48,H:.71,X:0};
+  const mouth=cue?poses[cue]:clamp((amount-.15)*1.6);
+  if(mouth>.07){
+   const ow=cue==='D'||cue==='H',ff=cue==='F'||cue==='G';
+   const rx=Math.max(2,z*(ow?2.65:cue==='C'?5.5:3.7));
+   const ry=Math.max(1,z*(.6+mouth*3.8));
+   ctx.save();ctx.globalAlpha=mouth*.69;
+   ctx.fillStyle=speaker==='Мию'||speaker==='Сайра'?'#883b59':'#4b2034';
+   ctx.beginPath();ctx.ellipse(x+mx*z,y+(my+.5)*z,rx,ry,0,0,2*Math.PI);ctx.fill();
+   if(ff){ctx.globalAlpha=.69*mouth;ctx.fillStyle='#edd9d4';
+     ctx.fillRect(x+mx*z-rx*.6,y+my*z-ry*.35,rx*1.2,Math.max(1,ry*.38));}
+   ctx.restore();
+  }
  }
  // Spatially stable captions; actual subtitle text is drawn later by v37Paint.
  const fade=ctx.createLinearGradient(0,h*.75,0,h);fade.addColorStop(0,'#07101c00');
