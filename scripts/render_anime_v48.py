@@ -122,20 +122,28 @@ def main():
    if source:
     # Import only after an ordinary page boot. Passing file JSON as a
     # Playwright argument avoids script-injection escaping/origin problems.
-    page.evaluate("""raw => {
-      localStorage.setItem('AI_ANIME_FACTORY_V48',raw);
-      if(localStorage.getItem('AI_ANIME_FACTORY_V48')!==raw)
+    # V48, V49 UNIFIED and V50 FINAL have different localStorage namespaces.
+    # The previously hard-coded V48 key silently made V49/V50 batches render
+    # the default demo instead of the actual supplied project. Fix in-place.
+    active_key=page.evaluate("""() => (
+      document.querySelector('#page-final-v50') ? 'AI_ANIME_FACTORY_V50' :
+      document.querySelector('#page-unified-v49') ? 'AI_ANIME_FACTORY_V49' :
+      'AI_ANIME_FACTORY_V48'
+    )""")
+    page.evaluate("""([key,raw]) => {
+      localStorage.setItem(key,raw);
+      if(localStorage.getItem(key)!==raw)
        throw Error('Imported project localStorage readback failed');
-    }""",data)
+    }""",[active_key,data])
     page.reload(wait_until="load")
     try:
      page.wait_for_function("() => document.querySelector('#v48-episode')?.options.length>0",
       timeout=25000)
     except Exception as ex:
-     stored=page.evaluate("""() => ({
-       bytes:localStorage.getItem('AI_ANIME_FACTORY_V48')?.length||0,
+     stored=page.evaluate("""key => ({
+       bytes:localStorage.getItem(key)?.length||0,
        options:document.querySelector('#v48-episode')?.options.length||0
-     })""")
+     })""",active_key)
      raise RuntimeError("Imported V48 project failed to initialize: "+str(stored)+
       "; browser errors: "+"; ".join(errors[:6])) from ex
    if args.qa_short:
