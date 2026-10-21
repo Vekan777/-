@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V49):
+AI ANIME FACTORY (текущий редактор V50):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -98,6 +98,7 @@ AI ANIME FACTORY (текущий редактор V49):
    anime-factory\\v47\\AI_Anime_Factory_V47_PORTABLE_VOICE.html
    anime-factory\\v48\\AI_Anime_Factory_V48_EPISODE_ENGINE.html
    anime-factory\\v49\\AI_Anime_Factory_V49_UNIFIED_STUDIO.html
+   anime-factory\\v50\\AI_Anime_Factory_V50_FINAL_2D.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -241,6 +242,13 @@ def prepare(root, source_dist):
                  "anime-factory/v49/unified_studio_v49.js",
                  "anime-factory/v49/build_unified_v49.py",
                  "anime-factory/v49/README_RU.md",
+                 "anime-factory/v50/deep_qa_v50.js",
+                 "anime-factory/v50/build_final_v50.py",
+                 "anime-factory/v50/README_RU.md",
+                 "scripts/build_anime_v50.py",
+                 "tests/test_anime_v50.py",
+                 "tests/test_deep_qa_v50.js",
+                 "tests/smoke_browser_v50.py",
                  "scripts/build_anime_v49.py",
                  "tests/test_anime_v49.py",
                  "tests/smoke_browser_v49.py",
@@ -542,6 +550,14 @@ def prepare(root, source_dist):
         unified49_builder.build().encode("utf-8")
     )
 
+    final50_path=root/"anime-factory"/"v50"/"build_final_v50.py"
+    final50_spec=importlib.util.spec_from_file_location("anime_v50_final",final50_path)
+    final50_builder=importlib.util.module_from_spec(final50_spec)
+    final50_spec.loader.exec_module(final50_builder)
+    data["anime-factory/v50/AI_Anime_Factory_V50_FINAL_2D.html"]=(
+        final50_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -644,6 +660,11 @@ def prepare(root, source_dist):
         with zipfile.ZipFile(optional_v49) as z:
             if z.testzip():raise ValueError("V49 ZIP CRC failure")
         data["legacy/"+optional_v49.name]=optional_v49.read_bytes()
+    optional_v50=source_dist/"AI_ANIME_FACTORY_V50_FINAL_2D_WINDOWS.zip"
+    if optional_v50.is_file():
+        with zipfile.ZipFile(optional_v50) as z:
+            if z.testzip():raise ValueError("V50 FINAL ZIP CRC error")
+        data["legacy/"+optional_v50.name]=optional_v50.read_bytes()
 
     data["README_RU.txt"] = README_RU.encode("utf-8")
     data["RUN_V7_WINDOWS.bat"] = BAT_GUI.encode("utf-8")
@@ -693,7 +714,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V49 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V50 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())

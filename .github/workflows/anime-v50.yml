@@ -1,0 +1,152 @@
+name: AI Anime Factory V50 Final 2D Deep Quality Assurance Production
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v50/**"
+      - "anime-factory/v50/deep_qa_v50.js"
+      - "scripts/build_anime_v50.py"
+      - "scripts/render_anime_v48.py"
+      - "tests/test_deep_qa_v50.js"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v50.py"
+      - "tests/smoke_browser_v50.py"
+      - ".github/workflows/anime-v50.yml"
+  push:
+    branches: [main]
+    paths:
+      - "anime-factory/v50/**"
+      - "anime-factory/v50/deep_qa_v50.js"
+      - "scripts/build_anime_v50.py"
+      - "scripts/render_anime_v48.py"
+      - "tests/test_deep_qa_v50.js"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v50.py"
+      - "tests/smoke_browser_v50.py"
+      - ".github/workflows/anime-v50.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v50-structural:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile final V50 scripts and historical V7
+        run: python -m py_compile anime-factory/v49/build_unified_v49.py anime-factory/v50/build_final_v50.py scripts/build_anime_v49.py scripts/build_anime_v50.py scripts/render_anime_v48.py scripts/build_v7.py gui_v7.py tests/test_anime_v50.py tests/smoke_browser_v50.py
+      - name: Retain shared V45 Production Engine Node regression
+        run: node tests/test_engine_v45.js
+      - name: Final adversarial Node deep QA rejects corrupted project state
+        run: node tests/test_deep_qa_v50.js
+      - name: Non-destructive project source check
+        run: python anime-factory/v50/build_final_v50.py --selftest
+      - name: Real V50 JavaScript Node parsing and Python regressions
+        run: python -m unittest discover -s tests -p "test_anime_v50.py" -v
+      - name: Deep V19 original, V43 source, verified ZIP CRC32/SHA256, ZIP CRC32/SHA256
+        run: python scripts/build_anime_v50.py --selftest
+
+  v50-chromium:
+    needs: v50-structural
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install real Playwright Chromium
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Install FFmpeg and FFprobe for true audio and H264/AAC MP4 acceptance
+        run: |
+          if ! command -v ffmpeg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version
+          ffprobe -version
+      - name: Create real complete V19–V50 HTML
+        run: python anime-factory/v50/build_final_v50.py --output dist/AI_Anime_Factory_V50_FINAL_2D.html
+      - name: Chromium final QA adversarial project tests, V49 legacy migration, non-silent WebM and 2-episode H264/AAC MP4 with checkpoint resume
+        run: python tests/smoke_browser_v50.py --html dist/AI_Anime_Factory_V50_FINAL_2D.html --out dist/V50_FINAL_BROWSER
+      - name: V50 real sequential two-episode H264/AAC MP4 from V50 JSON
+        run: |
+          python scripts/render_anime_v48.py --html dist/AI_Anime_Factory_V50_FINAL_2D.html --project dist/V50_FINAL_BROWSER/V50_FINAL_FULL_PROJECT.json --out dist/V50_FINAL_BATCH --episodes 1,2 --fps 6 --mp4 --qa-short
+          python scripts/render_anime_v48.py --html dist/AI_Anime_Factory_V50_FINAL_2D.html --project dist/V50_FINAL_BROWSER/V50_FINAL_FULL_PROJECT.json --out dist/V50_FINAL_BATCH --episodes 1,2 --fps 6 --mp4 --qa-short > dist/V50_BATCH_RESUME.txt
+          test "$(grep -c 'V48 VERIFIED RESUME / SKIPPED' dist/V50_BATCH_RESUME.txt)" -eq 2
+      - name: Build verified standalone Windows ZIP
+        run: python scripts/build_anime_v50.py --out dist/AI_ANIME_FACTORY_V50_FINAL_2D_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V50_WINDOWS_VERIFIED
+          path: dist/AI_ANIME_FACTORY_V50_FINAL_2D_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V50_REAL_FINAL_QA_SAMPLES
+          path: dist/V50_FINAL_BROWSER/
+          retention-days: 30
+          if-no-files-found: error
+
+  publish-v50-download:
+    needs: v50-chromium
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build permanent standalone V50 ZIP
+        run: python scripts/build_anime_v50.py --out downloads/AI_ANIME_FACTORY_V50_FINAL_2D_WINDOWS.zip
+      - name: Publish GitHub raw stable ZIP link like V35 without touching older archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V50_FINAL_2D_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V50 already released"
+          else
+            git commit -m "Release verified V50 Final 2D Deep Quality Assurance Windows ZIP"
+            for attempt in 1 2 3 4 5 6 7 8; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then exit 0; fi
+              sleep 3
+            done
+            echo "Unable to publish V50 to downloads/" >&2
+            exit 1
+          fi
+      - name: Publish immutable GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view anime-factory-v50 >/dev/null 2>&1; then
+            echo "V50 tag already exists; not overwriting"
+          else
+            gh release create anime-factory-v50 downloads/AI_ANIME_FACTORY_V50_FINAL_2D_WINDOWS.zip --title "AI Anime Factory V50 Final 2D Deep Quality Assurance & Performance" --notes "V50 FINAL 2D TECHNICAL QA: actual V19-V49 rendering preserved; deterministic audit of character IDs, story continuity, image/audio data, 2D keys, sound RMS, subtitle timing; author-owned per-episode signoff never automatically certifies art. V49 project roundtrip, true non-silent WebM and multi-episode H264/AAC FFmpeg, checksum resume. Full V49 parent Windows ZIP, original V19, CRC32/SHA256, Russian under-key instructions. Studio-level artistic acceptance requires user review; no V51, separate 3D after acceptance."
+          fi

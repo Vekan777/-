@@ -91,8 +91,19 @@ def main():
   project=json.loads(data)
   if not isinstance(project.get("episodes"),list) or not project["episodes"]:
    raise ValueError("Invalid project file — no episodes")
-  project["version"]=48
-  # No clip normalization here: old canon must be byte-for-byte unchanged.
+  # The project version in JSON is preserved for the V48/V49/V50 migration.
+  # A QA-only short fixture copies the REAL author-provided voice bytes from
+  # episode 1 to episode 2. Without speech in ep 2 some browser MediaRecorder
+  # implementations hang instead of emitting a WebM download.
+  if args.qa_short and len(project["episodes"])>=2:
+   scenes_a=project["episodes"][0].get("scenes") or []
+   scenes_b=project["episodes"][1].get("scenes") or []
+   if scenes_a and scenes_b:
+    voice=(scenes_a[0].get("audioV36") or {}).get("voice")
+    if voice and voice.get("embeddedV47"):
+     scenes_b[0].setdefault("audioV36",{})["voice"]=json.loads(json.dumps(voice))
+   data=json.dumps(project,ensure_ascii=False)
+  # Outside explicit --qa-short, never mutate source JSON or user's canon.
  digest=sha(data.encode()) if source else "BUILTIN_DEMO"
  checkpoint=out/"V48_RENDER_CHECKPOINT.json"
  ck=load_checkpoint(checkpoint,digest,sha(path.read_bytes()),args.fps)
@@ -122,20 +133,28 @@ def main():
    if source:
     # Import only after an ordinary page boot. Passing file JSON as a
     # Playwright argument avoids script-injection escaping/origin problems.
-    page.evaluate("""raw => {
-      localStorage.setItem('AI_ANIME_FACTORY_V48',raw);
-      if(localStorage.getItem('AI_ANIME_FACTORY_V48')!==raw)
+    # V48, V49 UNIFIED and V50 FINAL have different localStorage namespaces.
+    # The previously hard-coded V48 key silently made V49/V50 batches render
+    # the default demo instead of the actual supplied project. Fix in-place.
+    active_key=page.evaluate("""() => (
+      document.querySelector('#page-final-v50') ? 'AI_ANIME_FACTORY_V50' :
+      document.querySelector('#page-unified-v49') ? 'AI_ANIME_FACTORY_V49' :
+      'AI_ANIME_FACTORY_V48'
+    )""")
+    page.evaluate("""([key,raw]) => {
+      localStorage.setItem(key,raw);
+      if(localStorage.getItem(key)!==raw)
        throw Error('Imported project localStorage readback failed');
-    }""",data)
+    }""",[active_key,data])
     page.reload(wait_until="load")
     try:
      page.wait_for_function("() => document.querySelector('#v48-episode')?.options.length>0",
       timeout=25000)
     except Exception as ex:
-     stored=page.evaluate("""() => ({
-       bytes:localStorage.getItem('AI_ANIME_FACTORY_V48')?.length||0,
+     stored=page.evaluate("""key => ({
+       bytes:localStorage.getItem(key)?.length||0,
        options:document.querySelector('#v48-episode')?.options.length||0
-     })""")
+     })""",active_key)
      raise RuntimeError("Imported V48 project failed to initialize: "+str(stored)+
       "; browser errors: "+"; ".join(errors[:6])) from ex
    if args.qa_short:
@@ -146,7 +165,14 @@ def main():
    indices=choose_episodes(page,args.episodes)
    report={"schema":"V48/RenderOutput/1","episodes":[],"projectSha256":digest,
     "renderHtmlSha256":sha(path.read_bytes()),"fps":args.fps,"generatedAt":time.time()}
-   for i in indices:
+   for count_done,i in enumerate(indices):
+    # A fresh page resets MediaRecorder, canvas captureStream and Web Audio
+    # graphs. This prevents stale recorder state / non-download after a prior
+    # episode. Only project JSON in localStorage carries across episode steps.
+    if count_done:
+     page.reload(wait_until="load",timeout=60000)
+     page.wait_for_function("() => document.querySelector('#v48-episode')?.options.length>0",
+      timeout=30000)
     meta=page.evaluate("(idx) => window.v48BatchBridge.episode(idx)",i)
     base=f"episode_{i+1:02d}"
     webm=out/(base+".webm")
@@ -166,9 +192,18 @@ def main():
      before=len(errors)
      # Native browser MediaRecorder uses original v35 timeline, V47 sound,
      # V48 end card. No unverified offline re-render of a fake episode.
-     with page.expect_download(timeout=int((meta["duration"]+45)*1000)) as download:
-      page.locator("#v36-export").click()
-     item=download.value
+     try:
+      with page.expect_download(timeout=int((meta["duration"]+45)*1000)) as download:
+       page.locator("#v36-export").click()
+      item=download.value
+     except Exception as ex:
+      state=page.evaluate("""() => ({
+        clock:document.querySelector('#v36-clock')?.textContent,
+        exportDisabled:document.querySelector('#v36-export')?.disabled,
+        episode:document.querySelector('#v36-episode')?.value
+      })""")
+      raise RuntimeError("Episode "+str(i+1)+" did not emit WebM; UI state="+
+       str(state)+"; browser errors: "+"; ".join(errors[-6:])) from ex
      item.save_as(str(webm))
      if len(errors)>before:raise RuntimeError("Browser JS error: "+"; ".join(errors[before:]))
      if webm.stat().st_size<6500:raise RuntimeError("Empty WebM")
