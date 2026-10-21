@@ -67,7 +67,7 @@ README_RU = """AI RESCUE FACTORY V7 — UNIFIED CANDIDATE / WINDOWS 10 x64
 Проверяются CRC32, SHA256, пути файлов и состав манифеста.
 Если архив повреждён — не используйте, скачайте его заново.
 
-AI ANIME FACTORY (текущий редактор V40):
+AI ANIME FACTORY (текущий редактор V41):
 Откройте вкладки в GUI или эти HTML:
    anime-factory\\v19\\AI_Anime_Factory_V19.html
    anime-factory\\v20\\AI_Anime_Factory_V20_3_PRESERVATION.html
@@ -89,6 +89,7 @@ AI ANIME FACTORY (текущий редактор V40):
    anime-factory\\v38\\AI_Anime_Factory_V38_CINEMATIC_FINISHING.html
    anime-factory\\v39\\AI_Anime_Factory_V39_CHARACTER_ACTION.html
    anime-factory\\v40\\AI_Anime_Factory_V40_CHARACTER_ART.html
+   anime-factory\\v41\\AI_Anime_Factory_V41_SILHOUETTE_STUDIO.html
 V20.3 — экспериментальная восстановленная редакция поверх V19.
 Графика остаётся процедурным 2D-аниматиком, это не готовый 3D-мультфильм.
 
@@ -205,6 +206,12 @@ def prepare(root, source_dist):
                  "anime-factory/v40/character_art_v40.js",
                  "anime-factory/v40/build_art_v40.py",
                  "anime-factory/v40/README_RU.md",
+                 "anime-factory/v41/silhouette_v41.js",
+                 "anime-factory/v41/build_silhouette_v41.py",
+                 "anime-factory/v41/README_RU.md",
+                 "scripts/build_anime_v41.py",
+                 "tests/test_anime_v41.py",
+                 "tests/smoke_browser_v41.py",
                  "scripts/build_anime_v40.py",
                  "tests/test_anime_v40.py",
                  "tests/smoke_browser_v40.py",
@@ -404,6 +411,14 @@ def prepare(root, source_dist):
         art40_builder.build().encode("utf-8")
     )
 
+    silhouettes41_path=root/"anime-factory"/"v41"/"build_silhouette_v41.py"
+    silhouettes41_spec=importlib.util.spec_from_file_location("anime_v41_studio",silhouettes41_path)
+    silhouettes41_builder=importlib.util.module_from_spec(silhouettes41_spec)
+    silhouettes41_spec.loader.exec_module(silhouettes41_builder)
+    data["anime-factory/v41/AI_Anime_Factory_V41_SILHOUETTE_STUDIO.html"]=(
+        silhouettes41_builder.build().encode("utf-8")
+    )
+
     names = [
         f"AI_RESCUE_FACTORY_V{i}_WINDOWS.zip" for i in range(1, 7)
     ] + [
@@ -461,6 +476,11 @@ def prepare(root, source_dist):
         with zipfile.ZipFile(optional_v40) as z:
             if z.testzip():raise ValueError("V40 release CRC32 failure")
         data["legacy/"+optional_v40.name]=optional_v40.read_bytes()
+    optional_v41=source_dist/"AI_ANIME_FACTORY_V41_SILHOUETTE_STUDIO_WINDOWS.zip"
+    if optional_v41.is_file():
+        with zipfile.ZipFile(optional_v41) as z:
+            if z.testzip():raise ValueError("V41 release CRC failure")
+        data["legacy/"+optional_v41.name]=optional_v41.read_bytes()
 
     data["README_RU.txt"] = README_RU.encode("utf-8")
     data["RUN_V7_WINDOWS.bat"] = BAT_GUI.encode("utf-8")
@@ -510,7 +530,7 @@ def write_release(data, dest):
         "version": "7.0",
         "status": "Candidate - awaiting Windows and Linux CI verification",
         "contains": ["Core V1-V6", "Legacy ZIPs", "Optional AI Pipeline",
-                     "V19 original HTML", "V20–V40 additive anime pipeline", "Tk GUI"],
+                     "V19 original HTML", "V20–V41 additive anime pipeline", "Tk GUI"],
         "files": [
             {"path":name, "size":len(content), "sha256":sha256(content)}
             for name,content in sorted(data.items())
