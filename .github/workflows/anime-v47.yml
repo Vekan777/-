@@ -1,0 +1,133 @@
+name: AI Anime Factory V47 Portable Voice & Lip Sync Engine Production
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v47/**"
+      - "anime-factory/v45/art_assets_v45.js"
+      - "scripts/build_anime_v47.py"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v47.py"
+      - "tests/smoke_browser_v47.py"
+      - ".github/workflows/anime-v47.yml"
+  push:
+    branches: [main]
+    paths:
+      - "anime-factory/v47/**"
+      - "anime-factory/v45/art_assets_v45.js"
+      - "scripts/build_anime_v47.py"
+      - "scripts/build_v7.py"
+      - "gui_v7.py"
+      - "tests/test_anime_v47.py"
+      - "tests/smoke_browser_v47.py"
+      - ".github/workflows/anime-v47.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v47-structural:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile all new V47 scripts and V7
+        run: python -m py_compile anime-factory/v46/build_animation_v46.py anime-factory/v47/build_voice_v47.py scripts/build_anime_v46.py scripts/build_anime_v47.py scripts/build_v7.py gui_v7.py tests/test_anime_v47.py tests/smoke_browser_v47.py
+      - name: Retain shared V45 Production Engine Node regression
+        run: node tests/test_engine_v45.js
+      - name: Non-destructive project source check
+        run: python anime-factory/v47/build_voice_v47.py --selftest
+      - name: Real V47 JavaScript Node parsing and Python regressions
+        run: python -m unittest discover -s tests -p "test_anime_v47.py" -v
+      - name: Deep V19 original, V43 source, verified ZIP CRC32/SHA256, ZIP CRC32/SHA256
+        run: python scripts/build_anime_v47.py --selftest
+
+  v47-chromium:
+    needs: v47-structural
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install real Playwright Chromium
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Create real complete V19–V47 HTML
+        run: python anime-factory/v47/build_voice_v47.py --output dist/AI_Anime_Factory_V47_PORTABLE_VOICE.html
+      - name: Chromium actual portable embedded audio, sound-driven mouth, JSON reload and audio/video WebM
+        run: python tests/smoke_browser_v47.py --html dist/AI_Anime_Factory_V47_PORTABLE_VOICE.html --out dist/V47_VOICE_BROWSER
+      - name: Build verified standalone Windows ZIP
+        run: python scripts/build_anime_v47.py --out dist/AI_ANIME_FACTORY_V47_PORTABLE_VOICE_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V47_WINDOWS_VERIFIED
+          path: dist/AI_ANIME_FACTORY_V47_PORTABLE_VOICE_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AI_ANIME_FACTORY_V47_REAL_VOICE_BROWSER_SAMPLES
+          path: dist/V47_VOICE_BROWSER/
+          retention-days: 30
+          if-no-files-found: error
+
+  publish-v47-download:
+    needs: v47-chromium
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build permanent standalone V47 ZIP
+        run: python scripts/build_anime_v47.py --out downloads/AI_ANIME_FACTORY_V47_PORTABLE_VOICE_WINDOWS.zip
+      - name: Publish GitHub raw stable ZIP link like V35 without touching older archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/AI_ANIME_FACTORY_V47_PORTABLE_VOICE_WINDOWS.zip
+          if git diff --cached --quiet; then
+            echo "V47 already released"
+          else
+            git commit -m "Release verified V47 Portable Voice & Lip Sync Engine Windows ZIP"
+            for attempt in 1 2 3 4 5 6 7 8; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then exit 0; fi
+              sleep 3
+            done
+            echo "Unable to publish V47 to downloads/" >&2
+            exit 1
+          fi
+      - name: Publish immutable GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view anime-factory-v47 >/dev/null 2>&1; then
+            echo "V47 tag already exists; not overwriting"
+          else
+            gh release create anime-factory-v47 downloads/AI_ANIME_FACTORY_V47_PORTABLE_VOICE_WINDOWS.zip --title "AI Anime Factory V47 Portable Voice & Lip Sync Engine & Performance" --notes "V47: real scene voice/music/fx WAV/MP3 audio bytes embedded in portable project JSON, automatically decoded after restart before V36 WebM export; waveform-amplitude lip motion in 2D face and PNG face overlay, per-scene gain, delay and speaker. 1.5 MB per clip browser quota guard, NOT a true phoneme recognizer. All V19–V46 preserved, full V46 ZIP+SHA/CRC. V48–V50 unfinished."
+          fi
