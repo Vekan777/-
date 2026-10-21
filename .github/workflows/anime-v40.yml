@@ -125,5 +125,5 @@ jobs:
           if gh release view anime-factory-v40 >/dev/null 2>&1; then
             echo "V40 tag already exists; not overwriting"
           else
-            gh release create anime-factory-v40 downloads/AI_ANIME_FACTORY_V40_CHARACTER_ART_WINDOWS.zip --title "AI Anime Factory V40 Character Art & Performance" --notes "V40: actual 2D rig animation, facial performance, canon-faithful hit/block/dodge effects, V38 color/V37 subtitle/V36 sound preserved, original V19 and complete V38 backup, ZIP SHA256/CRC32. Not 3D or generative AI character drawing."
+            gh release create anime-factory-v40 downloads/AI_ANIME_FACTORY_V40_CHARACTER_ART_WINDOWS.zip --title "AI Anime Factory V40 Character Art & Performance" --notes "V40: actual 2D vector eye/face, hair and costume drawing layered over V39 motion, V38 color, V37 subtitles, V36 audio/WebM; real before/after pixel checks. Original V19, previous V20-V39 sources, complete V39 parent backup ZIP and SHA256/CRC32. Not 3D or automatic illustration generation."
           fi
