@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 BASE=ROOT/'anime-factory/v50_2/build_complete_v502.py'
 ART=ROOT/'anime-factory/v50_2/season_stage_v502.js'
+PERFORMANCE=ROOT/'anime-factory/v50_2/performance_v502.js'
 MARKER='/* END V50.2 REPRODUCIBLE ART AND MOTION */'
 
 def build(project=None):
@@ -28,6 +29,16 @@ def build(project=None):
     html=html.replace(MARKER,MARKER+'\n'+ART.read_text(encoding='utf-8')+
                       '\n/* END SEASON 03–06 STORY STAGE */',1)
     if 'window.v502SeasonStageQA' not in html:raise RuntimeError('Story-stage loader missing')
+    if not PERFORMANCE.is_file():raise FileNotFoundError(PERFORMANCE)
+    anchor='/* END SEASON 03–06 STORY STAGE */'
+    if html.count(anchor)!=1:raise RuntimeError('Missing six-season stage anchor')
+    html=html.replace(anchor,anchor+'\n'+PERFORMANCE.read_text(encoding='utf-8')+
+                      '\n/* END V50.2 PERFORMANCE PASS */',1)
+    switch="if(!P)buildSeason();else{renderAll();show('project');"
+    if html.count(switch)!=1:raise RuntimeError('Unexpected original boot script')
+    html=html.replace(switch,
+      "if(P&&!P.v502Performance)P.v502Performance={enabled:true,artApproval:false,"
+      "status:'TECHNICAL_2D_ANIMATIC_NOT_STUDIO_FINAL'};\n"+switch,1)
     return html,meta
 
 def main():
