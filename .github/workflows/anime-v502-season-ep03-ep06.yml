@@ -85,18 +85,18 @@ jobs:
               canvas.paste(image,(x,y));d.text((x,y+h-27),p.stem,fill="white")
           canvas.save("dist/V502/SEASON_QA/EP03_EP06_24_FRAMES.jpg",quality=90)
           PY
-      - name: Record 4 real 2D MP4 Russian preview episodes 3–6 (not full anime)
+      - name: Record 6 real short 2D Russian pilot previews, preserving episodes 1–2
         run: |
           python scripts/render_six_pilots_v502.py \
             --html dist/AI_Anime_Factory_V50_2_SIX_EPISODES.html \
             --project dist/V502/PROJECT_SIX_EPISODES.json \
-            --episodes 3,4,5,6 --width 640 --fps 6 --out dist/V502/VIDEO
+            --episodes 1,2,3,4,5,6 --width 640 --fps 6 --out dist/V502/VIDEO
       - name: Verify each MP4 is audible H264 AAC, no clips are a dummy
         run: |
           python - <<'PY'
           import json,subprocess
           from pathlib import Path
-          for n in (3,4,5,6):
+          for n in (1,2,3,4,5,6):
             path=Path(f"dist/V502/VIDEO/episode_{n:02d}.mp4")
             assert path.stat().st_size>100000
             p=subprocess.run(["ffprobe","-v","error","-show_entries",
@@ -139,7 +139,7 @@ jobs:
               'py -3 render_six_pilots_v502.py --html AI_Anime_Factory_V50_2_UNIFIED.html --project PROJECT_V502_UNIFIED.json --episodes 1,2,3,4,5,6 --width 640 --fps 6 --out NEW_RENDER\r\npause\r\n')
           with zipfile.ZipFile(zipfile_name) as z:
             assert z.testzip() is None
-            assert all(f"VIDEOS/episode_{i:02d}.mp4" in z.namelist() for i in (3,4,5,6))
+            assert all(f"VIDEOS/episode_{i:02d}.mp4" in z.namelist() for i in (1,2,3,4,5,6))
           print("SIX EPISODE WINDOWS ZIP",zipfile_name.stat().st_size)
           PY
       - uses: actions/upload-artifact@v4
@@ -155,7 +155,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: V502_FOUR_REAL_RUSSIAN_EPISODES_03_TO_06
+          name: V502_SIX_REAL_RUSSIAN_PILOT_PREVIEWS
           path: dist/V502/VIDEO/
           retention-days: 30
           if-no-files-found: error
