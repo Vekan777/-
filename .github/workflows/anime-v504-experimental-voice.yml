@@ -18,6 +18,8 @@ jobs:
           curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 -o dist/V504_MODELS/v5_5_ru.pt https://models.silero.ai/models/tts/ru/v5_5_ru.pt
           curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 -o dist/V504_MODELS/Rhubarb-Lip-Sync-1.14.0-Linux.zip https://github.com/DanielSWolf/rhubarb-lip-sync/releases/download/v1.14.0/Rhubarb-Lip-Sync-1.14.0-Linux.zip
           test $(stat -c%s dist/V504_MODELS/Rhubarb-Lip-Sync-1.14.0-Linux.zip) -gt 40000000
+          curl --fail --location --retry 3 --max-time 180 -o dist/V504_MODELS/piper_linux_x86_64.tar.gz https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
+          test $(stat -c%s dist/V504_MODELS/piper_linux_x86_64.tar.gz) -gt 20000000
           file dist/V504_MODELS/v5_5_ru.pt
           test $(stat -c%s dist/V504_MODELS/v5_5_ru.pt) -gt 30000000
           sha256sum dist/V504_MODELS/v5_5_ru.pt > dist/V504_MODELS/V504_SHA256.txt
