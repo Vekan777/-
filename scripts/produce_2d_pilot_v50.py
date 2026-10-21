@@ -94,7 +94,34 @@ def get_initial_project(html):
             page.wait_for_function(
                 "() => window.v50FinalQA && window.v50FinalQA.currentProject()?.episodes?.length>=2",
                 timeout=45000)
+            # Real V45 PNG cutout layers, authored in the existing editor, not a mock.
+            page.locator('[data-page="art-assets-v45"]').click()
+            for actor_index in (0,1,2):
+                page.locator("#v45-character").select_option(str(actor_index))
+                page.locator("#v45-make").click()
+                page.wait_for_function("""() => document.querySelector('#v45-status')
+                    ?.textContent.includes('7/7')""",timeout=30000)
+            # Use V46's genuine 35-key animation presets on BOTH actors.
+            page.locator('[data-page="animation-v46"]').click()
+            moves=("walk","warmth","strike","warmth","bow","walk")
+            secondary=("walk","warmth","guard","warmth","guard","walk")
+            for ep_index in (0,1):
+                page.locator("#v46-episode").select_option(str(ep_index))
+                for scene_index in range(6):
+                    page.locator("#v46-scene").select_option(str(scene_index))
+                    for role,action in (("hero",moves[scene_index]),
+                                        ("partner",secondary[scene_index])):
+                        page.locator("#v46-role").select_option(role)
+                        page.locator("#v46-action").select_option(action)
+                        page.locator("#v46-action-apply").click()
             project=page.evaluate("() => window.v50FinalQA.currentProject()")
+            for actor in project["characters"][:3]:
+                if not actor.get("productionRig",{}).get("parts",{}).get("face",{}).get("image"):
+                    raise RuntimeError("Real V45 actor cutout not persisted")
+            for ep in project["episodes"][:2]:
+                for s in ep["scenes"]:
+                    if not s.get("animationV46",{}).get("tracks",{}).get("hero",{}).get("arms"):
+                        raise RuntimeError("Native V46 movement not persisted")
             if failures:raise RuntimeError("V50 JS: "+"; ".join(failures[:3]))
             return project
         finally:browser.close()
