@@ -1,0 +1,26 @@
+name: V50.4 Permissive Russian Five-Voice Model
+on:
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/anime-v504-mit-voices.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch-mit-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download official MIT licensed Silero CIS base model
+        run: |
+          mkdir -p dist/V504_MIT
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 220 -o dist/V504_MIT/v5_cis_base.pt https://models.silero.ai/models/tts/ru/v5_cis_base.pt
+          test $(stat -c%s dist/V504_MIT/v5_cis_base.pt) -gt 40000000
+          sha256sum dist/V504_MIT/v5_cis_base.pt > dist/V504_MIT/SHA256.txt
+          printf 'Silero v5_cis_base weight license MIT per upstream repository; check obligations for each final asset.\n' > dist/V504_MIT/LICENSE_NOTICE.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V504_PERMISSIVE_SILERO_CIS_BASE_MODEL
+          path: dist/V504_MIT/
+          retention-days: 7

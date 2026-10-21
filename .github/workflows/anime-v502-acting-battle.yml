@@ -1,0 +1,191 @@
+name: V50.2 ACTING characters battle and optional Russian neural TTS
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v50_2/acting_battle_v502.js"
+      - "anime-factory/v50_2/build_acting_v502.py"
+      - "anime-factory/v50_2/ACTING_BATTLE_VOICE_README_RU.md"
+      - "scripts/upgrade_ru_voice_v502.py"
+      - "tests/test_v502_acting_battle.py"
+      - ".github/workflows/anime-v502-acting-battle.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-six-real-2d-episodes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax + original plot regression
+        run: |
+          node --check anime-factory/v50_2/acting_battle_v502.js
+          python -m py_compile anime-factory/v50_2/build_acting_v502.py scripts/upgrade_ru_voice_v502.py tests/test_v502_acting_battle.py
+          node tests/test_deep_qa_v50.js
+          python anime-factory/v50_2/build_acting_v502.py --out dist/ACTING_EMPTY_TEST.html --selftest
+      - name: Install Chromium and Russian media tools
+        run: |
+          python -m pip install playwright==1.56.0 pillow numpy
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+      - name: Reconstruct the same six canonical episodes from GitHub only
+        run: |
+          python anime-factory/v50_2/build_complete_v502.py \
+            --out dist/BASE_V502.html
+          python scripts/produce_2d_pilot_v501.py \
+            --html dist/BASE_V502.html --out dist/V502 --tts
+          mv dist/V502/PROJECT_PILOT_V50.json dist/V502/PROJECT_V501.json
+          python scripts/postprocess_v502.py \
+            --project dist/V502/PROJECT_V501.json --output dist/V502/PROJECT_V502.json
+          python scripts/expand_season_v502.py \
+            --project dist/V502/PROJECT_V502.json \
+            --story anime-factory/v50_2/STORY_EP03_EP06_V502.json \
+            --out dist/V502/PROJECT_SIX_RU.json --tts --sound
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("dist/V502/PROJECT_SIX_RU.json")
+          d=json.loads(p.read_text())
+          d["v502Acting"]={"enabled":True,"artApproval":False,"phonemeAligned":False}
+          d["v502Performance"]={"enabled":True,"artApproval":False}
+          assert len(d["episodes"])==6
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2),encoding="utf-8")
+          print("All 6 episodes, original 2 + additional 4, no story change")
+          PY
+      - name: Build six-episode ACTING editor with independent face and battle layers
+        run: |
+          python anime-factory/v50_2/build_acting_v502.py \
+            --project dist/V502/PROJECT_SIX_RU.json \
+            --out dist/AI_Anime_Factory_V502_ACTING.html
+      - name: Render 36 real 2D frames and test acting + original fallback
+        run: |
+          python tests/test_v502_acting_battle.py \
+            --html dist/AI_Anime_Factory_V502_ACTING.html \
+            --out dist/V502/ACTING_QA
+      - name: Make readable 36-frame contact sheet
+        run: |
+          python - <<'PY'
+          from PIL import Image,ImageDraw
+          from pathlib import Path
+          folder=Path("dist/V502/ACTING_QA"); files=sorted(folder.glob("EP*_SC*.png"))
+          assert len(files)==36,len(files)
+          W,H=300,198
+          out=Image.new("RGB",(W*6,H*6),"#101829");draw=ImageDraw.Draw(out)
+          for i,p in enumerate(files):
+              im=Image.open(p).convert("RGB")
+              im.thumbnail((W-6,H-28))
+              x=(i%6)*W+3;y=(i//6)*H+3
+              out.paste(im,(x,y))
+              draw.text((x+3,y+H-25),p.stem,fill="#fff")
+          out.save(folder/"V502_ACTING_ALL_36_FRAMES.jpg",quality=86)
+          PY
+      - name: Render six genuinely new Russian technical pilot MP4 videos
+        run: |
+          python scripts/render_six_pilots_v502.py \
+            --html dist/AI_Anime_Factory_V502_ACTING.html \
+            --project dist/V502/PROJECT_SIX_RU.json \
+            --episodes 1,2,3,4,5,6 --fps 6 --width 640 \
+            --out dist/V502/VIDEO
+      - name: Verify all video streams and captions
+        run: |
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          for n in range(1,7):
+              p=Path(f"dist/V502/VIDEO/episode_{n:02d}.mp4")
+              assert p.is_file() and p.stat().st_size>100000,p
+              out=subprocess.run(["ffprobe","-v","error","-show_entries",
+                "stream=codec_name,codec_type,width,height,nb_frames:format=duration",
+                "-of","json",str(p)],check=True,capture_output=True,text=True)
+              info=json.loads(out.stdout)
+              assert {"h264","aac"}.issubset({s["codec_name"] for s in info["streams"]})
+              video=next(s for s in info["streams"] if s["codec_type"]=="video")
+              assert int(video["nb_frames"])>=420
+              assert float(info["format"]["duration"])>60
+              assert Path(f"dist/V502/VIDEO/episode_{n:02d}.srt").stat().st_size>200
+              print("VERIFIED ACTING PILOT",n,video["nb_frames"])
+          PY
+      - name: Optional test Piper Dmitri genuine Russian neural sample
+        continue-on-error: true
+        shell: bash
+        run: |
+          mkdir -p dist/V502/NEURAL_SAMPLE
+          if python -m pip install piper-tts==1.3.0 ; then
+            curl -fL --retry 2 -o dist/V502/NEURAL_SAMPLE/ru_RU-dmitri-medium.onnx \
+              "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx?download=true"
+            curl -fL --retry 2 -o dist/V502/NEURAL_SAMPLE/ru_RU-dmitri-medium.onnx.json \
+              "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx.json"
+            printf '%s\n' "Я не позволю забрать их воспоминания." | \
+              piper --model dist/V502/NEURAL_SAMPLE/ru_RU-dmitri-medium.onnx \
+              --output_file dist/V502/NEURAL_SAMPLE/RU_DMITRI_NEURAL_TEST.wav
+            ffprobe -v error -show_entries format=duration \
+              -of default=noprint_wrappers=1 dist/V502/NEURAL_SAMPLE/RU_DMITRI_NEURAL_TEST.wav
+            echo "RU PIPER NEURAL AUDIO PRESENT; other character voices remain ESPEAK PREVIEW"
+          fi
+          # Never redistribute a 63MB model in a compact Windows preview.
+          rm -f dist/V502/NEURAL_SAMPLE/ru_RU-dmitri-medium.onnx \
+                dist/V502/NEURAL_SAMPLE/ru_RU-dmitri-medium.onnx.json
+      - name: Package Windows tool, all SIX new MP4, original art and source
+        run: |
+          python scripts/package_v502_unified_windows.py \
+            --html dist/AI_Anime_Factory_V502_ACTING.html \
+            --project dist/V502/PROJECT_SIX_RU.json \
+            --video-dir dist/V502/VIDEO \
+            --out dist/AI_ANIME_FACTORY_V502_ACTING_WINDOWS.zip
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          archive=Path("dist/AI_ANIME_FACTORY_V502_ACTING_WINDOWS.zip")
+          with zipfile.ZipFile(archive,"a",zipfile.ZIP_DEFLATED,compresslevel=7) as z:
+              for src,dst in [
+                ("anime-factory/v50_2/acting_battle_v502.js","SOURCE/acting_battle_v502.js"),
+                ("anime-factory/v50_2/build_acting_v502.py","SOURCE/build_acting_v502.py"),
+                ("anime-factory/v50_2/performance_v502.js","SOURCE/performance_v502.js"),
+                ("anime-factory/v50_2/season_stage_v502.js","SOURCE/season_stage_v502.js"),
+                ("scripts/upgrade_ru_voice_v502.py","upgrade_ru_voice_v502.py"),
+                ("scripts/expand_season_v502.py","SOURCE/expand_season_v502.py"),
+                ("scripts/render_six_pilots_v502.py","render_six_pilots_v502.py"),
+                ("tests/test_v502_acting_battle.py","SOURCE/test_v502_acting_battle.py"),
+                ("anime-factory/v50_2/ACTING_BATTLE_VOICE_README_RU.md","START_HERE_ACTING_RU.md"),
+                ("dist/V502/ACTING_QA/ACTING_QA.json","QA/ACTING_QA.json"),
+                ("dist/V502/ACTING_QA/V502_ACTING_ALL_36_FRAMES.jpg","ACTING_36_FRAMES.jpg")]:
+                  z.write(src,dst)
+              sample=Path("dist/V502/NEURAL_SAMPLE/RU_DMITRI_NEURAL_TEST.wav")
+              if sample.exists():z.write(sample,"NEURAL_RU_DMITRI_SAMPLE.wav")
+              z.writestr("RENDER_6_ACTING_WINDOWS.bat",
+                 '@echo off\r\ncd /d "%~dp0"\r\n'
+                 'if exist "tools\\ffmpeg\\bin\\ffmpeg.exe" set "PATH=%CD%\\tools\\ffmpeg\\bin;%PATH%"\r\n'
+                 'py -3 render_six_pilots_v502.py --html AI_Anime_Factory_V50_2_UNIFIED.html '
+                 '--project PROJECT_V502_UNIFIED.json --episodes 1,2,3,4,5,6 '
+                 '--width 640 --fps 6 --out NEW_ACTING_RENDER\r\npause\r\n')
+          with zipfile.ZipFile(archive) as z:
+              assert z.testzip() is None
+              assert "SOURCE/acting_battle_v502.js" in z.namelist()
+              assert all(f"VIDEOS/episode_{n:02d}.mp4" in z.namelist() for n in range(1,7))
+          print("READY V50.2 ACTING PACKAGE",archive.stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V502_ACTING_REAL_36_FRAMES_AND_RU_PROJECT
+          path: |
+            dist/V502/ACTING_QA
+            dist/V502/PROJECT_SIX_RU.json
+            dist/V502/NEURAL_SAMPLE/RU_DMITRI_NEURAL_TEST.wav
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V502_ACTING_SIX_RU_PILOTS_WINDOWS
+          path: dist/AI_ANIME_FACTORY_V502_ACTING_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error

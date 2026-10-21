@@ -1,0 +1,108 @@
+name: V50.2 Fully Reproducible 2D Motion Art Studio
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v50_2/art/**"
+      - "anime-factory/v50_2/motion_rig_v502.js"
+      - "anime-factory/v50_2/build_complete_v502.py"
+      - "anime-factory/v50_2/UNIFIED_README_RU.md"
+      - "scripts/package_v502_unified_windows.py"
+      - "tests/test_v502_complete_unified.py"
+      - ".github/workflows/anime-v502-unified-source.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unified-real-2d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Offline-first source syntax + canon integrity checks
+        run: |
+          node --check anime-factory/v50_2/art_pass_preview.js
+          node --check anime-factory/v50_2/motion_rig_v502.js
+          node --check anime-factory/v50_2/clean_cuts_v502.js
+          python -m py_compile anime-factory/v50_2/build_complete_v502.py scripts/package_v502_unified_windows.py tests/test_v502_complete_unified.py
+          node tests/test_deep_qa_v50.js
+          python anime-factory/v50_2/build_complete_v502.py --selftest
+      - name: Install Chromium/FFmpeg Russian technical-voice preview
+        run: |
+          python -m pip install playwright==1.56.0 pillow
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+      - name: Build independent V19-V50.2 FULL editor and 13 native JPG assets
+        run: |
+          python anime-factory/v50_2/build_complete_v502.py \
+            --out dist/AI_Anime_Factory_V50_2_BOOTSTRAP.html
+      - name: Reconstruct original 6 episode project and spoken 2-episode pilot
+        run: |
+          python scripts/produce_2d_pilot_v501.py \
+            --html dist/AI_Anime_Factory_V50_2_BOOTSTRAP.html \
+            --out dist/V502 --tts
+          mv dist/V502/PROJECT_PILOT_V50.json dist/V502/PROJECT_V501.json
+          python scripts/postprocess_v502.py \
+            --project dist/V502/PROJECT_V501.json \
+            --output dist/V502/PROJECT_V502.json
+      - name: Embed exact 2-episode Russian pilot into portable Windows HTML
+        run: |
+          python anime-factory/v50_2/build_complete_v502.py \
+            --project dist/V502/PROJECT_V502.json \
+            --out dist/AI_Anime_Factory_V50_2_UNIFIED.html
+      - name: Real 12-scene, 10-battle, 13-JPEG Chromium visual and rollback QA
+        run: |
+          python tests/test_v502_complete_unified.py \
+            --html dist/AI_Anime_Factory_V50_2_UNIFIED.html \
+            --out dist/V502/UNIFIED_QA
+      - name: Verify output project has all 6 episodes and no human approval lies
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          project=json.loads(Path("dist/V502/PROJECT_V502.json").read_text(encoding="utf-8"))
+          assert len(project["episodes"])>=6
+          assert project["productionV50"]["qaAccepted"] is False
+          assert project["v502Director"]["approval"] is False
+          assert project["v502Director"]["rightsVerified"] is False
+          assert project["pilotProductionV50"]["status"]=="DRAFT_NOT_RELEASE_READY"
+          for e in project["episodes"][:2]:
+              assert len(e["scenes"])==6 and e["storyV20"]
+              for s in e["scenes"]:
+                  assert len(s["lines"])==2
+                  assert len(s["audioV36"]["voice"]["segmentsV501"])==2
+          print("CANON + VOICE + RIGHTS GUARDS PASS")
+          PY
+      - name: Full reproducible Windows ZIP, no hidden local assets
+        run: |
+          python scripts/package_v502_unified_windows.py \
+            --html dist/AI_Anime_Factory_V50_2_UNIFIED.html \
+            --project dist/V502/PROJECT_V502.json \
+            --out dist/AI_ANIME_FACTORY_V502_REPRODUCIBLE_WINDOWS.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V502_REPRODUCIBLE_EDITOR_FRAMES_AND_QA
+          path: |
+            dist/V502/UNIFIED_QA
+            dist/V502/PROJECT_V502.json
+            dist/V502/PILOT_PRODUCTION_QA.json
+            dist/V502_ART_ASSET_SHA256.json
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V502_WINDOWS_FULL_REPO_SOURCE
+          path: dist/AI_ANIME_FACTORY_V502_REPRODUCIBLE_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error

@@ -1,0 +1,31 @@
+name: V50.4 Experimental Russian Voices and Lip Sync Model
+on:
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/anime-v504-experimental-voice.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  legal-noncommercial-model-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch official Silero Russian multi-speaker model
+        run: |
+          mkdir -p dist/V504_MODELS
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 -o dist/V504_MODELS/v5_5_ru.pt https://models.silero.ai/models/tts/ru/v5_5_ru.pt
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 -o dist/V504_MODELS/Rhubarb-Lip-Sync-1.14.0-Linux.zip https://github.com/DanielSWolf/rhubarb-lip-sync/releases/download/v1.14.0/Rhubarb-Lip-Sync-1.14.0-Linux.zip
+          test $(stat -c%s dist/V504_MODELS/Rhubarb-Lip-Sync-1.14.0-Linux.zip) -gt 40000000
+          curl --fail --location --retry 3 --max-time 180 -o dist/V504_MODELS/piper_linux_x86_64.tar.gz https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz
+          test $(stat -c%s dist/V504_MODELS/piper_linux_x86_64.tar.gz) -gt 20000000
+          file dist/V504_MODELS/v5_5_ru.pt
+          test $(stat -c%s dist/V504_MODELS/v5_5_ru.pt) -gt 30000000
+          sha256sum dist/V504_MODELS/v5_5_ru.pt > dist/V504_MODELS/V504_SHA256.txt
+          printf '%s\n' 'FOR NONCOMMERCIAL INTERNAL ART PROOF ONLY' 'Silero main models CC BY-NC, no commercial series approval' > dist/V504_MODELS/NOTICE_LICENSE_RU.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V504_SILERO_RUSSIAN_NONCOMMERCIAL_MODEL_FOR_INTERNAL_PREVIEW
+          path: dist/V504_MODELS/
+          retention-days: 7
