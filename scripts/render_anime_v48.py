@@ -31,7 +31,20 @@ def probe(file):
   "format=duration:stream=codec_type,codec_name","-of","json",str(file)],90))
  types={s.get("codec_type") for s in d.get("streams",[])}
  if not {"video","audio"}.issubset(types):raise RuntimeError("Missing video/audio tracks in "+str(file))
- if float(d.get("format",{}).get("duration",0))<.3:raise RuntimeError("Video is too short")
+ # MediaRecorder WebM often omits format.duration despite valid video packets.
+ # Measure actual video PTS from the demuxer instead of assuming absent=0.
+ reported=float(d.get("format",{}).get("duration") or 0)
+ if reported<.3:
+  raw=command(["ffprobe","-v","error","-select_streams","v:0",
+   "-show_entries","packet=pts_time","-of","csv=p=0",str(file)],90)
+  timestamps=[]
+  for line in raw.splitlines():
+   try:timestamps.append(float(line.strip().split(",")[0]))
+   except (ValueError,IndexError):pass
+  if timestamps:reported=max(timestamps)
+ d["_verified_duration"]=reported
+ if reported<.3:
+  raise RuntimeError("Video is too short or no timestamps: "+str(d)[:1600])
  return d
 def make_mp4(source,dst):
  if not shutil.which("ffmpeg"):raise RuntimeError("FFmpeg is required for MP4 export")
@@ -160,7 +173,7 @@ def main():
      if len(errors)>before:raise RuntimeError("Browser JS error: "+"; ".join(errors[before:]))
      if webm.stat().st_size<6500:raise RuntimeError("Empty WebM")
      info=probe(webm)
-     if abs(float(info["format"]["duration"])-meta["duration"])>1.9:
+     if abs(float(info["_verified_duration"])-meta["duration"])>1.9:
       raise RuntimeError("WebM duration mismatch with V35 episode")
      if args.mp4:make_mp4(webm,mp4)
      ck["episodes"][str(i)]={"status":"completed",**meta,
