@@ -42,6 +42,7 @@ V42_STAGE = BASE / "anime-factory" / "v42" / "AI_Anime_Factory_V42_STAGE_DEPTH.h
 V43_DIRECTOR = BASE / "anime-factory" / "v43" / "AI_Anime_Factory_V43_ACTION_DIRECTOR.html"
 V44_KEYPOSES = BASE / "anime-factory" / "v44" / "AI_Anime_Factory_V44_TRUE_KEYPOSES.html"
 V45_ART_ENGINE = BASE / "anime-factory" / "v45" / "AI_Anime_Factory_V45_ART_ENGINE.html"
+V46_ANIMATION = BASE / "anime-factory" / "v46" / "AI_Anime_Factory_V46_ANIMATION_ENGINE.html"
 
 
 class Studio:
@@ -56,7 +57,7 @@ class Studio:
         header = ttk.Frame(win, padding=12)
         header.pack(fill="x")
         ttk.Label(header, text="AI RESCUE FACTORY V7", font=("Segoe UI", 20, "bold")).pack(anchor="w")
-        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V45",
+        ttk.Label(header, text="Автономная сборка ZIP • Резервные копии • Восстановление • V19–V46",
                   font=("Segoe UI", 10)).pack(anchor="w")
         controls = ttk.Frame(win, padding=(12, 4))
         controls.pack(fill="x")
@@ -106,6 +107,7 @@ class Studio:
             ("Открыть Anime Factory V43 Action Camera", lambda: self.open_html(V43_DIRECTOR)),
             ("Открыть Anime Factory V44 True Keyposes", lambda: self.open_html(V44_KEYPOSES)),
             ("Открыть Anime Factory V45 Art Engine", lambda: self.open_html(V45_ART_ENGINE)),
+            ("Открыть Anime Factory V46 Animation Engine", lambda: self.open_html(V46_ANIMATION)),
             ("Открыть Anime Factory V20.3", lambda: self.open_html(V20)),
             ("Открыть папку проекта", self.show_workspace)
         ]
