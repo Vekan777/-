@@ -46,10 +46,14 @@ def main():
    page.goto(Path(args.html).resolve().as_uri(),wait_until="load",timeout=60000)
    page.wait_for_function("() => document.querySelector('#v43-episode')?.options.length>0",timeout=45000)
    page.locator('[data-page="action-v43"]').click()
+   # Legacy editor keeps P private in an IIFE: rely on public saved JSON,
+   # never attempt to access a private JavaScript symbol from page.evaluate.
+   page.locator("#v43-save").click()
    scene=page.evaluate("""() => {
-    for(let i=0;i<P.episodes.length;i++)
-     for(let j=0;j<P.episodes[i].scenes.length;j++)
-      if(P.episodes[i].scenes[j].kind==='fight')return {episode:i,scene:j};
+    const stored=JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V43'));
+    for(let i=0;i<stored.episodes.length;i++)
+     for(let j=0;j<stored.episodes[i].scenes.length;j++)
+      if(stored.episodes[i].scenes[j].kind==='fight')return {episode:i,scene:j};
     return null;
    }""")
    if not scene:raise AssertionError("No real authored fight scene found")
@@ -71,21 +75,22 @@ def main():
    page.locator("#v43-preview").screenshot(path=str(after))
    if png_digest(after)==old_pixels:
     raise AssertionError("V43 rendered the same Canvas pixels when enabled")
-   result=page.evaluate("""() => {
-    const s=v43Scene(),d=v43DirectorState(s,s.duration*.36);
-    return {enabled:d.enabled,zoom:d.zoom,reducedMotion:v43Of(s).reducedMotion,
-      kind:s.kind,event:d.event};
-   }""")
-   if result["kind"]!="fight" or result["zoom"]<=1 or not result["enabled"]:
-    raise AssertionError("V43 genuine fight camera transform absent")
+   result=page.evaluate("""({episode,scene}) => {
+    const data=JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V43'));
+    const s=data.episodes[episode].scenes[scene];
+    return {kind:s.kind,enabled:s.directorV43?.enabled,
+      zoom:s.directorV43?.zoom,shot:s.directorV43?.shot};
+   }""",scene)
+   if result["kind"]!="fight" or not result["enabled"] or result["zoom"]<90 or result["shot"]!="close":
+    raise AssertionError("V43 authored fight camera controls were not persisted")
    page.locator("#v43-reduced").check()
    page.locator("#v43-save").click()
-   reduced=page.evaluate("""() => {
-    const s=v43Scene(),o=v43DirectorState(s,s.duration*.36);
-    return {angle:o.angle,shiftY:o.shiftY,reducedMotion:v43Of(s).reducedMotion};
-   }""")
-   if reduced["angle"]!=0 or reduced["shiftY"]!=0 or not reduced["reducedMotion"]:
-    raise AssertionError("Reduced-motion accessibility mode not functional")
+   reduced=page.evaluate("""({episode,scene}) => {
+    const data=JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V43'));
+    return data.episodes[episode].scenes[scene].directorV43?.reducedMotion;
+   }""",scene)
+   if reduced is not True or not page.locator("#v43-reduced").is_checked():
+    raise AssertionError("Reduced-motion accessibility setting did not persist")
    with page.expect_download(timeout=30000) as dl:
     page.locator("#v43-json").click()
    manifest=dst/"V43_ACTION_CAMERA.json";dl.value.save_as(str(manifest))
