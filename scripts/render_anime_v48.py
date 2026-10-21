@@ -101,7 +101,8 @@ def main():
   context=browser.new_context(accept_downloads=True)
   if source:
    encoded=json.dumps(data,ensure_ascii=False)
-   context.add_init_script("try{localStorage.setItem('AI_ANIME_FACTORY_V48',"+
+   context.add_init_script("try{if(!localStorage.getItem('AI_ANIME_FACTORY_V48'))"+
+    "localStorage.setItem('AI_ANIME_FACTORY_V48',"+
     encoded+");}catch(error){console.error('V48 JSON restore:',error.message);}")
   page=context.new_page()
   errors=[]
