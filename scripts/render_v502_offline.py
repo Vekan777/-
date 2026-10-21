@@ -96,7 +96,12 @@ def render(html,project,out,ei,width,fps,preview):
         try:
             page.goto(html.resolve().as_uri(),wait_until="load",timeout=60000)
             page.wait_for_function("() => window.v502Motion && window.v502CleanCutsQA",timeout=35000)
-            page.evaluate("p=>localStorage.setItem('AI_ANIME_FACTORY_V50',JSON.stringify(p))",project)
+            # Canonical voice JSON intentionally has no optional art toggles.
+            # Enable them in a render-only COPY (original source remains unchanged).
+            preview_project=json.loads(json.dumps(project,ensure_ascii=False))
+            for key in ("v502Director","v502Art","v502MotionRig","v502CleanCuts"):
+                preview_project.setdefault(key,{})["enabled"]=True
+            page.evaluate("p=>localStorage.setItem('AI_ANIME_FACTORY_V50',JSON.stringify(p))",preview_project)
             page.reload(wait_until="load")
             page.wait_for_function("() => window.v502Motion && window.v502CleanCutsQA",timeout=35000)
             page.wait_for_function("() => window.v502CleanCutsQA.loaded()===13",timeout=35000)
