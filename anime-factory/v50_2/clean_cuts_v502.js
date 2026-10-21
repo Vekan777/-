@@ -25,13 +25,29 @@ function opaqueCut(g,img,w,h,sec,sceneId,shotKey){
  const t=Math.max(0,Math.min(1,sec));
  g.save();g.globalAlpha=1;g.globalCompositeOperation='source-over';
  g.fillStyle='#070e1e';g.fillRect(0,0,w,h);
+ const portrait=img.naturalWidth/img.naturalHeight<1.48;
  const base=Math.max(w/img.naturalWidth,h/img.naturalHeight);
- const scale=base*(1.03+t*.045),sw=img.naturalWidth*scale,sh=img.naturalHeight*scale;
+ const scale=base*(1.03+t*.045);
+ const sw=img.naturalWidth*scale,sh=img.naturalHeight*scale;
  const shiftX=Math.sin(t*2.15+sceneId*.9)*Math.max(0,sw-w)*.32;
  const shiftY=Math.cos(t*1.4+sceneId*.55)*Math.max(0,sh-h)*.28;
- g.filter='saturate(1.06) contrast(1.04)';
- g.drawImage(img,(w-sw)/2+shiftX,(h-sh)/2+shiftY,sw,sh);
- g.filter='none';
+ if(portrait){
+   // Preserve the entire face: naive portrait cover cropped it to the jaw.
+   g.save();g.filter='blur(20px) brightness(.35) saturate(1.15)';
+   g.drawImage(img,(w-sw)/2+shiftX,(h-sh)/2+shiftY,sw,sh);g.restore();
+   g.fillStyle='#0814268c';g.fillRect(0,0,w,h);
+   const frontScale=Math.min((w-120)/img.naturalWidth,(h-57)/img.naturalHeight)*(1+t*.015);
+   const fw=frontScale*img.naturalWidth,fh=frontScale*img.naturalHeight;
+   const anchor=(sceneId%2===0?.46:.56)*w;
+   const px=Math.max(18,Math.min(w-fw-18,anchor-fw*.5));
+   const py=(h-fh)/2+6;
+   g.save();g.shadowColor='#020713';g.shadowBlur=32;
+   g.drawImage(img,px,py,fw,fh);g.restore();
+ } else {
+   g.filter='saturate(1.06) contrast(1.04)';
+   g.drawImage(img,(w-sw)/2+shiftX,(h-sh)/2+shiftY,sw,sh);
+   g.filter='none';
+ }
  const rim=g.createRadialGradient(w*.5,h*.47,w*.2,w*.5,h*.47,w*.82);
  rim.addColorStop(0,'#00000000');rim.addColorStop(1,'#0309177c');
  g.fillStyle=rim;g.fillRect(0,0,w,h);
