@@ -1,0 +1,85 @@
+name: Anime V50.3 Two Russian Neural Voices - Real Piper Voice Test
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/anime-v503-ru-piper.yml"
+      - "anime-factory/v50_3/**"
+      - "scripts/voice_v503_dual.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthesize-two-genuine-voices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check original Piper binaries, both Russian models and two JSON configs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v503/piper /tmp/v503/voices dist/v503
+          curl -fLsS --retry 3 --connect-timeout 20 --max-time 240 \
+            -o /tmp/v503/piper.tgz \
+            "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz"
+          tar -xzf /tmp/v503/piper.tgz -C /tmp/v503
+          test -x /tmp/v503/piper/piper
+          for voice in denis dmitri; do
+            for ext in onnx onnx.json; do
+              curl -fLsS --retry 3 --connect-timeout 20 --max-time 300 \
+                -o "/tmp/v503/voices/ru_RU-$voice-medium.$ext" \
+                "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/$voice/medium/ru_RU-$voice-medium.$ext?download=true"
+            done
+          done
+          python - <<'PY'
+          import pathlib,json,hashlib
+          root=pathlib.Path('/tmp/v503/voices')
+          expected={"denis":"15fab56e11a097858ee115545d0f697fc2a316c41a291a5362349fb870411b0a",
+                    "dmitri":"f073356ebc4bd0f80c5af58df2953a5988bd5bdab1eb38635ce960b071fbefcb"}
+          for role,digest in expected.items():
+              model=root/f'ru_RU-{role}-medium.onnx'
+              meta=json.loads((root/f'ru_RU-{role}-medium.onnx.json').read_text())
+              actual=hashlib.sha256(model.read_bytes()).hexdigest()
+              assert actual==digest,(role,actual,digest)
+              assert meta['audio']['sample_rate']==22050 and meta['dataset']==role
+              print('VERIFIED original model',role,actual)
+          PY
+      - name: Synthesize ACTUAL Russian male voice samples
+        run: |
+          set -euo pipefail
+          export LD_LIBRARY_PATH=/tmp/v503/piper:${LD_LIBRARY_PATH:-}
+          echo "Этот знак снова вспыхнул. Значит, мы должны идти дальше." | \
+            /tmp/v503/piper/piper --model /tmp/v503/voices/ru_RU-denis-medium.onnx \
+             --output_file dist/v503/akira_denis_neural_ru.wav
+          echo "Я держу мост. Не оборачивайся, Акира." | \
+            /tmp/v503/piper/piper --model /tmp/v503/voices/ru_RU-dmitri-medium.onnx \
+             --output_file dist/v503/ren_dmitri_neural_ru.wav
+          python - <<'PY'
+          import wave,math,struct,json,pathlib
+          rows=[]
+          for filename in ['akira_denis_neural_ru.wav','ren_dmitri_neural_ru.wav']:
+            p=pathlib.Path('dist/v503')/filename
+            with wave.open(str(p)) as f:
+              assert f.getframerate()==22050 and f.getnchannels()==1 and f.getsampwidth()==2
+              n=f.getnframes(); b=f.readframes(n)
+            vals=struct.unpack('<'+'h'*n,b)
+            duration=n/22050
+            rms=math.sqrt(sum(v*v for v in vals)/max(1,n))/32768
+            assert .75<duration<18 and rms>.005,(filename,duration,rms)
+            rows.append({'file':filename,'duration':duration,'rms':rms,
+                         'source':'ACTUAL_PIPER_RUSSIAN_MODEL',
+                         'actorApproved':False})
+          pathlib.Path('dist/v503/QA.json').write_text(
+            json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('REAL TWO PIPER RUSSIAN VOICES PASSED',rows)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: V503_GENUINE_DENIS_DMITRI_RUSSIAN_VOICE_SAMPLES
+          path: dist/v503
+          retention-days: 30
+          if-no-files-found: error
