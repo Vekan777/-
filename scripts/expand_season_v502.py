@@ -202,6 +202,8 @@ def apply(project,pack,with_tts=False,with_audio=False):
              'noResurrectionOfLostMemory':True,'renBetrayalRepairedByActionsNotInstantForgiveness':True,
              'episode6ChildhoodHomeDuplicateFixed':True},
         'artApproval':False,'voiceApproval':False,'rightsApproved':False}
+    out['v502SeasonStage']={'enabled':True,'status':'FOUR_SCRIPTED_EPISODES_PREVIEW',
+                            'artApproval':False,'humanVoiceApproved':False}
     out['productionV50']['qaAccepted']=False
     return out,reports
 
