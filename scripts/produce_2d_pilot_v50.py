@@ -78,8 +78,15 @@ def make_tts(lines, here):
     total=sum(sec for _,sec in chunks)+.35*(len(chunks)-1)
     if len(encoded)>1500000*1.4:
         raise RuntimeError("Scene voice exceeds portable V47 audio quota")
+    # Speaker-accurate timing for V50.1 lip sync; no fake phoneme alignment.
+    segments=[];cursor=0.0
+    for index,(_,seconds) in enumerate(chunks):
+        segments.append({"role":lines[index][0],
+            "start":round(cursor,3),"end":round(cursor+seconds,3)})
+        cursor+=seconds+(.35 if index+1<len(chunks) else 0)
     return {"url":"data:audio/mpeg;base64,"+encoded,"wave":waveform,
-            "total":round(total,2),"first":round(first,2),"bytes":mp3.stat().st_size}
+            "total":round(total,2),"first":round(first,2),
+            "segments":segments,"bytes":mp3.stat().st_size}
 
 def get_initial_project(html):
     from playwright.sync_api import sync_playwright
@@ -229,7 +236,10 @@ def build(project,pack,with_tts=False):
                   "embeddedV47":voice["url"],"waveV47":voice["wave"],
                   "durationV47":voice["total"],"sampleRateV47":50,
                   "gain":.95,"offset":.25,"mouthEnabledV47":True,
-                  "speakerV47":lines[0][0]})
+                  "speakerV47":lines[0][0],
+                  "segmentsV501":voice["segments"],
+                  "languageV501":"ru-RU",
+                  "actingStatusV501":"TEMPORARY_ESPEAK_NOT_FINAL"})
             seconds+=duration
         report.append({"episode":ep_plan["number"],"title":episode["title"],
             "scriptedScenes":6,"subtitleCues":12,"durationSeconds":round(seconds,2),
@@ -239,6 +249,8 @@ def build(project,pack,with_tts=False):
     project["productionV50"]={"episodeReviews":{},"notes":
        "Пилотный аниматик: ручная проверка кадров, речи, прав, монтажа НЕ завершена.",
        "qaAccepted":False}
+    project["v501Visual"]={"enabled":True,"style":"V50.1_CINEMATIC_VECTOR_PILOT",
+        "language":"ru-RU","humanArtApproved":False}
     project["pilotProductionV50"]={"schema":pack["schema"],
         "originalV50ProjectSha256":canonical_fingerprint,
         "source":"AI Anime Factory V50 built-in story and original cast",
