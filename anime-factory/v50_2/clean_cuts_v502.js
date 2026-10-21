@@ -51,8 +51,11 @@ function opaqueCut(g,img,w,h,sec,sceneId,shotKey){
  const rim=g.createRadialGradient(w*.5,h*.47,w*.2,w*.5,h*.47,w*.82);
  rim.addColorStop(0,'#00000000');rim.addColorStop(1,'#0309177c');
  g.fillStyle=rim;g.fillRect(0,0,w,h);
+ // A previous 100% black fade at t=0 caused blank combat frames.
+ // Keep each shot's artwork visible even on the exact edit boundary.
  const edge=Math.min(1,t/.055,(1-t)/.055);
- if(edge<1){g.globalAlpha=Math.max(0,1-edge);g.fillStyle='#030714';g.fillRect(0,0,w,h)}
+ if(edge<1){g.globalAlpha=.08*Math.max(0,1-edge);
+   g.fillStyle='#030714';g.fillRect(0,0,w,h)}
  g.globalAlpha=1;g.fillStyle='#071024';
  g.fillRect(0,0,w,22);g.fillRect(0,h-25,w,25);
  g.fillStyle='#dfebf4';g.font='600 12px Arial,sans-serif';
