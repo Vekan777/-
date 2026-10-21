@@ -22,7 +22,8 @@ SOURCE=[
  "anime-factory/v50_1/build_cinematic_v501.py",
  "anime-factory/v50_1/cinematic_pilot_v501.js",
  "scripts/postprocess_v502.py",
- "scripts/render_anime_v48.py"
+ "scripts/render_anime_v48.py",
+ "scripts/render_v502_offline.py"
 ]
 def sha(file):return hashlib.sha256(Path(file).read_bytes()).hexdigest()
 def main():
@@ -77,7 +78,7 @@ def main():
             add_disk(p,"ART/"+p.name)
         for p in media:
             add_disk(p,"VIDEOS/"+p.name)
-        for name in ("scripts/render_anime_v48.py","scripts/postprocess_v502.py"):
+        for name in ("scripts/render_anime_v48.py","scripts/postprocess_v502.py","scripts/render_v502_offline.py"):
             add_disk(ROOT/name,Path(name).name)
         z.writestr("RUN_WINDOWS.bat",
                    '@echo off\r\nstart "" "%~dp0'+STUDIO+'"\r\n')
@@ -91,6 +92,15 @@ def main():
                    'py -3 render_anime_v48.py --html "'+STUDIO+
                    '" --project "'+PROJECT+
                    '" --out NEW_EPISODES --episodes 1,2 --fps 6 --mp4\r\npause\r\n')
+        z.writestr("RENDER_HD_12FPS_WINDOWS.bat",
+                   '@echo off\r\ncd /d "%~dp0"\r\n'
+                   'if exist "tools\\ffmpeg\\bin\\ffmpeg.exe" '
+                   'set "PATH=%CD%\\tools\\ffmpeg\\bin;%PATH%"\r\n'
+                   'py -3 -m pip install numpy playwright==1.56.0\r\n'
+                   'py -3 -m playwright install chromium\r\n'
+                   'py -3 render_v502_offline.py --html "'+STUDIO+
+                   '" --project "'+PROJECT+
+                   '" --out NEW_HD_VIDEO --episodes 1,2 --fps 12 --width 960\r\npause\r\n')
         z.writestr("tools/ffmpeg/bin/README_RU.txt",
                    "Из уже имеющегося ffmpeg-9.0.2-full_build.zip "
                    "извлеките ffmpeg.exe и ffprobe.exe сюда.")
