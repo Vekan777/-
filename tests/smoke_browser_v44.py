@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""V44 headless Chromium: authentic action camera, canon invariants, WebM with audio."""
+"""V44 headless Chromium: real draw-time 2D actor rig, canon invariants, WebM with audio."""
 from __future__ import annotations
 import argparse,hashlib,json,math,shutil,struct,subprocess,wave
 from pathlib import Path
@@ -45,7 +45,7 @@ def main():
   try:
    page.goto(Path(args.html).resolve().as_uri(),wait_until="load",timeout=60000)
    page.wait_for_function("() => document.querySelector('#v44-episode')?.options.length>0",timeout=45000)
-   page.locator('[data-page="action-v44"]').click()
+   page.locator('[data-page="keyposes-v44"]').click()
    # Legacy editor keeps P private in an IIFE: rely on public saved JSON,
    # never attempt to access a private JavaScript symbol from page.evaluate.
    page.locator("#v44-save").click()
@@ -95,14 +95,14 @@ def main():
     page.locator("#v44-json").click()
    manifest=dst/"V44_ACTOR_KEYPOSES.json";dl.value.save_as(str(manifest))
    report=json.loads(manifest.read_text(encoding="utf-8"))
-   if report["version"]!=43 or report["episodes"][scene["episode"]]["scenes"][scene["scene"]]["keyposes"]["enabled"] is not True:
+   if report["version"]!=44 or report["episodes"][scene["episode"]]["scenes"][scene["scene"]]["keyposes"]["enabled"] is not True:
     raise AssertionError("V44 true rig pose JSON not persisted")
    with page.expect_download(timeout=30000) as dl:
     page.locator("#v44-sheet").click()
    sheet=dst/"V44_FOUR_REAL_KEYPOSES.png";dl.value.save_as(str(sheet))
    png_digest(sheet)
    original=page.evaluate("""() => JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V44'))""")
-   if original["version"]!=43 or not original["characters"][0].get("silhouetteV41"):
+   if original["version"]!=44 or not original["characters"][0].get("silhouetteV41"):
     raise AssertionError("V41 actors lost")
    if not original["episodes"][0].get("storyV20"):
     raise AssertionError("Original storyline lost")
@@ -119,7 +119,7 @@ def main():
    }""")
    page.reload(wait_until="load")
    page.wait_for_function("() => document.querySelector('#v44-episode')?.options.length>0",timeout=45000)
-   page.locator('[data-page="action-v44"]').click()
+   page.locator('[data-page="keyposes-v44"]').click()
    page.locator("#v44-save").click() # normalize synthetic duration before old baseline
    old=page.evaluate("""() => JSON.parse(localStorage.getItem('AI_ANIME_FACTORY_V44'))""")
    page.locator("#v44-reach").fill("72")
@@ -130,7 +130,7 @@ def main():
    preserved(prior,latest,"original-scene-fields")
    preserved(old["characters"],fresh["characters"],"original-character-fields")
    if old["episodes"][0]["storyV20"]!=fresh["episodes"][0]["storyV20"]:
-    raise AssertionError("Story was rewritten by camera")
+    raise AssertionError("Story was rewritten by rig")
    page.locator('[data-page="audio-v36"]').click()
    page.locator("#v36-slot").select_option("voice")
    page.locator("#v36-audiofile").set_input_files(str(wav))
@@ -155,7 +155,7 @@ def main():
      raise AssertionError("Real WebM truncated")
    if errors:raise AssertionError("JavaScript errors: "+"; ".join(errors[:5]))
    (dst/"V44_BROWSER_QA.json").write_text(json.dumps({
-    "version":43,"true_rig_pixel_change":True,
+    "version":44,"true_rig_pixel_change":True,
     "two_pose_timestamps_checked":True,"story_characters_preserved":True,
     "webm_bytes":movie.stat().st_size,"ffprobe":probe,
     "pageerrors":errors},ensure_ascii=False,indent=2),encoding="utf-8")
