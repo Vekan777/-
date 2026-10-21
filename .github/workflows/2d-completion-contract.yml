@@ -1,0 +1,42 @@
+name: 2D Final V50 Scope Freeze and Acceptance Contract
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/roadmap/**"
+      - "scripts/check_2d_completion_contract.py"
+      - ".github/workflows/2d-completion-contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "anime-factory/roadmap/**"
+      - "scripts/check_2d_completion_contract.py"
+      - ".github/workflows/2d-completion-contract.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract-check:
+    name: V45-V50 scope freeze, 26 gates, evidence presence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify contract and historical evidence sources
+        run: python scripts/check_2d_completion_contract.py
+      - name: Validate Python compiler
+        run: python -m py_compile scripts/check_2d_completion_contract.py
+      - name: Publish acceptance status summary
+        shell: bash
+        run: |
+          {
+            echo '## 2D production freeze: V45–V50'
+            echo
+            echo 'V49 = only unified 2D release. V50 = final repair and acceptance.'
+            echo
+            echo 'NOTE: passing this contract verification does **not** imply that 2D FINAL passes; all acceptance gates are currently open.'
+            echo
+            echo 'See anime-factory/roadmap/2D_FINAL_TO_V50_RU.md and AUDIT_V44_TO_2D_FINAL_RU.md.'
+          } >> "$GITHUB_STEP_SUMMARY"

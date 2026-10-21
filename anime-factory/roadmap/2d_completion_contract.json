@@ -1,0 +1,269 @@
+{
+  "schema": "AIAnimeFactory/2DCompletionContract/1",
+  "status": "PLANNED_NOT_FINISHED",
+  "baseline": {
+    "version": 44,
+    "release": "https://github.com/Vekan777/-/releases/tag/anime-factory-v44",
+    "source": "anime-factory/v44/build_keyposes_v44.py"
+  },
+  "release_policy": {
+    "first_remaining": 45,
+    "last_major_2d": 50,
+    "total_remaining_major": 6,
+    "unified_major": 49,
+    "qa_final_major": 50,
+    "bugfix_series": "V50.x",
+    "prohibit_more_major_2d": true,
+    "three_d_product": "3D Edition v1",
+    "three_d_gate": "2D_V50_MANUAL_AND_AUTOMATED_ACCEPTANCE_PASS"
+  },
+  "versions": [
+    {
+      "id": 45,
+      "slug": "art-assets",
+      "goal": "fully editable layered custom 2D characters, backgrounds, licensed editable demo assets",
+      "status": "PLANNED",
+      "gate_ids": [
+        "ASSET_LAYERS",
+        "ART_IMPORT",
+        "ASSET_PORTABLE",
+        "ASSET_LICENSE"
+      ]
+    },
+    {
+      "id": 46,
+      "slug": "animation-studio",
+      "goal": "real rig timeline, transform keyframes, reusable 2D actions and multiple genuine poses",
+      "status": "PLANNED",
+      "gate_ids": [
+        "REAL_RIG",
+        "KEYFRAME_TIMELINE",
+        "REUSABLE_MOTION",
+        "MIGRATION_SAFE"
+      ]
+    },
+    {
+      "id": 47,
+      "slug": "voice-lipsync",
+      "goal": "audio files survive restart/transfer; timed actual mouth shapes, sound mixing and playable voice",
+      "status": "PLANNED",
+      "gate_ids": [
+        "AUDIO_PORTABLE",
+        "LIPSYNC",
+        "AUDIO_VIDEO_SYNC",
+        "SUBTITLE_SYNC"
+      ]
+    },
+    {
+      "id": 48,
+      "slug": "episode-render",
+      "goal": "multi-episode render, MP4 via local FFmpeg, resumable batches, end credits, verified backups",
+      "status": "PLANNED",
+      "gate_ids": [
+        "BATCH_MOVIES",
+        "STREAMING_RENDER",
+        "MP4_EXPORT",
+        "BACKUP_RESTORE",
+        "TWO_EPISODES"
+      ]
+    },
+    {
+      "id": 49,
+      "slug": "2d-unified",
+      "goal": "single friendly UI, consistent legacy data roundtrips, reproducible finished sample episode",
+      "status": "PLANNED",
+      "gate_ids": [
+        "ONE_UI",
+        "LEGACY_ROUNDTRIP",
+        "WORKING_DEMO_60_180S",
+        "ONE_ARCHIVE"
+      ]
+    },
+    {
+      "id": 50,
+      "slug": "2d-final-qa",
+      "goal": "deep repair, actual Windows desktop acceptance, integrity/legal/security/artistic review",
+      "status": "PLANNED",
+      "gate_ids": [
+        "WINDOWS10_LOW_SPEC",
+        "AUTOMATED_REGRESSION",
+        "HUMAN_VISUAL_REVIEW",
+        "RELEASE_CHECKLIST",
+        "3D_GATE"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "ASSET_LAYERS",
+      "kind": "automated+manual",
+      "passed": false
+    },
+    {
+      "id": "ART_IMPORT",
+      "kind": "automated+manual",
+      "passed": false
+    },
+    {
+      "id": "ASSET_PORTABLE",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "ASSET_LICENSE",
+      "kind": "manual",
+      "passed": false
+    },
+    {
+      "id": "REAL_RIG",
+      "kind": "automated+manual",
+      "passed": false
+    },
+    {
+      "id": "KEYFRAME_TIMELINE",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "REUSABLE_MOTION",
+      "kind": "automated+manual",
+      "passed": false
+    },
+    {
+      "id": "MIGRATION_SAFE",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "AUDIO_PORTABLE",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "LIPSYNC",
+      "kind": "automated+manual",
+      "passed": false
+    },
+    {
+      "id": "AUDIO_VIDEO_SYNC",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "SUBTITLE_SYNC",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "BATCH_MOVIES",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "STREAMING_RENDER",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "MP4_EXPORT",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "BACKUP_RESTORE",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "TWO_EPISODES",
+      "kind": "automated+manual",
+      "passed": false
+    },
+    {
+      "id": "ONE_UI",
+      "kind": "manual",
+      "passed": false
+    },
+    {
+      "id": "LEGACY_ROUNDTRIP",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "WORKING_DEMO_60_180S",
+      "kind": "automated+manual",
+      "passed": false
+    },
+    {
+      "id": "ONE_ARCHIVE",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "WINDOWS10_LOW_SPEC",
+      "kind": "manual",
+      "passed": false
+    },
+    {
+      "id": "AUTOMATED_REGRESSION",
+      "kind": "automated",
+      "passed": false
+    },
+    {
+      "id": "HUMAN_VISUAL_REVIEW",
+      "kind": "manual",
+      "passed": false
+    },
+    {
+      "id": "RELEASE_CHECKLIST",
+      "kind": "manual",
+      "passed": false
+    },
+    {
+      "id": "3D_GATE",
+      "kind": "automated+manual",
+      "passed": false
+    }
+  ],
+  "hard_blockers": [
+    {
+      "id": "AUDIO_IN_RAM_ONLY",
+      "priority": "P0",
+      "source": "anime-factory/v36/audio_v36.js",
+      "version_to_fix": 47,
+      "status": "OPEN"
+    },
+    {
+      "id": "TEXT_ONLY_MOUTH_TIMING",
+      "priority": "P0",
+      "source": "anime-factory/v19/AI_Anime_Factory_V19.html",
+      "version_to_fix": 47,
+      "status": "OPEN"
+    },
+    {
+      "id": "PNG_BATCH_LIMIT_1800",
+      "priority": "P0",
+      "source": "anime-factory/v19/AI_Anime_Factory_V19.html",
+      "version_to_fix": 48,
+      "status": "OPEN"
+    },
+    {
+      "id": "NO_PORTABLE_LAYERED_ACTOR_PIPELINE",
+      "priority": "P0",
+      "source": "anime-factory/v44/keyposes_v44.js",
+      "version_to_fix": 45,
+      "status": "OPEN"
+    },
+    {
+      "id": "NO_FINISHED_EPISODE_IN_ACCEPTANCE",
+      "priority": "P1",
+      "source": "tests/smoke_browser_v44.py",
+      "version_to_fix": 49,
+      "status": "OPEN"
+    }
+  ],
+  "references": [
+    "anime-factory/roadmap/2D_FINAL_TO_V50_RU.md",
+    "anime-factory/roadmap/AUDIT_V44_TO_2D_FINAL_RU.md"
+  ]
+}
