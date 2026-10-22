@@ -1,0 +1,43 @@
+{
+  "version": "C8 Rev16.7",
+  "blender": "3.6.23 Linux CPU",
+  "source": "full Rev16.6 native Blender scene",
+  "source_unchanged": true,
+  "original_bones_per_actor": 21,
+  "total_bones_per_actor": 51,
+  "added_phalanx_bones": 60,
+  "new_weighted_finger_meshes": 4,
+  "independent_blender_checks": "73/73",
+  "same_frame_actual_mesh_deformation_m": {
+    "LIRA_L": 0.06389481227,
+    "LIRA_R": 0.05378616981,
+    "KAEL_L": 0.06396260265,
+    "KAEL_R": 0.05527699495
+  },
+  "glb_reimport": {
+    "passed": true,
+    "armatures": 2,
+    "joints_each": 51,
+    "articulated_finger_meshes": 4,
+    "mesh_count": 187
+  },
+  "clean_extract_rebuild": "4/4 subprocesses",
+  "injected_failure_recovery_pass": true,
+  "video": {
+    "real_consecutive_frames": 8,
+    "range": [
+      611,
+      618
+    ],
+    "fps": 12,
+    "width": 384,
+    "height": 216
+  },
+  "archives": {
+    "full_sha256": "4fe4f634b1dd4f33a4d8ba17ae4fe61d97e232d06280784f28d464e5d2478c8a",
+    "compact_sha256": "8728a9de3b0ec3ed6a0095b03e47f56fbb511f64e1c2128945de11da21beecd3"
+  },
+  "large_binaries_in_github": false,
+  "Windows_machine_tested": false,
+  "production_gate": "PRODUCTION_BLOCKED"
+}
