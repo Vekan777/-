@@ -1,0 +1,51 @@
+{
+  "release": "C8 Rev16.6",
+  "source": "real immutable Rev16.5 Blender scene",
+  "blender": "3.6.23 Linux CPU",
+  "animatable_finger_morph_targets": 40,
+  "hands": 4,
+  "morphs_per_hand": 10,
+  "fingers_per_hand": 5,
+  "native_blender_qa": {
+    "passed": 186,
+    "total": 186
+  },
+  "python_tests": {
+    "passed": 9,
+    "total": 9
+  },
+  "source_actor_and_sword_target_action_shas_unchanged": 4,
+  "gltf": {
+    "clean_import": true,
+    "skins": 2,
+    "joints_per_skin": 21,
+    "finger_meshes": 4,
+    "finger_morphs_each": 10,
+    "animations": 21
+  },
+  "wrist_hilt_gap_max_m": 0.0457452549,
+  "ik_cyclic_dependency_fix_rejected": true,
+  "render": {
+    "real_consecutive_frames": 12,
+    "frame_range": [
+      605,
+      616
+    ],
+    "fps": 12,
+    "width": 384,
+    "height": 216,
+    "duration_seconds": 1
+  },
+  "cleanroom_rebuild": {
+    "stages": 4,
+    "passed": 4
+  },
+  "rollback_injected_failure_files_byte_identical": true,
+  "sha256_archives": {
+    "full": "7f783e25e49420014c1e44be3bbcdbd2ff97307febb061ec6e1eb9ee3c371a37",
+    "compact": "6805457eef6ef9bca83a6a47da529f27abf2e2a1b401293ac02e8db34c2d295e"
+  },
+  "actual_windows_hardware_test": false,
+  "artifact_gate": "PRODUCTION_BLOCKED",
+  "full_sources_and_binary_models_in_github": false
+}
