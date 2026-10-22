@@ -1,0 +1,37 @@
+{
+  "release": "C8 Rev16.1",
+  "technical_gate": "PASS",
+  "artistic_gate": "PRODUCTION_BLOCKED",
+  "qa": {
+    "blender_checks": [
+      28,
+      28
+    ],
+    "glb_structure": [
+      8,
+      8
+    ],
+    "gltf_blender_reimport": [
+      5,
+      5
+    ],
+    "source_armature_fcurves": [
+      2,
+      2
+    ],
+    "unittests": [
+      7,
+      7
+    ]
+  },
+  "model": {
+    "actor_count": 2,
+    "joints_each": 21,
+    "new_face_morphs_each": 24,
+    "exported_gltf_meshes": 100,
+    "exported_gltf_animations": 4
+  },
+  "release_package_sha256": "91354994d1b9734fed7aad92acbb06e4164fa080bb450b07b9b25882c8a78eee",
+  "compact_package_sha256": "4880d4c6f382fcf78a949b678c1cfc45e577137882c17432344cd6f1a7e1544b",
+  "note": "All heavy binaries and complete sources are in the ChatGPT ZIP downloads. No independent Windows machine test."
+}
