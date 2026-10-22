@@ -1,25 +1,23 @@
 # AI Anime Factory C8 Rev14 — CPU Quality Autopilot
 
-Технический выпуск C8, **профессиональная художественная приёмка не пройдена**. Полные ZIP лежат в текущем чате (бинарные GLB/WAV/MP4 и Python-код не объявляются размещёнными в GitHub).
+**Technical release, artistic studio acceptance = false.** Released as a C8 iteration (not a finished professional anime factory). Binaries and complete source are in the ChatGPT ZIP downloads, not falsely claimed to live in GitHub.
 
-## Файлы сборки
-- `AI_ANIME_FACTORY_C8_REV14_CPU_AUTOPILOT_WINDOWS.zip` — 67 453 455 байт, 562 файла. SHA256 `a4b1bbc970e2e015e9040e2ff472df615adb792ce54c84281088b97a658eef5e`.
-- `C8_REV14_CPU_AUTOPILOT_COMPACT_WINDOWS.zip` — 18 213 113 байт, 40 файлов. SHA256 `e024a95f4b1c28c0b7f0aa634cd7005343ed2cb3993639701a11e924ce294773`.
-- `C8_REV14_VERIFIED_QA_REPORTS.zip` — 2 925 441 байт. SHA256 `31b6799d3df4b390c6dc44933124c0fd1877c5bbc6c8d4673ace5e39e4e876c3`.
+## Final checked downloads
+- AI_ANIME_FACTORY_C8_REV14_CPU_AUTOPILOT_WINDOWS.zip — 67,454,473 bytes, 563 source/data files, sha256 dc61d954544b9fb595039a967259d8a5b106006994fb8818c1424d8ca1734125
+- C8_REV14_CPU_AUTOPILOT_COMPACT_WINDOWS.zip — 18,214,142 bytes, 41 files, sha256 20794e2744be115adf0a1456439350c4e849b23a4378f2bfecd917e4b89f5271
+- C8_REV14_VERIFIED_QA_REPORTS.zip — 2,925,566 bytes, 19 files, sha256 fba8c0d93e4a47cfbdcc69b863eef626187cb65762f08e6461744cdc7279facb
+All ZIP CRC and per-file SHA-256 manifest checks passed. Final GLB is **C8_REV14_CORRECTED_SKINNED.glb**, exported from the corrected Blender project (avoiding a stale model/scene mismatch).
 
-## Проверенный конвейер
-Исходный Blender Rev12 был реально открыт в Blender 3.6.23. Новый скрипт добавляет 3072 ключа мимики и процедурную микротекстуру на десяти материалах при сохранении 2 weighted skinning armature (по 21 кости и 24 лицевых формы).
-Первая автоматическая коррекция поз **ухудшила** оценку и была отклонена. Вторая дала увеличение средней разницы наклона груди двух бойцов при 10 контактах с 0.1866 до 0.5166 радиана, а геометрические проверки оружия прошли. Визуально это не превращает бой в студийную анимацию.
-518 реальных кадров Blender Workbench на CPU собраны в проверенный H.264/AAC 43.166984-секундный MP4 224×126, 12 FPS. Настоящих Cycles-кадров 640×360 — 3.
-Анализ **декодированного MP4 одним и тем же алгоритмом**: почти неподвижных переходов Rev12 472/517, Rev14 271/517. На значения влияют и графические настройки. 9 Python тестов прошли, ZIP CRC и SHA256 каждого участника архива проверены.
-В звуке 10 синтетических ударов и **только один** ранее полученный русский тестовый образец. Это не актёрская озвучка всех диалогов.
+## Actual verification
+- Real Blender 3.6.23 CPU build on a fully available 518-frame source scene; two 21-bone skinned characters; 24 nonempty facial shapes; 3,072 face key insertions; procedural texture microdetail in ten materials.
+- First automated pose correction was rejected for worsening the intended asymmetry measure; fixed candidate increased mean torso pitch difference at authored contacts 0.1866→0.5166 radians, passed 10 sword-contact geometry checks with no unintended nearby crossings.
+- Full 518 real Workbench CPU frames at 224×126 / 12 FPS, 43.166984s H264/AAC MP4 and three separate Cycles 640×360 stills.
+- Actual decoded-video motion QA, same algorithm/threshold: Rev12 472/517 near-still transitions; Rev14 271/517. Rendering details and framing also affect pixel differences; this is not a studio animation score.
+- Audio contains one prior user-provided synthetic Russian speech sample and ten procedural Foley impacts, not professionally recorded Russian acting.
+- Nine Python tests passed and exported final corrected glTF 2.0 GLB with skins and animations.
+- Optional genuine Russian acoustic forced-alignment bridge to externally installed Montreal Forced Aligner and `russian_mfa`, but MFA was NOT installed or executed in this QA environment. Its status correctly reads BLOCKED_NOT_ALIGNED; no fake phoneme timing.
+- PRODUCTION_BLOCKED release gate flags low visual motion, missing real forced alignment/voice performance, immature sculpt and battle choreography, incomplete 20+ minute episode.
+- Windows BAT/PowerShell starters create Blender output and STUDIO_TOOLS/REPORT_FOR_CHATGPT.zip; the user's actual Windows machine was NOT tested.
+- Full bundle retains original Rev11 sources and source Rev12 .blend, but is not a full integrated migration of V19–V50.
 
-## Фонемная русская речь
-`scripts/mfa_bridge.py` интегрирует *опциональный* реальный Montreal Forced Aligner (внешняя установка и модель `russian_mfa`), если он доступен; результаты валидируются и переводятся в веса facial viseme. В окружении MFA **не установлен**, поэтому тест корректно вернул `BLOCKED_NOT_ALIGNED`. Программные синтетические интервалы не выдаются за акустическую разметку. См. https://montreal-forced-aligner.readthedocs.io/en/latest/user_guide/workflows/alignment.html .
-
-## Автоматическое качество
-`scripts/release_gate.py` возвращает `PRODUCTION_BLOCKED` с шестью причинами: недостаточная экранная пластика, недоказанный forced alignment, неполный русский дубляж, необходимость художественной скульптуры, режиссёрской постановки и полноразмерного эпизода. Не выдавать текущий результат за профессиональное аниме.
-
-## Windows
-`START_HERE_WINDOWS.bat` предназначен для Blender 3.6.23 CPU, при отсутствии может скачать официальный portable ZIP; проверен **код и реальный рендер на Linux Blender**, но запуск .bat на целевом Windows 10 i7-3630QM/GT 740M **не проверялся**. `CREATE_REPORT_FOR_CHATGPT_WINDOWS.bat` создаёт `STUDIO_TOOLS/REPORT_FOR_CHATGPT.zip`.
-Внутри полной ZIP лежит оригинальный ZIP исходников Rev11 и входной .blend Rev12. Это не интеграция линии V19–V50, которая остаётся незавершённой.
+The result remains stylized and far short of Solo Leveling/A-1 Pictures studio quality.
