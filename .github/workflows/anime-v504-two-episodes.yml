@@ -76,17 +76,17 @@ jobs:
             --output dist/v504/two_original.json
           python scripts/expand_season_v502.py --project dist/v504/two_original.json \
             --out dist/v504/six_original.json --tts --sound
-      - name: Synthesize all 24 two-episode dialogues in FOUR actual voice timbres
+      - name: Synthesize all 72 six-season dialogues in FOUR actual voice timbres
         run: |
           export LD_LIBRARY_PATH=/tmp/v504/piper
           python scripts/voice_v504_five_roles.py --project dist/v504/six_original.json \
             --out dist/v504/neural_voices.json --piper-bin /tmp/v504/piper/piper \
-            --voices-dir /tmp/v504/voices --episodes 1,2
+            --voices-dir /tmp/v504/voices --episodes 1,2,3,4,5,6
       - name: Analyze real Russian recording mouth shapes
         run: |
           python scripts/lipsync_v504_russian.py --project dist/v504/neural_voices.json \
             --out dist/v504/complete_lip_voice.json \
-            --rhubarb "$(cat /tmp/v504/rhubarb-bin)" --episodes 1,2
+            --rhubarb "$(cat /tmp/v504/rhubarb-bin)" --episodes 1,2,3,4,5,6
       - name: Verify plot, voice distinction, every subtitle and mouth cue
         run: |
           python - <<'PY'
@@ -95,10 +95,11 @@ jobs:
           a=json.loads((root/'six_original.json').read_text())
           b=json.loads((root/'complete_lip_voice.json').read_text())
           assert len(b['episodes'])==6
+          assert b['v504NeuralFiveActors']['voicesSynthesized']['silero_archon']>=2
           assert a['pilotProductionV50']['originalV50ProjectSha256']==b['pilotProductionV50']['originalV50ProjectSha256']
           assert [[(l['speaker'],l['text']) for s in e['scenes'] for l in s['lines']] for e in a['episodes']]==[[ (l['speaker'],l['text']) for s in e['scenes'] for l in s['lines']] for e in b['episodes']]
           roles=set();models=set();cue_total=0
-          for ep in b['episodes'][:2]:
+          for ep in b['episodes']:
             assert len(ep['scenes'])==6
             for scene in ep['scenes']:
               assert len(scene['lines'])==len(scene['subtitlesV37']['cues'])==2
@@ -111,10 +112,10 @@ jobs:
               assert len(cues)>=3
               assert all(0<=x['start']<x['end']<=scene['duration']+.01 for x in cues)
               cue_total+=len(cues)
-          assert {'Акира','Мию','Рэн','Сайра'}<=roles
+          assert {'Акира','Мию','Рэн','Сайра','Архонт'}<=roles
           assert all('ESPEAK' not in x for x in models),models
-          assert cue_total>=45,cue_total
-          print('REAL NEURAL FOUR CHARACTERS / 24 LINES /',cue_total,'RUSSIAN LIP CUES',models)
+          assert cue_total>=135,cue_total
+          print('REAL NEURAL FIVE CHARACTERS / 72 LINES /',cue_total,'RUSSIAN LIP CUES',models)
           PY
       - name: Build full existing editor with new V50.4 voice and mouth data
         run: |
