@@ -1,0 +1,36 @@
+{
+  "release": "C8 Rev16.3",
+  "source": "C8 Rev16.2",
+  "original_pose_sample_sha256": "3719e12dae88cef59eb8f1846d7b1c108584c1cf6fcd82554ed99536d8258246",
+  "original_pose_samples": 11,
+  "blender_version": "3.6.23",
+  "garment_meshes_added": 12,
+  "boot_deformed_mesh_samples": 336,
+  "boot_ground_tolerance_m": -0.012,
+  "min_deformed_toe_z_m": -0.0041,
+  "uncorrected_boot_count": 0,
+  "grip_samples": 168,
+  "max_wrist_to_hilt_gap_m": 0.04575,
+  "independent_blender_checks": "46/46",
+  "python_quality_gate_tests": "5/5",
+  "rebuild_stages": "5/5",
+  "export_reimport": {
+    "armatures": 2,
+    "joints_per_armature": 21,
+    "mesh_count": 122,
+    "face_morphs_per_actor": 24,
+    "animations": 4
+  },
+  "real_preview": {
+    "frames": 15,
+    "fps": 12,
+    "width": 384,
+    "height": 216,
+    "duration_seconds": 1.25
+  },
+  "technical_gate": "PASS",
+  "artistic_gate": "PRODUCTION_BLOCKED",
+  "bin_in_github": false,
+  "full_zip_sha256": "ad607bb179ca772b94d147bde8b4f1614c5db6062cc9da5b7b1fb28f649cd2ea",
+  "compact_zip_sha256": "a06f391a6a5fd11a818c56ea2826cb8c8e32f2d886afc1e60bfc51d572367424"
+}
