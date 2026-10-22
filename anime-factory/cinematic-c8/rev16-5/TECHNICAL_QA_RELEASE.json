@@ -1,0 +1,39 @@
+{
+  "release": "C8 Rev16.5",
+  "verified_on": "Blender 3.6.23 Linux CPU",
+  "scene_parent": "Rev16.4 real native Blender scene",
+  "qa": {
+    "blender_checks": "115/115",
+    "python_tests": "10/10",
+    "rebuild_subprocesses": "4/4",
+    "gltf_clean_import": true,
+    "root_following_actor_rig": true,
+    "maximum_arm_mesh_endpoint_error_m": 0.03622,
+    "source_11_pose_hash": "3719e12dae88cef59eb8f1846d7b1c108584c1cf6fcd82554ed99536d8258246",
+    "continuous_real_frames": 12,
+    "fps": 12,
+    "video_resolution": "384x216",
+    "duration_s": 1
+  },
+  "assets": {
+    "arm_meshes": 4,
+    "finger_meshes": 4,
+    "total_fingers": 20,
+    "rigs": 2,
+    "joints_each": 21
+  },
+  "archive_sha256": {
+    "full": "14c8214542a5d84a52d9fa815459f6c1e9e2cb37bdb29d45e036330183ab62c0",
+    "compact": "d5b82171552c1d24bbdaa18e551a402dc42ea1b33e736f4404d67e945c2a1c65"
+  },
+  "sha256_source_blend": "ae20ce1fb81bfad4b1a55eb5b02d581dfcff0e0bdcf4675a2ee894dfdf24938e",
+  "binary_assets_in_github": false,
+  "studio_gate": "PRODUCTION_BLOCKED",
+  "limitations": [
+    "20 procedural fingers lack individual joint animation",
+    "wrist/weapon contact not independently proven",
+    "full battle and episode not rendered",
+    "Russian voice + real phoneme alignment pending",
+    "Windows hardware acceptance pending"
+  ]
+}
