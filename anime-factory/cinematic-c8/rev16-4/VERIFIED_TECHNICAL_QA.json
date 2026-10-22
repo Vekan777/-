@@ -1,0 +1,56 @@
+{
+  "release": "C8 Rev16.4",
+  "original_pose_sha256": "3719e12dae88cef59eb8f1846d7b1c108584c1cf6fcd82554ed99536d8258246",
+  "source_pose_samples": 11,
+  "added_visible_actor_variants": 10,
+  "per_actor_shoulder_vertices_sculpted": 298,
+  "old_frames_end": 566,
+  "new_frames_start": 567,
+  "white_pixel_roi": {
+    "frame": 617,
+    "xyxy": [
+      369,
+      144,
+      432,
+      222
+    ],
+    "threshold": "all RGB channels >215",
+    "original": 1069,
+    "new": 0
+  },
+  "qa": {
+    "blender": "61/61",
+    "python": "9/9",
+    "export_reimport": {
+      "pass": true,
+      "rigs": 2,
+      "joints_each": 21,
+      "new_gloves": 4,
+      "new_big_body_meshes": 2,
+      "morph_channels_per_head": 24,
+      "animations": 5
+    },
+    "safe_rebuild": "4/4"
+  },
+  "real_render": {
+    "frames": 16,
+    "fps": 12,
+    "duration_seconds": 1.333333,
+    "width": 384,
+    "height": 216
+  },
+  "archives": {
+    "full": {
+      "bytes": 25152153,
+      "files": 48,
+      "sha256": "8d689e035237a3e81a3405af423a04443480c05d613f8972644c258834ab1f33"
+    },
+    "compact": {
+      "bytes": 9401427,
+      "files": 16,
+      "sha256": "fcbc336c3661c77b3783d7aa099c13992a263cb96c884173894eb97ca047a878"
+    }
+  },
+  "binary_assets_in_github": false,
+  "production_gate": "PRODUCTION_BLOCKED"
+}
