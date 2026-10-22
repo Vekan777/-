@@ -1,0 +1,44 @@
+{
+  "release": "C8 Rev16",
+  "production_gate": "PRODUCTION_BLOCKED",
+  "source": "original user-provided Rev14 Blender",
+  "preserve_original_frames": [
+    1,
+    518
+  ],
+  "extended_frames": [
+    519,
+    566
+  ],
+  "fps": 12,
+  "actor_bones_each": 21,
+  "face_morphs_each": 24,
+  "glb": {
+    "skins": 2,
+    "images": 6,
+    "materials": 32,
+    "animations": 4
+  },
+  "blender_qa": {
+    "passed": 11,
+    "total": 11
+  },
+  "python_qa": {
+    "passed": 8,
+    "total": 8
+  },
+  "lighting_candidates": {
+    "tested": 3,
+    "approved_automatically": 0,
+    "alternatives_rejected": 2,
+    "baseline_preserved": true
+  },
+  "followup": [
+    "adult proportion sculpt",
+    "hair dynamics",
+    "weapon contact acting",
+    "RU voice/lip sync",
+    "full episode",
+    "studio art director"
+  ]
+}
