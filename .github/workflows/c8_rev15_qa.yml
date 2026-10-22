@@ -1,0 +1,26 @@
+name: AI Anime Factory C8 Rev15 QA
+
+on:
+  pull_request:
+    paths:
+      - "anime-factory/cinematic-c8-rev15/**"
+      - ".github/workflows/c8_rev15_qa.yml"
+  push:
+    branches:
+      - "anime-factory/c8-rev15-director-autopilot"
+  workflow_dispatch:
+
+jobs:
+  python-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run Rev15 deterministic QA
+        run: |
+          cd anime-factory/cinematic-c8-rev15
+          python -m unittest discover -s tests -v
+          python -m studio.director examples/REV15_DUEL_LYRA_KAEL_NONCANON.json --iterations 100 --output /tmp/rev15_motion.json --report /tmp/rev15_qa.json

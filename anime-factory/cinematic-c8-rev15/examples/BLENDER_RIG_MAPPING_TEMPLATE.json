@@ -1,0 +1,7 @@
+{
+  "NOTE": "ЗАМЕНИТЕ названия объектов и костей фактическими из Rev14 .blend. Это только пример. Неправильные названия блокируют запись.",
+  "actors": {
+    "lyra": {"object": "REPLACE_LYRA_ARMATURE", "bone_map": {"torso_pitch": "REPLACE_SPINE", "weapon_arm": "REPLACE_WEAPON_ARM", "guard_arm": "REPLACE_GUARD_ARM"}, "axes": {"torso_pitch": "X", "weapon_arm": "X", "guard_arm": "X"}},
+    "kael": {"object": "REPLACE_KAEL_ARMATURE", "bone_map": {"torso_pitch": "REPLACE_SPINE", "weapon_arm": "REPLACE_WEAPON_ARM", "guard_arm": "REPLACE_GUARD_ARM"}, "axes": {"torso_pitch": "X", "weapon_arm": "X", "guard_arm": "X"}}
+  }
+}

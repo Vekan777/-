@@ -1,0 +1,33 @@
+{
+  "status": "SUGGESTION_NOT_BPY_VERIFIED",
+  "source_glb_sha256": "2c67168ca111b9f5f4ee1f318f1f11011d3a4e6e1902ea305a134a308f0db0de",
+  "actors": {
+    "lyra": {
+      "object": "LIRA | ARMATURE 22 BONES",
+      "bone_map": {
+        "torso_pitch": "chest",
+        "weapon_arm": "upper_arm.R",
+        "guard_arm": "upper_arm.L"
+      },
+      "axes": {
+        "torso_pitch": "X",
+        "weapon_arm": "X",
+        "guard_arm": "X"
+      }
+    },
+    "kael": {
+      "object": "KAEL | ARMATURE 22 BONES",
+      "bone_map": {
+        "torso_pitch": "chest",
+        "weapon_arm": "upper_arm.R",
+        "guard_arm": "upper_arm.L"
+      },
+      "axes": {
+        "torso_pitch": "X",
+        "weapon_arm": "X",
+        "guard_arm": "X"
+      }
+    }
+  },
+  "notes": "Source GLB contains these names, but upper-arm bone rotation modes have not been confirmed in bpy. No animation applied."
+}
