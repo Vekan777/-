@@ -1,0 +1,60 @@
+{
+  "release": "AI Anime Factory C8 Rev16.2",
+  "scene_source": "C8_REV16_1_FINAL_REAL_ANIME_FACES_AND_HAIR.blend",
+  "scene_final": "C8_REV16_2_COMBAT_FOOT_PLANT_CAMERA_STUDIO.blend",
+  "original_frames": [
+    1,
+    566
+  ],
+  "appended_frames": [
+    567,
+    650
+  ],
+  "fps": 12,
+  "pose_check": {
+    "sampled_frames": 11,
+    "sha256": "3719e12dae88cef59eb8f1846d7b1c108584c1cf6fcd82554ed99536d8258246"
+  },
+  "blender_qa": {
+    "passed": 29,
+    "total": 29
+  },
+  "python_tests": {
+    "passed": 10,
+    "total": 10
+  },
+  "blade_tip_gap_m_at_frame_617": 0.1081,
+  "exported_glb": {
+    "skins": 2,
+    "joints_each": 21,
+    "meshes": 110,
+    "animations": 4,
+    "new_face_morphs_each": 24,
+    "embedded_images": 4,
+    "reimport_passed": true
+  },
+  "rendered_video": {
+    "frames": 24,
+    "original_frame_range": [
+      605,
+      628
+    ],
+    "fps": 12,
+    "width": 320,
+    "height": 180,
+    "duration_seconds": 2
+  },
+  "zip_sha256": {
+    "full": "a2e47ce14e1a7663d4eaefd62a66a369be162b0ac585ffdd4b1784ae24004428",
+    "compact": "c684eb79bb7261e2c92eab1d18b5adc5c490f27985593feda690611f9ae031dd"
+  },
+  "release_gate": "PRODUCTION_BLOCKED",
+  "limitations": [
+    "foot-tip QA does not validate rendered boot silhouette in every frame",
+    "hand-guided swords do not guarantee hand contact",
+    "full 84-frame production render not delivered",
+    "original expressive human acting and Russian dubbing incomplete",
+    "actual Windows laptop not tested"
+  ],
+  "github_binary_claim": false
+}
