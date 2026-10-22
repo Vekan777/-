@@ -1,0 +1,166 @@
+name: V50.2 Six-Episode Cinematic Performance and Real 2D Video
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "anime-factory/v50_2/performance_v502.js"
+      - "anime-factory/v50_2/season_stage_v502.js"
+      - "anime-factory/v50_2/build_season_v502.py"
+      - "tests/test_v502_performance.py"
+      - ".github/workflows/anime-v502-performance.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-real-russian-pilots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check syntax, original canon and safe optional overlays
+        run: |
+          node --check anime-factory/v50_2/performance_v502.js
+          node --check anime-factory/v50_2/season_stage_v502.js
+          node --check anime-factory/v50_2/motion_rig_v502.js
+          python -m py_compile anime-factory/v50_2/build_season_v502.py tests/test_v502_performance.py scripts/render_six_pilots_v502.py
+          node tests/test_deep_qa_v50.js
+      - name: Install Chromium, FFmpeg, Pillow, numpy, Russian eSpeak TTS
+        run: |
+          python -m pip install playwright==1.56.0 pillow numpy
+          python -m playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg espeak-ng espeak-ng-data
+      - name: Build original offline V50.2 from GitHub source alone
+        run: |
+          python anime-factory/v50_2/build_complete_v502.py \
+            --out dist/AI_Anime_Factory_V50_2_BOOTSTRAP.html
+          python scripts/produce_2d_pilot_v501.py \
+            --html dist/AI_Anime_Factory_V50_2_BOOTSTRAP.html \
+            --out dist/V502 --tts
+          mv dist/V502/PROJECT_PILOT_V50.json dist/V502/PROJECT_V501.json
+          python scripts/postprocess_v502.py \
+            --project dist/V502/PROJECT_V501.json \
+            --output dist/V502/PROJECT_V502.json
+          python scripts/expand_season_v502.py \
+            --project dist/V502/PROJECT_V502.json \
+            --story anime-factory/v50_2/STORY_EP03_EP06_V502.json \
+            --out dist/V502/PROJECT_SIX_EPISODES.json --tts --sound
+      - name: Build six-episode PERFORMANCE editor and embed project
+        run: |
+          python anime-factory/v50_2/build_season_v502.py \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --out dist/AI_Anime_Factory_V50_2_PERFORMANCE.html
+      - name: Validate original first two episodes and all new memory costs
+        run: |
+          python tests/test_season_v502.py \
+            --source dist/V502/PROJECT_V502.json \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --html dist/AI_Anime_Factory_V50_2_PERFORMANCE.html \
+            --out dist/V502/SEASON_QA
+      - name: 18 actual Chromium performance frames, full voice and fallback tests
+        run: |
+          python tests/test_v502_performance.py \
+            --html dist/AI_Anime_Factory_V50_2_PERFORMANCE.html \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --out dist/V502/PERFORMANCE_QA
+      - name: Create six-episode 2D performance contact sheet
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image,ImageDraw
+          folder=Path("dist/V502/PERFORMANCE_QA")
+          paths=sorted(folder.glob("ep*_scene*.png"))
+          assert len(paths)==18,len(paths)
+          sheet=Image.new("RGB",(4*380,5*235),"#0e1524")
+          d=ImageDraw.Draw(sheet)
+          for i,p in enumerate(paths):
+            im=Image.open(p).convert("RGB")
+            im.thumbnail((370,205))
+            x=(i%4)*380+5;y=(i//4)*235+4
+            sheet.paste(im,(x,y))
+            d.text((x,y+204),p.stem,fill="white")
+          sheet.save(folder/"V502_PERFORMANCE_18_SCENES.jpg",quality=90)
+          PY
+      - name: Record six real FULL Russian 640x360 H264/AAC pilot episodes
+        run: |
+          python scripts/render_six_pilots_v502.py \
+            --html dist/AI_Anime_Factory_V50_2_PERFORMANCE.html \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --episodes 1,2,3,4,5,6 --fps 6 --width 640 \
+            --out dist/V502/VIDEO
+      - name: Verify real frame count, duration, audible AAC and six subtitle files
+        run: |
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          for n in range(1,7):
+              p=Path(f"dist/V502/VIDEO/episode_{n:02d}.mp4")
+              assert p.stat().st_size>100000
+              r=subprocess.run(["ffprobe","-v","error","-show_entries",
+                "stream=codec_name,codec_type,width,height,nb_frames:format=duration",
+                "-of","json",str(p)],capture_output=True,text=True,check=True)
+              d=json.loads(r.stdout)
+              assert {"h264","aac"}<=set(s.get("codec_name") for s in d["streams"])
+              v=next(s for s in d["streams"] if s.get("codec_type")=="video")
+              assert v["width"]==640 and v["height"]==360 and int(v["nb_frames"])>300
+              assert float(d["format"]["duration"])>60
+              assert Path(f"dist/V502/VIDEO/episode_{n:02d}.srt").stat().st_size>200
+              print("FULL TECHNICAL RUSSIAN PILOT",n,v["nb_frames"],d["format"]["duration"])
+          PY
+      - name: Windows ZIP with complete six episode program, images and sources
+        run: |
+          python scripts/package_v502_unified_windows.py \
+            --html dist/AI_Anime_Factory_V50_2_PERFORMANCE.html \
+            --project dist/V502/PROJECT_SIX_EPISODES.json \
+            --video-dir dist/V502/VIDEO \
+            --out dist/AI_ANIME_FACTORY_V502_PERFORMANCE_WINDOWS.zip
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          name=Path("dist/AI_ANIME_FACTORY_V502_PERFORMANCE_WINDOWS.zip")
+          with zipfile.ZipFile(name,"a",zipfile.ZIP_DEFLATED,compresslevel=7) as z:
+              for source,dest in [
+                ("anime-factory/v50_2/performance_v502.js","SOURCE/performance_v502.js"),
+                ("anime-factory/v50_2/season_stage_v502.js","SOURCE/season_stage_v502.js"),
+                ("anime-factory/v50_2/build_season_v502.py","SOURCE/build_season_v502.py"),
+                ("scripts/render_six_pilots_v502.py","render_six_pilots_v502.py"),
+                ("scripts/expand_season_v502.py","SOURCE/expand_season_v502.py"),
+                ("anime-factory/v50_2/STORY_EP03_EP06_V502.json","STORY_EP03_EP06_V502.json"),
+                ("tests/test_v502_performance.py","SOURCE/test_v502_performance.py"),
+                ("dist/V502/PERFORMANCE_QA/V502_PERFORMANCE_QA.json","QA/PERFORMANCE_QA.json"),
+                ("dist/V502/PERFORMANCE_QA/V502_PERFORMANCE_18_SCENES.jpg","PREVIEW_18_SCENES.jpg")
+              ]:z.write(source,dest)
+              z.writestr("RENDER_6_RU_WINDOWS.bat",
+                  '@echo off\r\ncd /d "%~dp0"\r\n'
+                  'if exist "tools\\ffmpeg\\bin\\ffmpeg.exe" '
+                  'set "PATH=%CD%\\tools\\ffmpeg\\bin;%PATH%"\r\n'
+                  'py -3 render_six_pilots_v502.py --html AI_Anime_Factory_V50_2_UNIFIED.html --project '
+                  'PROJECT_V502_UNIFIED.json --episodes 1,2,3,4,5,6 --width 640 --fps 6 --out NEW_RENDER\r\npause\r\n')
+          with zipfile.ZipFile(name) as z:
+              assert z.testzip() is None
+              assert all(f"VIDEOS/episode_{n:02d}.mp4" in z.namelist() for n in range(1,7))
+              assert "SOURCE/performance_v502.js" in z.namelist()
+          print("READY ZIP",name.stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: V502_PERFORMANCE_BROWSER_18_REAL_FRAMES_RU_PROJECT
+          path: |
+            dist/V502/PROJECT_SIX_EPISODES.json
+            dist/V502/PERFORMANCE_QA
+          retention-days: 30
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: AI_ANIME_FACTORY_V502_PERFORMANCE_SIX_WINDOWS_MP4
+          path: dist/AI_ANIME_FACTORY_V502_PERFORMANCE_WINDOWS.zip
+          retention-days: 30
+          if-no-files-found: error
