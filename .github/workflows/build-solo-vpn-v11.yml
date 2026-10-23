@@ -49,7 +49,7 @@ jobs:
           SOLO_API_ORIGIN: ${{ inputs.api_origin || 'https://www.YOUR_DOMAIN.example' }}
         working-directory: solo-vpn/build/android
         run: |
-          if ! [[ "$SOLO_API_ORIGIN" =~ ^https://[a-zA-Z0-9.-]+$ ]]; then
+          if [[ "$SOLO_API_ORIGIN" != "https://www.YOUR_DOMAIN.example" ]] && ! [[ "$SOLO_API_ORIGIN" =~ ^https://[a-zA-Z0-9.-]+$ ]]; then
             echo 'Invalid HTTPS API origin'; exit 1
           fi
           gradle --no-daemon :app:assembleDebug "-PsoloApiUrl=$SOLO_API_ORIGIN" -PsoloChannel=direct
