@@ -1,0 +1,61 @@
+name: Solo VPN V11 - real WireGuard debug compile
+on:
+  push:
+    branches: [solo-vpn-v11-dev]
+    paths:
+      - 'solo-vpn/v11-android-patch.tgz.b64'
+      - '.github/workflows/build-solo-vpn-v11.yml'
+  workflow_dispatch:
+    inputs:
+      api_origin:
+        description: 'Real HTTPS API origin (default is placeholder for debug only)'
+        required: false
+        type: string
+        default: 'https://www.YOUR_DOMAIN.example'
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Install Android SDK API 35
+        run: |
+          SDK_MANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          test -n "$SDK_MANAGER"
+          "$SDK_MANAGER" 'platforms;android-35' 'build-tools;35.0.1'
+      - name: Restore known V8 WireGuard project
+        run: |
+          mkdir -p solo-vpn/build
+          base64 -d solo-vpn/android-project.tgz.b64 > /tmp/solo-android-base.tgz
+          echo '67a896d3b1c6d852bd2a40ca95e4199989fb72d17707c7c957e4eaa72c2dd272  /tmp/solo-android-base.tgz' | sha256sum -c -
+          tar xzf /tmp/solo-android-base.tgz -C solo-vpn/build
+          base64 -d solo-vpn/solo-avatar-256.png.b64 > solo-vpn/build/android/app/src/main/res/drawable/solo_avatar.png
+      - name: Overlay V11 Android code
+        run: |
+          base64 -d solo-vpn/v11-android-patch.tgz.b64 > /tmp/solo-v11-android-patch.tgz
+          echo 'ad17ad9f89fcca6585b54d569d2cbccd92f694e8e80d10d0935d0b299e768af4  /tmp/solo-v11-android-patch.tgz' | sha256sum -c -
+          tar xzf /tmp/solo-v11-android-patch.tgz -C solo-vpn/build
+      - name: Compile real WireGuard debug APK (not signed release)
+        env:
+          SOLO_API_ORIGIN: ${{ inputs.api_origin || 'https://www.YOUR_DOMAIN.example' }}
+        working-directory: solo-vpn/build/android
+        run: |
+          if ! [[ "$SOLO_API_ORIGIN" =~ ^https://[a-zA-Z0-9.-]+$ ]]; then
+            echo 'Invalid HTTPS API origin'; exit 1
+          fi
+          gradle --no-daemon :app:assembleDebug "-PsoloApiUrl=$SOLO_API_ORIGIN" -PsoloChannel=direct
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SoloVPN-V11-WireGuard-DEBUG-not-production
+          path: solo-vpn/build/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
