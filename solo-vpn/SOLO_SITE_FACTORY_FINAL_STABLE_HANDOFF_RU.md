@@ -1,0 +1,13 @@
+# Solo Site Factory — стабильная локальная сборка движка (24 октября 2026)
+
+ВНИМАНИЕ: полный рабочий ZIP находится в чате `SOLO_SITE_FACTORY_FINAL_STABLE_ENGINE.zip`, не в GitHub. SHA256 **1985f31b8d3fb9e8a4f58189ae97e74d5dcd844fce285b5206307224bc0eabd6**. Размер 89068 байт; в архиве 39 исходных файлов / инструкций / тестов. ZIP распакован в чистой папке и испытан повторно.
+
+Основа: `SOLO_SITE_FACTORY_STABLE_CONVEYOR_ENGINE.zip`, без потери функциональности сканирования макетов, Jinja2? (фабрика использует собственный builder Python), генерации SVG, товаров, управления лицензиями, разрешённых внешних загрузок, статических шаблонов, Tkinter Studio, экспортера ZIP.
+
+Реальные изменения: `engine/release.py` делает настоящие local HTTP smoke, проверяет фактически созданные два ZIP (вложенный webroot, все SHA256, согласованность `public_html/`, поиск опасных путей и служебных файлов); `engine/doctor.py` запускает диагностику/GUI-smoke; архивы публикуются после проверки через staging и os.replace; обнаружение символьных ссылок на директории в webroot; CLI возвращает ошибку при провальном QA/HTTP/browser/ZIP; кнопка «ЗАВЕРШИТЬ САЙТ» теперь включает Chromium offline и обновляет панель процентов. Windows скрипты `DIAGNOSTICS_WINDOWS.bat`, `TEST_ENGINE_WINDOWS.bat`, `VERIFY_SITE_PACKAGE_WINDOWS.bat`. Инструкции `FINAL_ENGINE_GUIDE_RU.md`, `RELEASE_STATUS_RU.md`, `START_HERE_WINDOWS.txt`.
+
+Доказательства: 65/65 pytest (Python 3.13/Linux), Linux Xvfb Tkinter GUI PASS (НЕ Windows 10 пользователя), генерация нового сайта-каталога, offline Chromium 390px и 1440px, local HTTP, packaged ZIP with SHA consistency, повторный clean unzip+65 tests. Экспорт статического сайта только preview mode. Отдельно импортирован самостоятельный статический Solo VPN (11 страниц) и пройден полный локальный конвейер: static QA, Chromium offline, local HTTP, архивная проверка; production BLOCKED. Демо: `SOLO_FACTORY_FINAL_SAMPLE_WEBSITE.zip`, `SOLO_FACTORY_FINAL_SAMPLE_DELIVERY.zip`, Solo VPN preview: `SOLO_VPN_AFTER_FACTORY_LOCAL_QA_DELIVERY.zip`.
+
+Не подтверждено: Windows 10/11 на реальном ноутбуке, настоящая загрузка чужих шаблонов/Wikimedia и платная AI-генерация, публичный HTTPS/живой домен, динамические приложения/платежи/VPN, абсолютная точность восстановления CSS по изображению. НЕЛЬЗЯ обещать профессиональную безошибочную разработку сайтов любой сложности или общие 100%. Это проверенный **локальный стабильный выпуск**, следующий этап — окончательная приёмка на Windows пользователя, затем отдельное доведение сайта Solo VPN (инфраструктура VPS/WireGuard, Android, платежи, правовые данные).
+
+Старые архивы Solo VPN не заменяются. Ни при каком следовании этого документа не нужно заново создавать сайт Solo VPN.
