@@ -1,6 +1,6 @@
 # Solo Site Factory — перенос шапки и геометрии из макетов (26.10.2026)
 
-Полные исходники находятся в архиве **SOLO_SITE_FACTORY_REFERENCE_STRUCTURE_ENGINE.zip** в текущем разговоре, а не в этой GitHub-ветке. SHA256: 33dd5ddb01750b95c521c8710b4e9cfa1a9ea6a8bf7bbccf326be2aeba113fae (актуальная контрольная сумма в SOLO_FACTORY_REFERENCE_STRUCTURE_SHA256.json). База — скачанный настоящий архив SOLO_SITE_FACTORY_COMPOSITION_ENGINE.zip; ничего не начинать с нуля.
+Полные исходники находятся в архиве **SOLO_SITE_FACTORY_REFERENCE_STRUCTURE_ENGINE.zip** в текущем разговоре, а не в этой GitHub-ветке. SHA256: 1a252d7e27046ba29291fec7a14b2cfd3b92b29c33c2718fd83dc746641eb8a0 (актуальная контрольная сумма в SOLO_FACTORY_REFERENCE_STRUCTURE_SHA256.json). База — скачанный настоящий архив SOLO_SITE_FACTORY_COMPOSITION_ENGINE.zip; ничего не начинать с нуля.
 
 Добавлено engine/reference_structure.py: отдельное определение фона, контрастного текста и видимой высоты шапки из desktop/mobile макетов. Параметры сохраняются в editable BLUEPRINT.json → reference_structure; confidence low, approved false. Встроено в анализ и CSS build с разными media queries. При отсутствии явной границы прежний CSS не меняется; данные проверяются против CSS-инъекций. Добавлены 8 новых тестов и RUN_REFERENCE_STRUCTURE_WINDOWS.bat, REFERENCE_STRUCTURE_GUIDE_RU.md.
 
