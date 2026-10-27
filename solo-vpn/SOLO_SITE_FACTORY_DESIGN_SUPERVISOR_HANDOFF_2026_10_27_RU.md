@@ -2,7 +2,7 @@
 
 ## Главное: сохранён полный исходный код для следующего чата
 Скачайте из текущего чата именно **SOLO_FACTORY_DESIGN_SUPERVISOR_TRANSFER_TO_NEW_CHAT_2026-10-27.zip**. Эта запись в GitHub содержит документ передачи, **НЕ** исходные файлы программы. В ZIP вложены:
-- `artifacts/engine.zip` — полный Solo Site Factory с AI Autopilot и управляющим циклом; исходный отдельный архив `SOLO_SITE_FACTORY_DESIGN_SUPERVISOR_ENGINE_2026-10-27.zip`, 210 файлов, SHA256 `REPLACE_ENGINE_SHA`.
+- `artifacts/engine.zip` — полный Solo Site Factory с AI Autopilot и управляющим циклом; исходный отдельный архив `SOLO_SITE_FACTORY_DESIGN_SUPERVISOR_ENGINE_2026-10-27.zip`, 210 файлов, SHA256 `5339115c130324f3f7ba797dd0bd499e4e481c1df6cc6b479b2835115372d1b4`.
 - `artifacts/site.zip` — отдельный неизменённый сайт Solo VPN; архив `SOLO_VPN_SITE_UNCHANGED_SUPERVISOR_2026-10-27.zip`, 91 файл, SHA256 `3531da41ae8f11ddb4748018cd4dcdac6714134ba0fe9f777000b815a514b95f`.
 - `artifacts/screenshots.zip` — реальные снимки демонстрационного HTML и неизменённого Solo VPN, сравнительные изображения, отчёт.
 - `HANDOFF_STATE.json`, `MANIFEST.json`, инструкция для нового чата. Проверка `verify-handoff` PASS.
