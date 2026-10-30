@@ -1,0 +1,14 @@
+{
+  "release": "V61",
+  "source": "6 images supplied by user in current conversation",
+  "mode_reference_files": {
+    "faithful_PC.png": "1b59f145497d2fa0f1943fc344101e9b800ebce5714d6486e5949e1a64bf9163",
+    "faithful_MOBILE.png": "20cb9cf15e1e1ebb291bcbc4b1d146f12666c90f6ea14d8b2b235a74b9020410",
+    "refined_PC.png": "3971ed7a2b1a9c92d6914221406318017b927986303153a2e2d275893cf818f3",
+    "refined_MOBILE.png": "bca3ec9d0145fd52fa747c975839b7a1116fc0c5cc35b4630b35c961ee881639",
+    "author_PC.png": "f879e47002b6f7bcce7dadc4102303391733e2e291f679d52df63c1a88b5d5d7",
+    "author_MOBILE.png": "88e5725d656dd6cb58f1f5e64fa4463378b92fee43666577b065916ee2669cf0"
+  },
+  "approved_v42_changes": false,
+  "generated_site_banners_illustrative": true
+}
